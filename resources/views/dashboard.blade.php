@@ -1,0 +1,360 @@
+<x-app-with-sidebar-layout>
+    <x-slot name="header">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="font-semibold text-2xl text-gray-800">Dashboard Deteksi Malware</h2>
+                <p class="text-sm text-gray-500 mt-1">Ringkasan hasil deteksi dari file yang sudah diproses.</p>
+            </div>
+            <div class="flex gap-2">
+                @can('detection-history.view')
+                    <a href="{{ route('detection.history') }}"
+                        class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-semibold">
+                        Riwayat
+                    </a>
+                @endcan
+                @can('detection.run')
+                    <a href="{{ route('detection') }}"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
+                        Upload File
+                    </a>
+                @endcan
+            </div>
+        </div>
+    </x-slot>
+
+    @php
+        $lastScanTime = $latestScan?->completed_at?->timezone('Asia/Jakarta')->format('H:i:s') ?? '-';
+        $lastScanDate = $latestScan?->completed_at?->timezone('Asia/Jakarta')->format('d/m/Y') ?? 'Belum ada scan';
+        $circumference = 251.33;
+        $normalArc = $totalTraffic > 0 ? ($normalPercentage / 100) * $circumference : 0;
+        $malwareArc = $totalTraffic > 0 ? ($malwarePercentage / 100) * $circumference : 0;
+    @endphp
+
+    @if ($totalScans === 0)
+        <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-5">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="font-semibold text-blue-900">Belum ada data deteksi tersimpan.</p>
+                    <p class="text-sm text-blue-700 mt-1">Upload file CSV di halaman Detection agar dashboard terisi otomatis.</p>
+                </div>
+                @can('detection.run')
+                    <a href="{{ route('detection') }}"
+                        class="inline-flex justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
+                        Mulai Deteksi
+                    </a>
+                @endcan
+            </div>
+        </div>
+    @endif
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-gray-600 text-sm font-medium">Total Data Traffic</p>
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                    </path>
+                </svg>
+            </div>
+            <p class="text-2xl font-bold text-gray-800">{{ number_format($totalTraffic, 0, ',', '.') }}</p>
+            <p class="text-xs text-gray-500 mt-1">{{ number_format($totalScans, 0, ',', '.') }} scan berhasil</p>
+        </div>
+
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-gray-600 text-sm font-medium">Normal</p>
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                </svg>
+            </div>
+            <p class="text-2xl font-bold text-gray-800">{{ number_format($normalTotal, 0, ',', '.') }}</p>
+            <p class="text-xs text-gray-500 mt-1">{{ number_format($normalPercentage, 2, ',', '.') }}%</p>
+        </div>
+
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-gray-600 text-sm font-medium">Malware</p>
+                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <p class="text-2xl font-bold text-gray-800">{{ number_format($malwareTotal, 0, ',', '.') }}</p>
+            <p class="text-xs text-gray-500 mt-1">{{ number_format($malwarePercentage, 2, ',', '.') }}%</p>
+        </div>
+
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-gray-600 text-sm font-medium">IP Mencurigakan</p>
+                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+            </div>
+            <p class="text-2xl font-bold text-gray-800">{{ number_format($suspiciousIpCount, 0, ',', '.') }}</p>
+            <p class="text-xs text-gray-500 mt-1">source IP malware</p>
+        </div>
+
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-gray-600 text-sm font-medium">Scan Terakhir</p>
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <p class="text-2xl font-bold text-gray-800">{{ $lastScanTime }}</p>
+            <p class="text-xs text-gray-500 mt-1">{{ $lastScanDate }} WIB</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 class="text-sm font-semibold text-gray-800 mb-4">Scan Terakhir</h3>
+            @if ($latestScan)
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                        <div class="min-w-0">
+                            <p class="text-xs text-gray-600 font-medium">File</p>
+                            <p class="text-lg font-bold text-blue-700 mt-1 truncate">{{ $latestScan->original_filename }}</p>
+                        </div>
+                        @can('detection-history.view')
+                            <a href="{{ route('detection.history.show', $latestScan) }}"
+                                class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-xs font-semibold">
+                                Detail
+                            </a>
+                        @endcan
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <p class="text-xs text-gray-600 font-medium">Total</p>
+                            <p class="text-2xl font-bold text-gray-800 mt-1">{{ number_format($latestScan->total_samples, 0, ',', '.') }}</p>
+                        </div>
+                        <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-xs text-gray-600 font-medium">Normal</p>
+                            <p class="text-2xl font-bold text-green-700 mt-1">{{ number_format($latestScan->normal_count, 0, ',', '.') }}</p>
+                        </div>
+                        <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+                            <p class="text-xs text-gray-600 font-medium">Malware</p>
+                            <p class="text-2xl font-bold text-red-700 mt-1">{{ number_format($latestScan->attack_count, 0, ',', '.') }}</p>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <div class="p-8 bg-gray-50 rounded-lg text-center text-gray-500">
+                    Belum ada scan yang selesai.
+                </div>
+            @endif
+        </div>
+
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 class="text-sm font-semibold text-gray-800 mb-4">Akumulasi Deteksi</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex items-center justify-center">
+                    <div class="relative w-44 h-44">
+                        <svg viewBox="0 0 100 100" class="w-full h-full">
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" stroke-width="18" />
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#22c55e" stroke-width="18"
+                                stroke-dasharray="{{ $normalArc }} {{ $circumference }}"
+                                transform="rotate(-90 50 50)" />
+                            <circle cx="50" cy="50" r="40" fill="none" stroke="#ef4444" stroke-width="18"
+                                stroke-dasharray="{{ $malwareArc }} {{ $circumference }}"
+                                stroke-dashoffset="-{{ $normalArc }}" transform="rotate(-90 50 50)" />
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-gray-800">{{ number_format($totalScans, 0, ',', '.') }}</p>
+                                <p class="text-xs text-gray-500">scan</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-3 flex flex-col justify-center">
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-gray-600">Normal</span>
+                            <span class="font-semibold text-green-700">{{ number_format($normalPercentage, 2, ',', '.') }}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: {{ min($normalPercentage, 100) }}%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-gray-600">Malware</span>
+                            <span class="font-semibold text-red-700">{{ number_format($malwarePercentage, 2, ',', '.') }}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-red-500 h-2 rounded-full" style="width: {{ min($malwarePercentage, 100) }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-lg border border-gray-200 p-6 lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-gray-800">Traffic per Upload</h3>
+                <div class="flex items-center gap-3">
+                    <span class="flex items-center gap-1 text-xs text-gray-600">
+                        <span class="w-3 h-3 bg-green-500 rounded-full"></span> Normal
+                    </span>
+                    <span class="flex items-center gap-1 text-xs text-gray-600">
+                        <span class="w-3 h-3 bg-red-500 rounded-full"></span> Malware
+                    </span>
+                </div>
+            </div>
+            <div class="h-64 bg-gray-50 rounded-lg p-4 overflow-x-auto">
+                @if ($chartScans->isNotEmpty())
+                    <div class="h-full min-w-full flex items-end gap-4">
+                        @foreach ($chartScans as $scan)
+                            @php
+                                $normalHeight = $scan->normal_count > 0 ? max(($scan->normal_count / $maxChartTotal) * 100, 4) : 0;
+                                $malwareHeight = $scan->attack_count > 0 ? max(($scan->attack_count / $maxChartTotal) * 100, 4) : 0;
+                            @endphp
+                            <div class="flex-1 min-w-16 flex flex-col items-center gap-2">
+                                <div class="h-48 flex items-end gap-1">
+                                    <div class="w-4 bg-green-500 rounded-t" style="height: {{ $normalHeight }}%;"></div>
+                                    <div class="w-4 bg-red-500 rounded-t" style="height: {{ $malwareHeight }}%;"></div>
+                                </div>
+                                @can('detection-history.view')
+                                    <a href="{{ route('detection.history.show', $scan) }}"
+                                        class="text-xs text-gray-500 hover:text-blue-600 max-w-20 truncate">
+                                        #{{ $scan->id }}
+                                    </a>
+                                @else
+                                    <span class="text-xs text-gray-500 max-w-20 truncate">#{{ $scan->id }}</span>
+                                @endcan
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="h-full flex items-center justify-center text-sm text-gray-500">
+                        Data chart akan muncul setelah deteksi pertama.
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 class="text-sm font-semibold text-gray-800 mb-4">Top IP Mencurigakan</h3>
+            <div class="space-y-3">
+                @forelse ($topSuspiciousIps as $ip)
+                    @php
+                        $location = $ip->location ?? ['label' => 'Lokasi tidak tersedia', 'source' => 'unavailable'];
+                        $locationSource = $location['source'] ?? 'unavailable';
+                        $canViewIpActivity = auth()->user()->can('dashboard.view');
+                    @endphp
+                    @if ($canViewIpActivity)
+                        <a href="{{ route('dashboard.ip-activity', ['ip' => $ip->source_ip]) }}"
+                            class="block border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:bg-blue-50 transition"
+                            aria-label="Lihat detail aktivitas IP {{ $ip->source_ip }}">
+                    @else
+                        <div class="block border border-gray-200 rounded-lg p-3">
+                    @endif
+                        <div class="flex items-center justify-between gap-3">
+                            <p class="font-semibold text-gray-800 truncate">{{ $ip->source_ip }}</p>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded font-semibold">
+                                    {{ number_format($ip->total, 0, ',', '.') }}
+                                </span>
+                                @if ($canViewIpActivity)
+                                    <span class="text-xs font-semibold text-blue-600">Detail</span>
+                                @endif
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Rata-rata confidence {{ number_format(((float) $ip->avg_confidence) * 100, 2, ',', '.') }}%
+                        </p>
+                        <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                            <span class="min-w-0 max-w-full truncate">Lokasi: {{ $location['label'] ?? 'Lokasi tidak tersedia' }}</span>
+                            @if ($locationSource === 'api')
+                                <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-semibold">GeoIP</span>
+                            @elseif ($locationSource === 'log')
+                                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded font-semibold">Log</span>
+                            @endif
+                        </div>
+                    @if ($canViewIpActivity)
+                        </a>
+                    @else
+                        </div>
+                    @endif
+                @empty
+                    <div class="p-8 bg-gray-50 rounded-lg text-center text-sm text-gray-500">
+                        Belum ada IP dengan prediksi malware.
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-gray-800">Deteksi Terbaru</h3>
+            @can('detection-history.view')
+                <a href="{{ route('detection.history') }}" class="text-sm text-blue-600 hover:text-blue-800 font-semibold">
+                    Lihat semua
+                </a>
+            @endcan
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-gray-200">
+                        <th class="text-left text-gray-600 font-medium py-3 px-2">Waktu Log</th>
+                        <th class="text-left text-gray-600 font-medium py-3 px-2">File</th>
+                        <th class="text-left text-gray-600 font-medium py-3 px-2">Event</th>
+                        <th class="text-left text-gray-600 font-medium py-3 px-2">Disposisi</th>
+                        <th class="text-left text-gray-600 font-medium py-3 px-2">Source IP</th>
+                        <th class="text-left text-gray-600 font-medium py-3 px-2">Destination IP</th>
+                        <th class="text-left text-gray-600 font-medium py-3 px-2">Protocol</th>
+                        <th class="text-left text-gray-600 font-medium py-3 px-2">Confidence</th>
+                        <th class="text-left text-gray-600 font-medium py-3 px-2">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($recentDetections as $item)
+                        @php
+                            $detectedAt = $item->update_time
+                                ? $item->update_time->format('d/m/Y H:i:s')
+                                : $item->created_at?->timezone('Asia/Jakarta')->format('d/m/Y H:i:s');
+                        @endphp
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-3 px-2 text-gray-800 whitespace-nowrap">
+                                {{ $detectedAt ?? '-' }}
+                            </td>
+                            <td class="py-3 px-2 text-gray-800 max-w-48 truncate">
+                                {{ $item->scan?->original_filename ?? '-' }}
+                            </td>
+                            <td class="py-3 px-2 text-gray-800">{{ $item->event_name ?? '-' }}</td>
+                            <td class="py-3 px-2 text-gray-800">{{ $item->disposition ?? '-' }}</td>
+                            <td class="py-3 px-2 text-gray-800">{{ $item->source_ip ?? '-' }}</td>
+                            <td class="py-3 px-2 text-gray-800">{{ $item->destination_ip ?? '-' }}</td>
+                            <td class="py-3 px-2 text-gray-800">{{ $item->protocol ?? '-' }}</td>
+                            <td class="py-3 px-2 text-gray-800">
+                                {{ $item->confidence !== null ? number_format(((float) $item->confidence) * 100, 2, ',', '.') . '%' : '-' }}
+                            </td>
+                            <td class="py-3 px-2">
+                                @if ((int) $item->prediction === 1)
+                                    <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded font-medium">Malware</span>
+                                @else
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded font-medium">Normal</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="9" class="py-8 text-center text-gray-500">
+                                Belum ada hasil deteksi.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</x-app-with-sidebar-layout>
