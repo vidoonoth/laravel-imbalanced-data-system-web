@@ -110,44 +110,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 class="text-sm font-semibold text-gray-800 mb-4">Scan Terakhir</h3>
-            @if ($latestScan)
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
-                        <div class="min-w-0">
-                            <p class="text-xs text-gray-600 font-medium">File</p>
-                            <p class="text-lg font-bold text-blue-700 mt-1 truncate">{{ $latestScan->original_filename }}</p>
-                        </div>
-                        @can('detection-history.view')
-                            <a href="{{ route('detection.history.show', $latestScan) }}"
-                                class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-xs font-semibold">
-                                Detail
-                            </a>
-                        @endcan
-                    </div>
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <p class="text-xs text-gray-600 font-medium">Total</p>
-                            <p class="text-2xl font-bold text-gray-800 mt-1">{{ number_format($latestScan->total_samples, 0, ',', '.') }}</p>
-                        </div>
-                        <div class="p-4 bg-green-50 rounded-lg border border-green-200">
-                            <p class="text-xs text-gray-600 font-medium">Normal</p>
-                            <p class="text-2xl font-bold text-green-700 mt-1">{{ number_format($latestScan->normal_count, 0, ',', '.') }}</p>
-                        </div>
-                        <div class="p-4 bg-red-50 rounded-lg border border-red-200">
-                            <p class="text-xs text-gray-600 font-medium">Malware</p>
-                            <p class="text-2xl font-bold text-red-700 mt-1">{{ number_format($latestScan->attack_count, 0, ',', '.') }}</p>
-                        </div>
-                    </div>
-                </div>
-            @else
-                <div class="p-8 bg-gray-50 rounded-lg text-center text-gray-500">
-                    Belum ada scan yang selesai.
-                </div>
-            @endif
-        </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">       
 
         <div class="bg-white rounded-lg border border-gray-200 p-6">
             <h3 class="text-sm font-semibold text-gray-800 mb-4">Akumulasi Deteksi</h3>
@@ -193,54 +156,105 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div class="bg-white rounded-lg border border-gray-200 p-6 lg:col-span-2">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-semibold text-gray-800">Traffic per Upload</h3>
-                <div class="flex items-center gap-3">
-                    <span class="flex items-center gap-1 text-xs text-gray-600">
-                        <span class="w-3 h-3 bg-green-500 rounded-full"></span> Normal
-                    </span>
-                    <span class="flex items-center gap-1 text-xs text-gray-600">
-                        <span class="w-3 h-3 bg-red-500 rounded-full"></span> Malware
-                    </span>
-                </div>
-            </div>
-            <div class="h-64 bg-gray-50 rounded-lg p-4 overflow-x-auto">
-                @if ($chartScans->isNotEmpty())
-                    <div class="h-full min-w-full flex items-end gap-4">
-                        @foreach ($chartScans as $scan)
-                            @php
-                                $normalHeight = $scan->normal_count > 0 ? max(($scan->normal_count / $maxChartTotal) * 100, 4) : 0;
-                                $malwareHeight = $scan->attack_count > 0 ? max(($scan->attack_count / $maxChartTotal) * 100, 4) : 0;
-                            @endphp
-                            <div class="flex-1 min-w-16 flex flex-col items-center gap-2">
-                                <div class="h-48 flex items-end gap-1">
-                                    <div class="w-4 bg-green-500 rounded-t" style="height: {{ $normalHeight }}%;"></div>
-                                    <div class="w-4 bg-red-500 rounded-t" style="height: {{ $malwareHeight }}%;"></div>
-                                </div>
-                                @can('detection-history.view')
-                                    <a href="{{ route('detection.history.show', $scan) }}"
-                                        class="text-xs text-gray-500 hover:text-blue-600 max-w-20 truncate">
-                                        #{{ $scan->id }}
-                                    </a>
-                                @else
-                                    <span class="text-xs text-gray-500 max-w-20 truncate">#{{ $scan->id }}</span>
-                                @endcan
-                            </div>
+        {{-- Deteksi Malware Bar Chart --}}
+        @php
+            $barChartMax = max($totalTraffic, 1);
+            // Calculate nice Y-axis steps
+            $rawStep = $barChartMax / 5;
+            $magnitude = pow(10, floor(log10(max($rawStep, 1))));
+            $niceStep = ceil($rawStep / $magnitude) * $magnitude;
+            $barChartCeil = $niceStep * 5;
+            if ($barChartCeil < $barChartMax) {
+                $barChartCeil = $niceStep * 6;
+            }
+            $yAxisSteps = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $yAxisSteps[] = $niceStep * $i;
+            }
+
+            $totalBarHeight = $barChartCeil > 0 ? ($totalTraffic / $barChartCeil) * 100 : 0;
+            $normalBarHeight = $barChartCeil > 0 ? ($normalTotal / $barChartCeil) * 100 : 0;
+            $malwareBarHeight = $barChartCeil > 0 ? ($malwareTotal / $barChartCeil) * 100 : 0;
+        @endphp
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 class="text-sm font-semibold text-gray-800 mb-4">Deteksi Malware</h3>
+            @if ($totalTraffic > 0)
+                <div class="flex h-56">
+                    {{-- Y-Axis Labels --}}
+                    <div class="flex flex-col justify-between pr-3 text-right flex-shrink-0 -mt-1.5 -mb-1.5">
+                        @foreach ($yAxisSteps as $step)
+                            <span class="text-xs text-gray-400 leading-none">{{ number_format($step, 0, ',', '.') }}</span>
                         @endforeach
                     </div>
-                @else
-                    <div class="h-full flex items-center justify-center text-sm text-gray-500">
-                        Data chart akan muncul setelah deteksi pertama.
+                    {{-- Chart Area --}}
+                    <div class="flex-1 flex flex-col">
+                        <div class="flex-1 border-l border-b border-gray-200 relative">
+                            {{-- Grid Lines --}}
+                            @for ($i = 1; $i <= 4; $i++)
+                                <div class="absolute w-full border-t border-gray-100" style="top: {{ ($i / 5) * 100 }}%;"></div>
+                            @endfor
+                            <div class="absolute w-full border-t border-gray-100" style="top: 0;"></div>
+
+                            {{-- Bars --}}
+                            <div class="absolute inset-0 flex items-end justify-around px-2 gap-2 pb-0">
+                                {{-- Total Data Bar --}}
+                                <div class="flex-1 flex flex-col items-center justify-end h-full max-w-20">
+                                    <div class="w-full rounded-t-md bg-blue-500 transition-all duration-700 ease-out relative group"
+                                        style="height: {{ max($totalBarHeight, 1) }}%;">
+                                        <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
+                                            {{ number_format($totalTraffic, 0, ',', '.') }}
+                                        </div>
+                                    </div>
+                                </div>
+                                {{-- Normal Bar --}}
+                                <div class="flex-1 flex flex-col items-center justify-end h-full max-w-20">
+                                    <div class="w-full rounded-t-md bg-green-500 transition-all duration-700 ease-out relative group"
+                                        style="height: {{ max($normalBarHeight, 1) }}%;">
+                                        <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
+                                            {{ number_format($normalTotal, 0, ',', '.') }}
+                                        </div>
+                                    </div>
+                                </div>
+                                {{-- Malware Bar --}}
+                                <div class="flex-1 flex flex-col items-center justify-end h-full max-w-20">
+                                    <div class="w-full rounded-t-md bg-red-500 transition-all duration-700 ease-out relative group"
+                                        style="height: {{ max($malwareBarHeight, 1) }}%;">
+                                        <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
+                                            {{ number_format($malwareTotal, 0, ',', '.') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {{-- X-Axis Labels --}}
+                        <div class="flex justify-around px-2 mt-2.5">
+                            <span class="flex-1 text-center text-xs text-gray-600 font-medium max-w-20">Total<br>Data</span>
+                            <span class="flex-1 text-center text-xs text-gray-600 font-medium max-w-20">Normal</span>
+                            <span class="flex-1 text-center text-xs text-gray-600 font-medium max-w-20">Malware</span>
+                        </div>
                     </div>
-                @endif
-            </div>
+                </div>
+                {{-- Legend --}}
+                <div class="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-gray-100">
+                    <span class="flex items-center gap-1.5 text-xs text-gray-600">
+                        <span class="w-2.5 h-2.5 bg-blue-500 rounded-sm"></span> Total Data
+                    </span>
+                    <span class="flex items-center gap-1.5 text-xs text-gray-600">
+                        <span class="w-2.5 h-2.5 bg-green-500 rounded-sm"></span> Normal
+                    </span>
+                    <span class="flex items-center gap-1.5 text-xs text-gray-600">
+                        <span class="w-2.5 h-2.5 bg-red-500 rounded-sm"></span> Malware
+                    </span>
+                </div>
+            @else
+                <div class="h-56 flex items-center justify-center bg-gray-50 rounded-lg text-sm text-gray-500">
+                    Data chart akan muncul setelah deteksi pertama.
+                </div>
+            @endif
         </div>
 
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
+         <div class="bg-white rounded-lg border border-gray-200 p-6">
             <h3 class="text-sm font-semibold text-gray-800 mb-4">Top IP Mencurigakan</h3>
             <div class="space-y-3">
                 @forelse ($topSuspiciousIps as $ip)
@@ -290,71 +304,9 @@
                 @endforelse
             </div>
         </div>
+
+
     </div>
 
-    <div class="bg-white rounded-lg border border-gray-200 p-6">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-semibold text-gray-800">Deteksi Terbaru</h3>
-            @can('detection-history.view')
-                <a href="{{ route('detection.history') }}" class="text-sm text-blue-600 hover:text-blue-800 font-semibold">
-                    Lihat semua
-                </a>
-            @endcan
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b border-gray-200">
-                        <th class="text-left text-gray-600 font-medium py-3 px-2">Waktu Log</th>
-                        <th class="text-left text-gray-600 font-medium py-3 px-2">File</th>
-                        <th class="text-left text-gray-600 font-medium py-3 px-2">Event</th>
-                        <th class="text-left text-gray-600 font-medium py-3 px-2">Disposisi</th>
-                        <th class="text-left text-gray-600 font-medium py-3 px-2">Source IP</th>
-                        <th class="text-left text-gray-600 font-medium py-3 px-2">Destination IP</th>
-                        <th class="text-left text-gray-600 font-medium py-3 px-2">Protocol</th>
-                        <th class="text-left text-gray-600 font-medium py-3 px-2">Confidence</th>
-                        <th class="text-left text-gray-600 font-medium py-3 px-2">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($recentDetections as $item)
-                        @php
-                            $detectedAt = $item->update_time
-                                ? $item->update_time->format('d/m/Y H:i:s')
-                                : $item->created_at?->timezone('Asia/Jakarta')->format('d/m/Y H:i:s');
-                        @endphp
-                        <tr class="border-b border-gray-100 hover:bg-gray-50">
-                            <td class="py-3 px-2 text-gray-800 whitespace-nowrap">
-                                {{ $detectedAt ?? '-' }}
-                            </td>
-                            <td class="py-3 px-2 text-gray-800 max-w-48 truncate">
-                                {{ $item->scan?->original_filename ?? '-' }}
-                            </td>
-                            <td class="py-3 px-2 text-gray-800">{{ $item->event_name ?? '-' }}</td>
-                            <td class="py-3 px-2 text-gray-800">{{ $item->disposition ?? '-' }}</td>
-                            <td class="py-3 px-2 text-gray-800">{{ $item->source_ip ?? '-' }}</td>
-                            <td class="py-3 px-2 text-gray-800">{{ $item->destination_ip ?? '-' }}</td>
-                            <td class="py-3 px-2 text-gray-800">{{ $item->protocol ?? '-' }}</td>
-                            <td class="py-3 px-2 text-gray-800">
-                                {{ $item->confidence !== null ? number_format(((float) $item->confidence) * 100, 2, ',', '.') . '%' : '-' }}
-                            </td>
-                            <td class="py-3 px-2">
-                                @if ((int) $item->prediction === 1)
-                                    <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded font-medium">Malware</span>
-                                @else
-                                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded font-medium">Normal</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="9" class="py-8 text-center text-gray-500">
-                                Belum ada hasil deteksi.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+    
 </x-app-with-sidebar-layout>

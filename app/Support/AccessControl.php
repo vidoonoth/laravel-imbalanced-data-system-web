@@ -126,6 +126,6 @@ class AccessControl
             }
         }
 
-        return 'profile.edit';
+        return 'profile.show';
     }
 }

@@ -24,7 +24,7 @@
             ? route('dashboard')
             : (Auth::user()->can('detection.run')
                 ? route('detection')
-                : route('profile.edit'));
+                : route('profile.show'));
     @endphp
 
     <div class="flex h-screen bg-gray-100" x-data="{ sidebarOpen: true }">
@@ -93,47 +93,7 @@
                     @endcan
                 </nav>
 
-                <!-- User Profile Section -->
-                <div class="p-4 border-t flex-shrink-0">
-                    <x-dropdown align="side" width="48">
-                        <x-slot name="trigger">
-                            <button
-                                class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-400 transition">
-                                <div class="flex items-center space-x-3">
-                                    <div
-                                        class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <span
-                                            class="text-white font-semibold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
-                                    </div>
-                                    <div class="text-left">
-                                        <p class="text-sm font-semibold truncate">{{ Auth::user()->name }}</p>
-                                        <p class="text-xs text-gray-400 truncate">{{ Auth::user()->email }}</p>
-                                    </div>
-                                </div>
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7"></path>
-                                </svg>
-                            </button>
-                        </x-slot>
-
-                        <x-slot name="content">
-                            <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('Profile') }}
-                            </x-dropdown-link>
-
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                        this.closest('form').submit();">
-                                    {{ __('Log Out') }}
-                                </x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
-                </div>
+               
             </div>
         </aside>
 
@@ -161,39 +121,48 @@
                         </div>
                     </div>
 
-                    <!-- Right Actions -->
-                    <div class="flex items-center space-x-4">
-                        <button class="p-2 hover:bg-gray-100 rounded-lg relative transition">
-                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
-                                </path>
-                            </svg>
-                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                        </button>
-
-                        <div class="hidden sm:flex items-center space-x-3 pl-4 border-l border-gray-200">
-                            <button class="p-2 hover:bg-gray-100 rounded-lg transition">
-                                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor"
+                     <!-- User Profile Section -->
+                <div class="flex-shrink-0">
+                    <x-dropdown align="side" width="48">
+                        <x-slot name="trigger">
+                            <button
+                                class="w-full flex items-center justify-between rounded-lg hover:bg-gray-400 transition">
+                                <div class="flex items-center space-x-3">
+                                    <div
+                                        class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <span
+                                            class="text-white font-semibold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                                    </div>
+                                    <div class="text-left">
+                                        <p class="text-sm font-semibold truncate">{{ Auth::user()->name }}</p>
+                                        <p class="text-xs text-gray-400 truncate">{{ Auth::user()->email }}</p>
+                                    </div>
+                                </div>
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                        d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
-                            <a href="{{ route('profile.edit') }}"
-                                class="p-2 hover:bg-gray-100 rounded-lg transition">
-                                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                                    </path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
+                        </x-slot>
+
+                        <x-slot name="content">
+                            <x-dropdown-link :href="route('profile.show')">
+                                {{ __('Profile') }}
+                            </x-dropdown-link>
+
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <x-dropdown-link :href="route('logout')"
+                                    onclick="event.preventDefault();
+                                                        this.closest('form').submit();">
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
+                            </form>
+                        </x-slot>
+                    </x-dropdown>
+                </div>
+
                 </div>
             </nav>
 
