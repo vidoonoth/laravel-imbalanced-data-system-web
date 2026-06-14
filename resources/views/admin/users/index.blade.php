@@ -1,9 +1,15 @@
 <x-app-with-sidebar-layout>
+
+    <x-slot name="breadcrumbs">
+        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : (Auth::user()->can('detection.run') ? route('detection') : route('profile.show')) }}" class="hover:text-gray-900">Dashboard</a>
+        <span class="text-gray-400">/</span>
+        <span class="text-gray-900 font-medium">Kelola Data User</span>
+    </x-slot>
+
     <x-slot name="header">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h2 class="font-semibold text-2xl text-gray-800">Manajemen User</h2>
-                <p class="text-sm text-gray-500 mt-1">Kelola akun, role, dan akses fitur administrator jaringan.</p>
+                <h2 class="font-semibold text-2xl text-gray-800">Kelola Data User</h2>                
             </div>
             <a href="{{ route('admin.users.create') }}"
                 class="inline-flex justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold">

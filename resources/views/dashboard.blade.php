@@ -1,24 +1,14 @@
 <x-app-with-sidebar-layout>
+    <x-slot name="breadcrumbs">
+        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : (Auth::user()->can('detection.run') ? route('detection') : route('profile.show')) }}" class="hover:text-gray-900">Dashboard</a>        
+    </x-slot>
+
     <x-slot name="header">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h2 class="font-semibold text-2xl text-gray-800">Dashboard Deteksi Malware</h2>
                 <p class="text-sm text-gray-500 mt-1">Ringkasan hasil deteksi dari file yang sudah diproses.</p>
-            </div>
-            <div class="flex gap-2">
-                @can('detection-history.view')
-                    <a href="{{ route('detection.history') }}"
-                        class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-semibold">
-                        Riwayat
-                    </a>
-                @endcan
-                @can('detection.run')
-                    <a href="{{ route('detection') }}"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
-                        Upload File
-                    </a>
-                @endcan
-            </div>
+            </div>            
         </div>
     </x-slot>
 
@@ -34,15 +24,8 @@
         <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-5">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <p class="font-semibold text-blue-900">Belum ada data deteksi tersimpan.</p>
-                    <p class="text-sm text-blue-700 mt-1">Upload file CSV di halaman Detection agar dashboard terisi otomatis.</p>
-                </div>
-                @can('detection.run')
-                    <a href="{{ route('detection') }}"
-                        class="inline-flex justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
-                        Mulai Deteksi
-                    </a>
-                @endcan
+                    <p class="font-semibold text-blue-900">Belum ada data deteksi </p>                   
+                </div>                
             </div>
         </div>
     @endif

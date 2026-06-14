@@ -1,6 +1,6 @@
 <x-app-with-sidebar-layout>
     <x-slot name="breadcrumbs">
-        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : (Auth::user()->can('detection.run') ? route('detection') : route('profile.show')) }}" class="hover:text-gray-900">Home</a>
+        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : (Auth::user()->can('detection.run') ? route('detection') : route('profile.show')) }}" class="hover:text-gray-900">Dashboard</a>
         <span class="text-gray-400">/</span>
         <span class="text-gray-900 font-medium">Profile</span>
     </x-slot>
@@ -35,6 +35,11 @@
     </x-slot>
 
     <div class="max-w-3xl space-y-6">
+        @if (session('status') === 'profile-updated')
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-sm font-medium text-green-800">
+                Profil dan foto profil Anda berhasil diperbarui.
+            </div>
+        @endif
         {{-- Profile Card --}}
         <div class="bg-white rounded-lg border border-gray-200 p-6 sm:p-8">
             <div class="flex items-center gap-5 mb-8">
