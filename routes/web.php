@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\PermissionController as AdminPermissionController;
 use App\Http\Controllers\DetectionController;
 use App\Http\Controllers\MLController;
 use App\Http\Controllers\ProfileController;
@@ -37,9 +38,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('admin')
         ->name('admin.')
-        ->middleware('permission:users.manage')
         ->group(function () {
-            Route::resource('users', AdminUserController::class)->except('show');
+            Route::middleware('permission:users.manage')->group(function () {
+                Route::resource('users', AdminUserController::class)->except('show');
+            });
+
+            Route::middleware('permission:permissions.manage')->group(function () {
+                Route::get('permissions', [AdminPermissionController::class, 'index'])->name('permissions.index');
+                Route::get('permissions/{user}/edit', [AdminPermissionController::class, 'edit'])->name('permissions.edit');
+                Route::put('permissions/{user}', [AdminPermissionController::class, 'update'])->name('permissions.update');
+            });
         });
 
     // ===== ML API Routes =====

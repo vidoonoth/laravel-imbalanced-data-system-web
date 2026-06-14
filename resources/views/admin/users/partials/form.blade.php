@@ -2,8 +2,6 @@
     $isEditing = filled($user);
     $isChangingPassword = $isEditing && (old('change_password') || $errors->has('password'));
     $selectedRole = old('role', $selectedRole ?? 'user');
-    $selectedPermissions = old('permissions', $selectedPermissions ?? []);
-    $groupedPermissions = collect($permissions)->groupBy('group', true);
 @endphp
 
 <form method="POST" action="{{ $action }}" class="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
@@ -71,38 +69,6 @@
             @endforeach
         </select>
         <x-input-error :messages="$errors->get('role')" class="mt-2" />
-    </div>
-
-    <div>
-        <div class="flex items-center justify-between gap-4 mb-3">
-            <div>
-                <h3 class="text-sm font-semibold text-gray-800">Hak Akses Fitur</h3>
-                <p class="text-xs text-gray-500 mt-1">Role admin selalu punya Manajemen User; akses fitur lain bisa diatur.</p>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            @foreach ($groupedPermissions as $group => $items)
-                <div class="border border-gray-200 rounded-lg p-4">
-                    <p class="text-sm font-semibold text-gray-800 mb-3">{{ $group }}</p>
-                    <div class="space-y-3">
-                        @foreach ($items as $permission => $meta)
-                            <label class="flex items-start gap-3">
-                                <input type="checkbox" name="permissions[]" value="{{ $permission }}"
-                                    @checked(in_array($permission, $selectedPermissions, true))
-                                    class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                <span>
-                                    <span class="block text-sm font-medium text-gray-800">{{ $meta['label'] }}</span>
-                                    <span class="block text-xs text-gray-500">{{ $meta['description'] }}</span>
-                                </span>
-                            </label>
-                        @endforeach
-                    </div>
-                </div>
-            @endforeach
-        </div>
-        <x-input-error :messages="$errors->get('permissions')" class="mt-2" />
-        <x-input-error :messages="$errors->get('permissions.*')" class="mt-2" />
     </div>
 
     <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

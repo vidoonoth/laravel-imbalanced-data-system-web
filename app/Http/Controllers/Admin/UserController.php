@@ -19,7 +19,7 @@ class UserController extends Controller
         AccessControl::ensureRolesAndPermissions();
 
         $users = User::query()
-            ->with(['roles', 'permissions'])
+            ->with(['roles'])
             ->when($request->filled('q'), function ($query) use ($request) {
                 $keyword = $request->string('q')->toString();
 
@@ -46,9 +46,7 @@ class UserController extends Controller
 
         return view('admin.users.create', [
             'roles' => AccessControl::roles(),
-            'permissions' => AccessControl::permissions(),
             'selectedRole' => AccessControl::ROLE_USER,
-            'selectedPermissions' => AccessControl::defaultUserPermissions(),
         ]);
     }
 
@@ -64,7 +62,11 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        $this->syncUserAccess($user, $validated['role'], $validated['permissions'] ?? []);
+        $defaultPermissions = $validated['role'] === AccessControl::ROLE_ADMIN
+            ? AccessControl::defaultAdminPermissions()
+            : AccessControl::defaultUserPermissions();
+
+        $this->syncUserAccess($user, $validated['role'], $defaultPermissions);
 
         return redirect()
             ->route('admin.users.index')
@@ -76,11 +78,9 @@ class UserController extends Controller
         AccessControl::ensureRolesAndPermissions();
 
         return view('admin.users.edit', [
-            'user' => $user->load(['roles', 'permissions']),
+            'user' => $user->load(['roles']),
             'roles' => AccessControl::roles(),
-            'permissions' => AccessControl::permissions(),
             'selectedRole' => $user->roles->pluck('name')->first() ?: AccessControl::ROLE_USER,
-            'selectedPermissions' => $this->effectivePermissionNames($user),
         ]);
     }
 
@@ -107,7 +107,8 @@ class UserController extends Controller
 
         $user->save();
 
-        $this->syncUserAccess($user, $validated['role'], $validated['permissions'] ?? []);
+        $currentPermissions = $user->permissions->pluck('name')->all();
+        $this->syncUserAccess($user, $validated['role'], $currentPermissions);
 
         return redirect()
             ->route('admin.users.index')
@@ -128,7 +129,7 @@ class UserController extends Controller
     }
 
     /**
-     * @return array{name: string, email: string, password?: string|null, role: string, permissions?: list<string>}
+     * @return array{name: string, email: string, password?: string|null, role: string}
      */
     private function validatedUserData(Request $request, ?User $user = null): array
     {
@@ -159,8 +160,6 @@ class UserController extends Controller
             ],
             'password' => $passwordRules,
             'role' => ['required', Rule::in(AccessControl::roles())],
-            'permissions' => ['array'],
-            'permissions.*' => [Rule::in(AccessControl::permissionNames())],
         ]);
     }
 
@@ -176,7 +175,10 @@ class UserController extends Controller
 
         if ($role === AccessControl::ROLE_ADMIN) {
             $user->syncRoles([AccessControl::ROLE_ADMIN]);
-            $user->syncPermissions(array_values(array_diff($allowedPermissions, [AccessControl::PERMISSION_MANAGE_USERS])));
+            $user->syncPermissions(array_values(array_diff($allowedPermissions, [
+                AccessControl::PERMISSION_MANAGE_USERS,
+                AccessControl::PERMISSION_MANAGE_PERMISSIONS
+            ])));
 
             return;
         }

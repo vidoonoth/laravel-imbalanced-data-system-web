@@ -91,6 +91,18 @@
                             <span class="whitespace-nowrap">User</span>
                         </a>
                     @endcan
+
+                    <!-- Hak Akses Menu -->
+                    @can('permissions.manage')
+                        <a href="{{ route('admin.permissions.index') }}" data-nav-link
+                            class="flex items-center space-x-3 px-4 py-3 rounded-lg {{ request()->routeIs('admin.permissions*') ? 'bg-gray-200' : 'hover:bg-gray-400' }} transition cursor-pointer">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                            <span class="whitespace-nowrap">Hak Akses Menu</span>
+                        </a>
+                    @endcan
                 </nav>
 
                
@@ -121,18 +133,22 @@
                         </div>
                     </div>
 
-                     <!-- User Profile Section -->
+                 <!-- User Profile Section -->
                 <div class="flex-shrink-0">
-                    <x-dropdown align="side" width="48">
+                    <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button
-                                class="w-full flex items-center justify-between rounded-lg hover:bg-gray-400 transition">
+                                class="flex items-center gap-3 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                                 <div class="flex items-center space-x-3">
-                                    <div
-                                        class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <span
-                                            class="text-white font-semibold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
-                                    </div>
+                                    @if(Auth::user()->avatar)
+                                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                                    @else
+                                        <div
+                                            class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <span
+                                                class="text-white font-semibold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                                        </div>
+                                    @endif
                                     <div class="text-left">
                                         <p class="text-sm font-semibold truncate">{{ Auth::user()->name }}</p>
                                         <p class="text-xs text-gray-400 truncate">{{ Auth::user()->email }}</p>

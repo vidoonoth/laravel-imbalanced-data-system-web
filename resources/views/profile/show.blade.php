@@ -38,9 +38,13 @@
         {{-- Profile Card --}}
         <div class="bg-white rounded-lg border border-gray-200 p-6 sm:p-8">
             <div class="flex items-center gap-5 mb-8">
-                <div class="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
-                    <span class="text-white font-bold text-2xl">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
-                </div>
+                @if($user->avatar)
+                    <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar" class="w-20 h-20 rounded-full object-cover flex-shrink-0 shadow-md">
+                @else
+                    <div class="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
+                        <span class="text-white font-bold text-2xl">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                    </div>
+                @endif
                 <div>
                     <h3 class="text-xl font-bold text-gray-900">{{ $user->name }}</h3>
                     <p class="text-sm text-gray-500 mt-0.5">{{ $user->email }}</p>

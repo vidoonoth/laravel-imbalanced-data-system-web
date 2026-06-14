@@ -15,6 +15,8 @@ class AccessControl
 
     public const PERMISSION_MANAGE_USERS = 'users.manage';
 
+    public const PERMISSION_MANAGE_PERMISSIONS = 'permissions.manage';
+
     /**
      * @return array<string, array{label: string, group: string, description: string}>
      */
@@ -39,7 +41,12 @@ class AccessControl
             self::PERMISSION_MANAGE_USERS => [
                 'label' => 'Manajemen User',
                 'group' => 'Administrasi',
-                'description' => 'Membuat, mengubah, menghapus user, role, dan hak akses.',
+                'description' => 'Membuat, mengubah, menghapus user, dan role.',
+            ],
+            self::PERMISSION_MANAGE_PERMISSIONS => [
+                'label' => 'Hak Akses Menu',
+                'group' => 'Administrasi',
+                'description' => 'Mengatur hak akses dan izin menu untuk setiap user.',
             ],
         ];
     }
@@ -57,7 +64,7 @@ class AccessControl
      */
     public static function defaultUserPermissions(): array
     {
-        return array_values(array_diff(self::permissionNames(), [self::PERMISSION_MANAGE_USERS]));
+        return array_values(array_diff(self::permissionNames(), [self::PERMISSION_MANAGE_USERS, self::PERMISSION_MANAGE_PERMISSIONS]));
     }
 
     /**
@@ -90,7 +97,7 @@ class AccessControl
         }
 
         Role::findOrCreate(self::ROLE_USER, 'web')->syncPermissions([]);
-        Role::findOrCreate(self::ROLE_ADMIN, 'web')->syncPermissions([self::PERMISSION_MANAGE_USERS]);
+        Role::findOrCreate(self::ROLE_ADMIN, 'web')->syncPermissions([self::PERMISSION_MANAGE_USERS, self::PERMISSION_MANAGE_PERMISSIONS]);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }

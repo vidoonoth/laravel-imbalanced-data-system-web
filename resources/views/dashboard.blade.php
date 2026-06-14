@@ -110,7 +110,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">       
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 items-start">       
 
         <div class="bg-white rounded-lg border border-gray-200 p-6">
             <h3 class="text-sm font-semibold text-gray-800 mb-4">Akumulasi Deteksi</h3>
