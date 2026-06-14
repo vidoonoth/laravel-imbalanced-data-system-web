@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DetectionResult;
-use App\Models\DetectionScan;
+
 use App\Services\IpGeolocationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -17,36 +17,25 @@ class DetectionController extends Controller
 
     public function dashboard()
     {
-        $scanQuery = DetectionScan::query()
-            ->where('status', 'success');
-
-        $totalScans = (clone $scanQuery)->count();
-        $totalTraffic = (int) (clone $scanQuery)->sum('total_samples');
-        $normalTotal = (int) (clone $scanQuery)->sum('normal_count');
-        $malwareTotal = (int) (clone $scanQuery)->sum('attack_count');
+        $totalTraffic = DetectionResult::count();
+        $normalTotal = DetectionResult::where('prediction', 0)->count();
+        $malwareTotal = DetectionResult::where('prediction', 1)->count();
 
         $normalPercentage = $totalTraffic > 0 ? ($normalTotal / $totalTraffic) * 100 : 0;
         $malwarePercentage = $totalTraffic > 0 ? ($malwareTotal / $totalTraffic) * 100 : 0;
 
-        $latestScan = (clone $scanQuery)
-            ->latest('completed_at')
+        $latestDetection = DetectionResult::query()
+            ->latest('detected_at')
             ->latest('id')
             ->first();
 
         $suspiciousIpCount = DetectionResult::query()
             ->where('prediction', 1)
             ->whereNotNull('source_ip')
-            ->whereHas('scan', function ($query) {
-                $query->where('status', 'success');
-            })
             ->distinct()
             ->count('source_ip');
 
         $recentDetections = DetectionResult::query()
-            ->with('scan')
-            ->whereHas('scan', function ($query) {
-                $query->where('status', 'success');
-            })
             ->latest('id')
             ->limit(8)
             ->get();
@@ -60,9 +49,6 @@ class DetectionController extends Controller
             )
             ->where('prediction', 1)
             ->whereNotNull('source_ip')
-            ->whereHas('scan', function ($query) {
-                $query->where('status', 'success');
-            })
             ->groupBy('source_ip')
             ->orderByDesc('total')
             ->limit(5)
@@ -73,29 +59,16 @@ class DetectionController extends Controller
                 return $ip;
             });
 
-        $chartScans = (clone $scanQuery)
-            ->latest('completed_at')
-            ->latest('id')
-            ->limit(8)
-            ->get()
-            ->reverse()
-            ->values();
-
-        $maxChartTotal = max((int) $chartScans->max('total_samples'), 1);
-
         return view('dashboard', [
-            'totalScans' => $totalScans,
             'totalTraffic' => $totalTraffic,
             'normalTotal' => $normalTotal,
             'malwareTotal' => $malwareTotal,
             'normalPercentage' => $normalPercentage,
             'malwarePercentage' => $malwarePercentage,
-            'latestScan' => $latestScan,
+            'latestDetection' => $latestDetection,
             'suspiciousIpCount' => $suspiciousIpCount,
             'recentDetections' => $recentDetections,
             'topSuspiciousIps' => $topSuspiciousIps,
-            'chartScans' => $chartScans,
-            'maxChartTotal' => $maxChartTotal,
         ]);
     }
 
@@ -130,7 +103,6 @@ class DetectionController extends Controller
         $activityTrend = $this->buildActivityTrend($activityTimes, $trendGranularity);
 
         $activities = (clone $baseQuery)
-            ->with('scan')
             ->orderByDesc('update_time')
             ->orderByDesc('created_at')
             ->orderByDesc('id')
@@ -138,7 +110,6 @@ class DetectionController extends Controller
             ->withQueryString();
 
         $alerts = (clone $baseQuery)
-            ->with('scan')
             ->where('prediction', 1)
             ->orderByDesc('confidence')
             ->orderByDesc('id')
@@ -185,66 +156,10 @@ class DetectionController extends Controller
         ]);
     }
 
-    public function history(Request $request)
-    {
-        $scanQuery = DetectionScan::query()
-            ->withCount('results')
-            ->latest('created_at');
-
-        if ($request->filled('q')) {
-            $keyword = $request->string('q')->toString();
-
-            $scanQuery->where(function ($query) use ($keyword) {
-                $query->where('original_filename', 'like', "%{$keyword}%")
-                    ->orWhere('status', 'like', "%{$keyword}%");
-            });
-        }
-
-        if ($request->filled('status') && in_array($request->string('status')->toString(), ['processing', 'success', 'failed'], true)) {
-            $scanQuery->where('status', $request->string('status')->toString());
-        }
-
-        $scans = $scanQuery->paginate(10)->withQueryString();
-
-        $successQuery = DetectionScan::query()
-            ->where('status', 'success');
-
-        $summary = [
-            'total_scans' => DetectionScan::query()->count(),
-            'successful_scans' => (clone $successQuery)->count(),
-            'total_samples' => (int) (clone $successQuery)->sum('total_samples'),
-            'attack_count' => (int) (clone $successQuery)->sum('attack_count'),
-        ];
-
-        return view('detection-history', [
-            'scans' => $scans,
-            'summary' => $summary,
-            'filters' => [
-                'q' => $request->string('q')->toString(),
-                'status' => $request->string('status')->toString(),
-            ],
-        ]);
-    }
-
-    public function show(DetectionScan $scan)
-    {
-        $results = $scan->results()
-            ->orderBy('row_index')
-            ->paginate(25);
-
-        return view('detection-history-show', [
-            'scan' => $scan,
-            'results' => $results,
-        ]);
-    }
-
     private function ipActivityQuery(string $ipAddress): Builder
     {
         return DetectionResult::query()
-            ->where('source_ip', $ipAddress)
-            ->whereHas('scan', function ($query) {
-                $query->where('status', 'success');
-            });
+            ->where('source_ip', $ipAddress);
     }
 
     private function topColumnValues(Builder $query, string $column, int $limit = 5)

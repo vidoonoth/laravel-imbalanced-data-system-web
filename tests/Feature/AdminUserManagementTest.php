@@ -30,18 +30,9 @@ test('admin can create network administrator user with limited feature access', 
         ->get(route('admin.users.create'))
         ->assertOk()
         ->assertSee('Dashboard')
-        ->assertSee('Detection')
-        ->assertSee('Riwayat Deteksi')
-        ->assertSee('Manajemen User')
-        ->assertSee('value="dashboard.view"', false)
-        ->assertSee('value="detection.run"', false)
-        ->assertSee('value="detection-history.view"', false)
-        ->assertSee('value="users.manage"', false)
-        ->assertDontSee('Aktivitas IP')
-        ->assertDontSee('Dataset Analysis')
-        ->assertDontSee('Imbalance Handling')
-        ->assertDontSee('Evaluation')
-        ->assertDontSee('Reports');
+        ->assertSee('Laporan')
+        ->assertSee('User')
+        ->assertSee('Hak Akses Menu');
 
     $this
         ->actingAs($admin)
@@ -51,41 +42,32 @@ test('admin can create network administrator user with limited feature access', 
             'password' => 'password',
             'password_confirmation' => 'password',
             'role' => AccessControl::ROLE_USER,
-            'permissions' => ['detection.run'],
         ])
         ->assertRedirect(route('admin.users.index'));
 
     $user = User::where('email', 'operator@example.com')->firstOrFail();
 
     expect($user->hasRole(AccessControl::ROLE_USER))->toBeTrue()
-        ->and($user->can('detection.run'))->toBeTrue()
-        ->and($user->can('dashboard.view'))->toBeFalse()
+        ->and($user->can('dashboard.view'))->toBeTrue()
+        ->and($user->can('report.view'))->toBeTrue()
         ->and($user->can(AccessControl::PERMISSION_MANAGE_USERS))->toBeFalse();
 
     $this
         ->actingAs($user)
-        ->get(route('detection'))
-        ->assertOk();
-
-    $this
-        ->actingAs($user)
         ->get(route('dashboard'))
-        ->assertForbidden();
+        ->assertOk();
 });
 
 test('admin permission validation errors render without crashing', function () {
     $admin = adminAccount();
+    $user = User::factory()->create();
+    AccessControl::assignDefaultUserAccess($user);
 
     $this
         ->actingAs($admin)
         ->followingRedirects()
-        ->from(route('admin.users.create'))
-        ->post(route('admin.users.store'), [
-            'name' => 'Operator Validasi',
-            'email' => 'operator-validasi@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-            'role' => AccessControl::ROLE_USER,
+        ->from(route('admin.permissions.edit', $user))
+        ->put(route('admin.permissions.update', $user), [
             'permissions' => ['dataset-analysis.view'],
         ])
         ->assertOk()
@@ -108,7 +90,6 @@ test('admin can update feature access without changing password', function () {
             'name' => 'Operator Hak Akses',
             'email' => 'akses@example.com',
             'role' => AccessControl::ROLE_USER,
-            'permissions' => ['dashboard.view'],
             'password' => 'browser-autofill-value',
         ])
         ->assertRedirect(route('admin.users.index'));
@@ -116,7 +97,6 @@ test('admin can update feature access without changing password', function () {
     $user->refresh();
 
     expect($user->can('dashboard.view'))->toBeTrue()
-        ->and($user->can('detection.run'))->toBeFalse()
         ->and(Hash::check('old-password', $user->password))->toBeTrue()
         ->and(Hash::check('browser-autofill-value', $user->password))->toBeFalse();
 });
@@ -130,21 +110,17 @@ test('admin role feature access can be customized', function () {
 
     $this
         ->actingAs($admin)
-        ->put(route('admin.users.update', $targetAdmin), [
-            'name' => 'Admin Terbatas',
-            'email' => 'admin-terbatas@example.com',
-            'role' => AccessControl::ROLE_ADMIN,
-            'permissions' => ['detection.run'],
+        ->put(route('admin.permissions.update', $targetAdmin), [
+            'permissions' => ['dashboard.view'],
         ])
-        ->assertRedirect(route('admin.users.index'));
+        ->assertRedirect(route('admin.permissions.index'));
 
     $targetAdmin->refresh();
 
     expect($targetAdmin->hasRole(AccessControl::ROLE_ADMIN))->toBeTrue()
         ->and($targetAdmin->can(AccessControl::PERMISSION_MANAGE_USERS))->toBeTrue()
-        ->and($targetAdmin->can('detection.run'))->toBeTrue()
-        ->and($targetAdmin->can('dashboard.view'))->toBeFalse()
-        ->and($targetAdmin->can('detection-history.view'))->toBeFalse();
+        ->and($targetAdmin->can('dashboard.view'))->toBeTrue()
+        ->and($targetAdmin->can('report.view'))->toBeFalse();
 });
 
 test('admin cannot demote the active account', function () {
@@ -158,18 +134,9 @@ test('admin cannot demote the active account', function () {
         ->get(route('admin.users.edit', $admin))
         ->assertOk()
         ->assertSee('Dashboard')
-        ->assertSee('Detection')
-        ->assertSee('Riwayat Deteksi')
-        ->assertSee('Manajemen User')
-        ->assertSee('value="dashboard.view"', false)
-        ->assertSee('value="detection.run"', false)
-        ->assertSee('value="detection-history.view"', false)
-        ->assertSee('value="users.manage"', false)
-        ->assertDontSee('Aktivitas IP')
-        ->assertDontSee('Dataset Analysis')
-        ->assertDontSee('Imbalance Handling')
-        ->assertDontSee('Evaluation')
-        ->assertDontSee('Reports');
+        ->assertSee('Laporan')
+        ->assertSee('User')
+        ->assertSee('Hak Akses Menu');
 
     $this
         ->actingAs($admin)
@@ -179,9 +146,9 @@ test('admin cannot demote the active account', function () {
             'password' => null,
             'password_confirmation' => null,
             'role' => AccessControl::ROLE_USER,
-            'permissions' => AccessControl::defaultUserPermissions(),
         ])
         ->assertSessionHasErrors('role');
 
     expect($admin->fresh()->hasRole(AccessControl::ROLE_ADMIN))->toBeTrue();
 });
+

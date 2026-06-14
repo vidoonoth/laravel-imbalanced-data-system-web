@@ -1,6 +1,6 @@
 <x-app-with-sidebar-layout>
     <x-slot name="breadcrumbs">
-        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : (Auth::user()->can('detection.run') ? route('detection') : route('profile.show')) }}" class="hover:text-gray-900">Dashboard</a>        
+        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : route('profile.show') }}" class="hover:text-gray-900">Dashboard</a>        
     </x-slot>
 
     <x-slot name="header">
@@ -13,14 +13,14 @@
     </x-slot>
 
     @php
-        $lastScanTime = $latestScan?->completed_at?->timezone('Asia/Jakarta')->format('H:i:s') ?? '-';
-        $lastScanDate = $latestScan?->completed_at?->timezone('Asia/Jakarta')->format('d/m/Y') ?? 'Belum ada scan';
+        $lastScanTime = $latestDetection?->detected_at?->timezone('Asia/Jakarta')->format('H:i:s') ?? '-';
+        $lastScanDate = $latestDetection?->detected_at?->timezone('Asia/Jakarta')->format('d/m/Y') ?? 'Belum ada deteksi';
         $circumference = 251.33;
         $normalArc = $totalTraffic > 0 ? ($normalPercentage / 100) * $circumference : 0;
         $malwareArc = $totalTraffic > 0 ? ($malwarePercentage / 100) * $circumference : 0;
     @endphp
 
-    @if ($totalScans === 0)
+    @if ($totalTraffic === 0)
         <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-5">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -41,7 +41,7 @@
                 </svg>
             </div>
             <p class="text-2xl font-bold text-gray-800">{{ number_format($totalTraffic, 0, ',', '.') }}</p>
-            <p class="text-xs text-gray-500 mt-1">{{ number_format($totalScans, 0, ',', '.') }} scan berhasil</p>
+            <p class="text-xs text-gray-500 mt-1">data terdeteksi</p>
         </div>
 
         <div class="bg-white rounded-lg border border-gray-200 p-6">
@@ -82,7 +82,7 @@
 
         <div class="bg-white rounded-lg border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-2">
-                <p class="text-gray-600 text-sm font-medium">Scan Terakhir</p>
+                <p class="text-gray-600 text-sm font-medium">Deteksi Terakhir</p>
                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -111,8 +111,8 @@
                         </svg>
                         <div class="absolute inset-0 flex items-center justify-center">
                             <div class="text-center">
-                                <p class="text-2xl font-bold text-gray-800">{{ number_format($totalScans, 0, ',', '.') }}</p>
-                                <p class="text-xs text-gray-500">scan</p>
+                                <p class="text-2xl font-bold text-gray-800">{{ number_format($totalTraffic, 0, ',', '.') }}</p>
+                                <p class="text-xs text-gray-500">total data</p>
                             </div>
                         </div>
                     </div>

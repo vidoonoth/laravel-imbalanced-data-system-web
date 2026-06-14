@@ -220,7 +220,6 @@
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700">Waktu</th>
-                        <th class="px-5 py-3 text-left font-semibold text-gray-700">File</th>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700">Event</th>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700">Disposisi</th>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700">Tujuan</th>
@@ -238,7 +237,6 @@
                         @endphp
                         <tr class="bg-red-50 hover:bg-red-100">
                             <td class="px-5 py-4 text-gray-800 whitespace-nowrap">{{ $alertTime ?? '-' }}</td>
-                            <td class="px-5 py-4 text-gray-700 max-w-48 truncate">{{ $alert->scan?->original_filename ?? '-' }}</td>
                             <td class="px-5 py-4 text-gray-700">{{ $alert->event_name ?? '-' }}</td>
                             <td class="px-5 py-4 text-gray-700">{{ $alert->disposition ?? '-' }}</td>
                             <td class="px-5 py-4 text-gray-700">{{ $alertDestination !== '' ? $alertDestination : '-' }}</td>
@@ -273,7 +271,6 @@
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700">Waktu</th>
-                        <th class="px-5 py-3 text-left font-semibold text-gray-700">File</th>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700">Event</th>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700">Disposisi</th>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700">Source IP</th>
@@ -294,7 +291,6 @@
                         @endphp
                         <tr class="hover:bg-gray-50 {{ (int) $activity->prediction === 1 ? 'bg-red-50' : '' }}">
                             <td class="px-5 py-4 text-gray-800 whitespace-nowrap">{{ $activityTime ?? '-' }}</td>
-                            <td class="px-5 py-4 text-gray-700 max-w-48 truncate">{{ $activity->scan?->original_filename ?? '-' }}</td>
                             <td class="px-5 py-4 text-gray-700">{{ $activity->event_name ?? '-' }}</td>
                             <td class="px-5 py-4 text-gray-700">{{ $activity->disposition ?? '-' }}</td>
                             <td class="px-5 py-4 text-gray-700">{{ $activity->source_ip ?? '-' }}</td>

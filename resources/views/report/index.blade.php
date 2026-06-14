@@ -1,6 +1,6 @@
 <x-app-with-sidebar-layout>
     <x-slot name="breadcrumbs">
-        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : (Auth::user()->can('detection.run') ? route('detection') : route('profile.show')) }}" class="hover:text-gray-900">Dashboard</a>
+        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : route('profile.show') }}" class="hover:text-gray-900">Dashboard</a>
         <span class="mx-2 text-gray-400">/</span>
         <span class="text-gray-900">Laporan</span>
     </x-slot>
@@ -9,7 +9,7 @@
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h2 class="font-semibold text-2xl text-gray-800">Laporan Deteksi Malware</h2>
-                <p class="text-sm text-gray-500 mt-1">Halaman ringkasan eksekutif, statistik aktivitas user, dan riwayat deteksi.</p>
+                <p class="text-sm text-gray-500 mt-1">Halaman ringkasan eksekutif, statistik deteksi harian, dan riwayat deteksi.</p>
             </div>
             <div class="flex items-center gap-2">
                 <a href="{{ route('report.export.pdf', request()->query()) }}"
@@ -51,20 +51,7 @@
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <!-- Total Scans -->
-        <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-gray-600 text-sm font-medium">Total Scan</p>
-                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                </svg>
-            </div>
-            <p class="text-3xl font-bold text-gray-800">{{ number_format($totalScans, 0, ',', '.') }}</p>
-            <p class="text-xs text-gray-500 mt-1">File log yang sukses dianalisis</p>
-        </div>
-
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <!-- Total Traffic / Samples -->
         <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
             <div class="flex items-center justify-between mb-2">
@@ -105,48 +92,47 @@
         </div>
     </div>
 
-    <!-- User stats & Suspicious IP section -->
+    <!-- Daily stats & Suspicious IP section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <!-- User Activity Stats -->
+        <!-- Daily Detection Stats -->
         <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm flex flex-col">
             <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
                 <h3 class="font-semibold text-gray-800 flex items-center gap-2">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
-                    Aktivitas Deteksi per User
+                    Statistik Deteksi Harian
                 </h3>
             </div>
             <div class="overflow-x-auto flex-1">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50 text-gray-600 border-b border-gray-100">
                         <tr>
-                            <th class="py-2.5 px-4 text-left font-semibold">User</th>
-                            <th class="py-2.5 px-4 text-center font-semibold">Jumlah Scan</th>
-                            <th class="py-2.5 px-4 text-right font-semibold">Log Diproses</th>
+                            <th class="py-2.5 px-4 text-left font-semibold">Tanggal</th>
+                            <th class="py-2.5 px-4 text-right font-semibold">Total Log</th>
+                            <th class="py-2.5 px-4 text-right font-semibold text-green-600">Normal</th>
                             <th class="py-2.5 px-4 text-right font-semibold text-red-600">Malware</th>
+                            <th class="py-2.5 px-4 text-right font-semibold text-red-600">% Malware</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 text-gray-700">
-                        @forelse ($userStats as $stat)
+                        @forelse ($dailyStats as $stat)
+                            @php
+                                $total = (int) $stat->total_count;
+                                $malware = (int) $stat->malware_count;
+                                $malwarePct = $total > 0 ? ($malware / $total) * 100 : 0;
+                            @endphp
                             <tr class="hover:bg-gray-50">
-                                <td class="py-3 px-4 flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold text-xs shrink-0">
-                                        {{ substr($stat->user?->name ?? 'U', 0, 2) }}
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-800">{{ $stat->user?->name ?? 'User Terhapus' }}</p>
-                                        <p class="text-xs text-gray-500">{{ $stat->user?->email }}</p>
-                                    </div>
-                                </td>
-                                <td class="py-3 px-4 text-center font-semibold">{{ $stat->total_scans }}</td>
-                                <td class="py-3 px-4 text-right">{{ number_format($stat->total_samples, 0, ',', '.') }}</td>
-                                <td class="py-3 px-4 text-right text-red-600 font-semibold">{{ number_format($stat->total_malware, 0, ',', '.') }}</td>
+                                <td class="py-3 px-4 font-medium">{{ Carbon\Carbon::parse($stat->date)->format('d/m/Y') }}</td>
+                                <td class="py-3 px-4 text-right">{{ number_format($total, 0, ',', '.') }}</td>
+                                <td class="py-3 px-4 text-right text-green-600">{{ number_format((int) $stat->normal_count, 0, ',', '.') }}</td>
+                                <td class="py-3 px-4 text-right text-red-600 font-semibold">{{ number_format($malware, 0, ',', '.') }}</td>
+                                <td class="py-3 px-4 text-right text-red-600 font-semibold">{{ number_format($malwarePct, 2, ',', '.') }}%</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="py-6 text-center text-gray-500">Belum ada data aktivitas user.</td>
+                                <td colspan="5" class="py-6 text-center text-gray-500">Belum ada data harian.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -215,7 +201,7 @@
         </div>
     </div>
 
-    <!-- Recent Scans / History -->
+    <!-- Recent Detections / History -->
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         <div class="p-6 border-b border-gray-100">
             <h3 class="font-semibold text-gray-800 flex items-center gap-2">
@@ -230,47 +216,49 @@
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="px-5 py-3 text-left font-semibold text-gray-700">Waktu</th>
-                        <th class="px-5 py-3 text-left font-semibold text-gray-700">User</th>
-                        <th class="px-5 py-3 text-left font-semibold text-gray-700">File</th>
-                        <th class="px-5 py-3 text-left font-semibold text-gray-700">Ukuran</th>
-                        <th class="px-5 py-3 text-left font-semibold text-gray-700">Total Log</th>
-                        <th class="px-5 py-3 text-left font-semibold text-gray-700">Normal</th>
-                        <th class="px-5 py-3 text-left font-semibold text-gray-700">Malware</th>
-                        <th class="px-5 py-3 text-left font-semibold text-gray-700">Malware %</th>
-                        <th class="px-5 py-3 text-left font-semibold text-gray-700">Aksi</th>
+                        <th class="px-5 py-3 text-left font-semibold text-gray-700">Waktu Deteksi</th>
+                        <th class="px-5 py-3 text-left font-semibold text-gray-700">Source IP</th>
+                        <th class="px-5 py-3 text-left font-semibold text-gray-700">Destination IP</th>
+                        <th class="px-5 py-3 text-left font-semibold text-gray-700">Protocol</th>
+                        <th class="px-5 py-3 text-center font-semibold text-gray-700">Prediction</th>
+                        <th class="px-5 py-3 text-right font-semibold text-gray-700">Confidence</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    @forelse ($recentScans as $scan)
+                    @forelse ($recentDetections as $record)
                         <tr class="hover:bg-gray-50">
                             <td class="px-5 py-4 text-gray-800 whitespace-nowrap">
-                                {{ $scan->completed_at ? $scan->completed_at->timezone('Asia/Jakarta')->format('d/m/Y H:i:s') : $scan->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i:s') }}
+                                {{ $record->detected_at ? $record->detected_at->timezone('Asia/Jakarta')->format('d/m/Y H:i:s') : $record->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i:s') }}
                             </td>
                             <td class="px-5 py-4 text-gray-800 whitespace-nowrap font-medium">
-                                {{ $scan->user?->name ?? 'System' }}
-                            </td>
-                            <td class="px-5 py-4">
-                                <div class="max-w-64">
-                                    <p class="font-semibold text-gray-800 truncate">{{ $scan->original_filename }}</p>
-                                    <p class="text-xs text-gray-500">#{{ $scan->id }}</p>
-                                </div>
+                                <a href="{{ route('dashboard.ip-activity', ['ip' => $record->source_ip]) }}" class="text-blue-600 hover:underline">
+                                    {{ $record->source_ip ?? '-' }}
+                                </a>
                             </td>
                             <td class="px-5 py-4 text-gray-700 whitespace-nowrap">
-                                {{ number_format(($scan->file_size ?? 0) / 1024 / 1024, 2, ',', '.') }} MB
+                                {{ $record->destination_ip ?? '-' }}
                             </td>
-                            <td class="px-5 py-4 text-gray-700">{{ number_format($scan->total_samples, 0, ',', '.') }}</td>
-                            <td class="px-5 py-4 text-green-700 font-semibold">{{ number_format($scan->normal_count, 0, ',', '.') }}</td>
-                            <td class="px-5 py-4 text-red-700 font-semibold">{{ number_format($scan->attack_count, 0, ',', '.') }}</td>
-                            <td class="px-5 py-4 text-gray-700">{{ number_format((float) $scan->attack_percentage, 2, ',', '.') }}%</td>
-                            <td class="px-5 py-4">
-                                <a href="{{ route('detection.history.show', $scan) }}"
-                                    class="text-blue-600 hover:text-blue-800 font-semibold">Detail</a>
+                            <td class="px-5 py-4 text-gray-700 whitespace-nowrap">
+                                {{ $record->protocol ?? '-' }}
+                            </td>
+                            <td class="px-5 py-4 text-center">
+                                @if ($record->prediction === 1)
+                                    <span class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded font-semibold">
+                                        Malware
+                                    </span>
+                                @else
+                                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded font-semibold">
+                                        Normal
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-4 text-right font-semibold text-gray-700">
+                                {{ number_format(((float) $record->confidence) * 100, 2, ',', '.') }}%
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-5 py-10 text-center text-gray-500">
+                            <td colspan="6" class="px-5 py-10 text-center text-gray-500">
                                 Belum ada riwayat deteksi yang sesuai filter.
                             </td>
                         </tr>
@@ -279,9 +267,9 @@
             </table>
         </div>
 
-        @if (method_exists($recentScans, 'hasPages') && $recentScans->hasPages())
+        @if (method_exists($recentDetections, 'hasPages') && $recentDetections->hasPages())
             <div class="px-5 py-4 border-t border-gray-200">
-                {{ $recentScans->links() }}
+                {{ $recentDetections->links() }}
             </div>
         @endif
     </div>

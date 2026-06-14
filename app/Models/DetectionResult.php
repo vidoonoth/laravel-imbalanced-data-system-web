@@ -10,7 +10,7 @@ class DetectionResult extends Model
     protected $table = 'detection_records';
 
     protected $fillable = [
-        'detection_scan_id',
+        'detected_at',
         'row_index',
         'update_time',
         'sn',
@@ -45,6 +45,7 @@ class DetectionResult extends Model
     protected function casts(): array
     {
         return [
+            'detected_at' => 'datetime',
             'update_time' => 'datetime',
             'priority' => 'integer',
             'source_port' => 'integer',
@@ -59,10 +60,5 @@ class DetectionResult extends Model
             'probability_attack' => 'decimal:6',
             'raw_record' => 'array',
         ];
-    }
-
-    public function scan(): BelongsTo
-    {
-        return $this->belongsTo(DetectionScan::class, 'detection_scan_id');
     }
 }

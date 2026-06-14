@@ -22,9 +22,7 @@
     @php
         $homeUrl = Auth::user()->can('dashboard.view')
             ? route('dashboard')
-            : (Auth::user()->can('detection.run')
-                ? route('detection')
-                : route('profile.show'));
+            : route('profile.show');
     @endphp
 
     <div class="flex h-screen bg-gray-100" x-data="{ sidebarOpen: true }">
@@ -53,30 +51,6 @@
                                     d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 9l7-4"></path>
                             </svg>
                             <span class="whitespace-nowrap">Dashboard</span>
-                        </a>
-                    @endcan
-
-                    <!-- Detection -->
-                    @can('detection.run')
-                        <a href="{{ route('detection') }}" data-nav-link
-                            class="flex items-center space-x-3 px-4 py-3 rounded-lg {{ request()->routeIs('detection') ? 'bg-gray-200' : 'hover:bg-gray-400' }} transition cursor-pointer">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span class="whitespace-nowrap">Detection</span>
-                        </a>
-                    @endcan
-
-                    <!-- Detection History -->
-                    @can('detection-history.view')
-                        <a href="{{ route('detection.history') }}" data-nav-link
-                            class="flex items-center space-x-3 px-4 py-3 rounded-lg {{ request()->routeIs('detection.history*') ? 'bg-gray-200' : 'hover:bg-gray-400' }} transition cursor-pointer">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span class="whitespace-nowrap">Riwayat</span>
                         </a>
                     @endcan
 

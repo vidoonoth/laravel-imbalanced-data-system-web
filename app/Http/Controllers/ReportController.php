@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DetectionResult;
-use App\Models\DetectionScan;
+
 use App\Services\IpGeolocationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -23,19 +23,18 @@ class ReportController extends Controller
         $dateFrom = $data['dateFrom'];
         $dateTo = $data['dateTo'];
         
-        $scanQuery = DetectionScan::query()
-            ->with('user')
-            ->where('status', 'success')
-            ->latest('completed_at');
-            
+        $detectionQuery = DetectionResult::query()
+            ->latest('detected_at')
+            ->latest('id');
+             
         if ($dateFrom) {
-            $scanQuery->where('completed_at', '>=', $dateFrom);
+            $detectionQuery->where('detected_at', '>=', $dateFrom);
         }
         if ($dateTo) {
-            $scanQuery->where('completed_at', '<=', $dateTo);
+            $detectionQuery->where('detected_at', '<=', $dateTo);
         }
         
-        $data['recentScans'] = $scanQuery->paginate(10)->withQueryString();
+        $data['recentDetections'] = $detectionQuery->paginate(10)->withQueryString();
 
         return view('report.index', $data);
     }
@@ -47,19 +46,18 @@ class ReportController extends Controller
         $dateFrom = $data['dateFrom'];
         $dateTo = $data['dateTo'];
         
-        $scanQuery = DetectionScan::query()
-            ->with('user')
-            ->where('status', 'success')
-            ->latest('completed_at');
-            
+        $detectionQuery = DetectionResult::query()
+            ->latest('detected_at')
+            ->latest('id');
+             
         if ($dateFrom) {
-            $scanQuery->where('completed_at', '>=', $dateFrom);
+            $detectionQuery->where('detected_at', '>=', $dateFrom);
         }
         if ($dateTo) {
-            $scanQuery->where('completed_at', '<=', $dateTo);
+            $detectionQuery->where('detected_at', '<=', $dateTo);
         }
         
-        $data['recentScans'] = $scanQuery->limit(200)->get();
+        $data['recentDetections'] = $detectionQuery->limit(200)->get();
         $data['isPdf'] = true;
 
         $pdf = Pdf::loadView('report.pdf', $data)->setPaper('a4', 'portrait');
@@ -80,20 +78,18 @@ class ReportController extends Controller
             $dateTo = Carbon::parse($request->string('date_to')->toString())->endOfDay();
         }
 
-        $scanQuery = DetectionScan::query()
-            ->where('status', 'success');
+        $baseQuery = DetectionResult::query();
 
         if ($dateFrom) {
-            $scanQuery->where('completed_at', '>=', $dateFrom);
+            $baseQuery->where('detected_at', '>=', $dateFrom);
         }
         if ($dateTo) {
-            $scanQuery->where('completed_at', '<=', $dateTo);
+            $baseQuery->where('detected_at', '<=', $dateTo);
         }
 
-        $totalScans = (clone $scanQuery)->count();
-        $totalTraffic = (int) (clone $scanQuery)->sum('total_samples');
-        $normalTotal = (int) (clone $scanQuery)->sum('normal_count');
-        $malwareTotal = (int) (clone $scanQuery)->sum('attack_count');
+        $totalTraffic = (clone $baseQuery)->count();
+        $normalTotal = (clone $baseQuery)->where('prediction', 0)->count();
+        $malwareTotal = (clone $baseQuery)->where('prediction', 1)->count();
 
         $normalPercentage = $totalTraffic > 0 ? ($normalTotal / $totalTraffic) * 100 : 0;
         $malwarePercentage = $totalTraffic > 0 ? ($malwareTotal / $totalTraffic) * 100 : 0;
@@ -108,15 +104,8 @@ class ReportController extends Controller
             )
             ->where('prediction', 1)
             ->whereNotNull('source_ip')
-            ->whereHas('scan', function ($query) use ($dateFrom, $dateTo) {
-                $query->where('status', 'success');
-                if ($dateFrom) {
-                    $query->where('completed_at', '>=', $dateFrom);
-                }
-                if ($dateTo) {
-                    $query->where('completed_at', '<=', $dateTo);
-                }
-            })
+            ->when($dateFrom, fn($q) => $q->where('detected_at', '>=', $dateFrom))
+            ->when($dateTo, fn($q) => $q->where('detected_at', '<=', $dateTo))
             ->groupBy('source_ip')
             ->orderByDesc('total')
             ->limit(10)
@@ -126,32 +115,30 @@ class ReportController extends Controller
                 return $ip;
             });
 
-        // User stats
-        $userStats = DetectionScan::query()
+        // Daily stats (date, total, normal, malware)
+        $dailyStats = DetectionResult::query()
             ->select(
-                'user_id',
-                DB::raw('COUNT(*) as total_scans'),
-                DB::raw('SUM(total_samples) as total_samples'),
-                DB::raw('SUM(attack_count) as total_malware')
+                DB::raw('DATE(detected_at) as date'),
+                DB::raw('COUNT(*) as total_count'),
+                DB::raw('SUM(CASE WHEN prediction = 0 THEN 1 ELSE 0 END) as normal_count'),
+                DB::raw('SUM(CASE WHEN prediction = 1 THEN 1 ELSE 0 END) as malware_count')
             )
-            ->where('status', 'success')
-            ->when($dateFrom, fn($q) => $q->where('completed_at', '>=', $dateFrom))
-            ->when($dateTo, fn($q) => $q->where('completed_at', '<=', $dateTo))
-            ->groupBy('user_id')
-            ->with('user')
+            ->when($dateFrom, fn($q) => $q->where('detected_at', '>=', $dateFrom))
+            ->when($dateTo, fn($q) => $q->where('detected_at', '<=', $dateTo))
+            ->groupBy(DB::raw('DATE(detected_at)'))
+            ->orderBy('date', 'desc')
             ->get();
 
         return [
             'dateFrom' => $dateFrom,
             'dateTo' => $dateTo,
-            'totalScans' => $totalScans,
             'totalTraffic' => $totalTraffic,
             'normalTotal' => $normalTotal,
             'malwareTotal' => $malwareTotal,
             'normalPercentage' => $normalPercentage,
             'malwarePercentage' => $malwarePercentage,
             'topSuspiciousIps' => $topSuspiciousIps,
-            'userStats' => $userStats,
+            'dailyStats' => $dailyStats,
             'filters' => [
                 'date_from' => $request->string('date_from')->toString(),
                 'date_to' => $request->string('date_to')->toString(),

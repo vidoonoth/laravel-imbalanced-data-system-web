@@ -84,7 +84,7 @@
             border: 1px solid #e2e8f0;
             padding: 10px;
             text-align: center;
-            width: 25%;
+            width: 33.3%;
         }
         .summary-label {
             font-size: 8px;
@@ -239,22 +239,17 @@
     <!-- Ringkasan Statistik -->
     <table class="summary-table">
         <tr>
-            <td class="summary-card" style="border-right: none;">
-                <div class="summary-label">Total Scan</div>
-                <div class="summary-value">{{ number_format($totalScans, 0, ',', '.') }}</div>
-                <div class="summary-subtext">File Log Diproses</div>
-            </td>
-            <td class="summary-card" style="border-right: none;">
+            <td class="summary-card" style="border-right: none; width: 33.3%;">
                 <div class="summary-label">Total Log Traffic</div>
                 <div class="summary-value">{{ number_format($totalTraffic, 0, ',', '.') }}</div>
                 <div class="summary-subtext">Baris Log Dianalisis</div>
             </td>
-            <td class="summary-card" style="border-right: none;">
+            <td class="summary-card" style="border-right: none; width: 33.3%;">
                 <div class="summary-label">Data Normal</div>
                 <div class="summary-value text-green">{{ number_format($normalTotal, 0, ',', '.') }}</div>
                 <div class="summary-subtext">{{ number_format($normalPercentage, 2, ',', '.') }}% dari total</div>
             </td>
-            <td class="summary-card">
+            <td class="summary-card" style="width: 33.3%;">
                 <div class="summary-label">Terdeteksi Malware</div>
                 <div class="summary-value text-red">{{ number_format($malwareTotal, 0, ',', '.') }}</div>
                 <div class="summary-subtext">{{ number_format($malwarePercentage, 2, ',', '.') }}% dari total</div>
@@ -262,30 +257,37 @@
         </tr>
     </table>
 
-    <!-- Aktivitas User -->
-    <div class="section-title">Aktivitas Deteksi per User</div>
+    <!-- Statistik Deteksi Harian -->
+    <div class="section-title">Statistik Deteksi Harian</div>
     <table class="data-table">
         <thead>
             <tr>
                 <th style="width: 5%; text-align: center;">No</th>
-                <th style="width: 35%;">Nama User</th>
-                <th style="width: 30%;">Email</th>
-                <th style="width: 15%; text-align: center;">Jumlah Scan</th>
-                <th style="width: 15%; text-align: right;">Total Malware</th>
+                <th style="width: 25%;">Tanggal</th>
+                <th style="width: 25%; text-align: right;">Total Log</th>
+                <th style="width: 20%; text-align: right; color: #2f855a;">Normal</th>
+                <th style="width: 25%; text-align: right; color: #c53030;">Malware (% Malware)</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($userStats as $index => $stat)
+            @forelse($dailyStats as $index => $stat)
+                @php
+                    $total = (int) $stat->total_count;
+                    $malware = (int) $stat->malware_count;
+                    $malwarePct = $total > 0 ? ($malware / $total) * 100 : 0;
+                @endphp
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td class="font-semibold">{{ $stat->user?->name ?? 'User Terhapus' }}</td>
-                    <td>{{ $stat->user?->email ?? '-' }}</td>
-                    <td class="text-center">{{ $stat->total_scans }}</td>
-                    <td class="text-right font-semibold text-red">{{ number_format($stat->total_malware, 0, ',', '.') }}</td>
+                    <td class="font-semibold">{{ Carbon\Carbon::parse($stat->date)->format('d/m/Y') }}</td>
+                    <td class="text-right">{{ number_format($total, 0, ',', '.') }}</td>
+                    <td class="text-right text-green font-semibold">{{ number_format((int) $stat->normal_count, 0, ',', '.') }}</td>
+                    <td class="text-right text-red font-semibold">
+                        {{ number_format($malware, 0, ',', '.') }} ({{ number_format($malwarePct, 2, ',', '.') }}%)
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="text-center" style="padding: 12px;">Belum ada data aktivitas user dalam rentang waktu ini.</td>
+                    <td colspan="5" class="text-center" style="padding: 12px;">Belum ada data harian dalam rentang waktu ini.</td>
                 </tr>
             @endforelse
         </tbody>
@@ -336,35 +338,41 @@
     <div class="page-break"></div>
 
     <!-- Riwayat Deteksi -->
-    <div class="section-title">Riwayat Deteksi Log (Maks. 200 Scan Terbaru)</div>
+    <div class="section-title">Riwayat Deteksi Log (Maks. 200 Deteksi Terbaru)</div>
     <table class="data-table">
         <thead>
             <tr>
-                <th style="width: 15%;">Waktu Selesai</th>
-                <th style="width: 15%;">User</th>
-                <th style="width: 30%;">Nama File</th>
-                <th style="width: 10%; text-align: right;">Total Log</th>
-                <th style="width: 10%; text-align: right;">Normal</th>
-                <th style="width: 10%; text-align: right;">Malware</th>
-                <th style="width: 10%; text-align: right;">Malware %</th>
+                <th style="width: 20%;">Waktu Deteksi</th>
+                <th style="width: 20%;">Source IP</th>
+                <th style="width: 20%;">Destination IP</th>
+                <th style="width: 15%;">Protocol</th>
+                <th style="width: 13%; text-align: center;">Prediction</th>
+                <th style="width: 12%; text-align: right;">Confidence</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($recentScans as $scan)
+            @forelse($recentDetections as $record)
                 <tr>
                     <td>
-                        {{ $scan->completed_at ? $scan->completed_at->timezone('Asia/Jakarta')->format('d/m/Y H:i:s') : $scan->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i:s') }}
+                        {{ $record->detected_at ? $record->detected_at->timezone('Asia/Jakarta')->format('d/m/Y H:i:s') : $record->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i:s') }}
                     </td>
-                    <td class="font-semibold">{{ $scan->user?->name ?? 'System' }}</td>
-                    <td style="word-break: break-all;">{{ $scan->original_filename }}</td>
-                    <td class="text-right">{{ number_format($scan->total_samples, 0, ',', '.') }}</td>
-                    <td class="text-right text-green font-semibold">{{ number_format($scan->normal_count, 0, ',', '.') }}</td>
-                    <td class="text-right text-red font-semibold">{{ number_format($scan->attack_count, 0, ',', '.') }}</td>
-                    <td class="text-right font-semibold">{{ number_format((float) $scan->attack_percentage, 2, ',', '.') }}%</td>
+                    <td class="font-semibold">{{ $record->source_ip ?? '-' }}</td>
+                    <td>{{ $record->destination_ip ?? '-' }}</td>
+                    <td>{{ $record->protocol ?? '-' }}</td>
+                    <td class="text-center font-semibold">
+                        @if($record->prediction === 1)
+                            <span style="color: #c53030;">MALWARE</span>
+                        @else
+                            <span style="color: #2f855a;">NORMAL</span>
+                        @endif
+                    </td>
+                    <td class="text-right font-semibold">
+                        {{ number_format(((float) $record->confidence) * 100, 2, ',', '.') }}%
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center" style="padding: 12px;">Belum ada riwayat deteksi yang sesuai filter.</td>
+                    <td colspan="6" class="text-center" style="padding: 12px;">Belum ada riwayat deteksi yang sesuai filter.</td>
                 </tr>
             @endforelse
         </tbody>

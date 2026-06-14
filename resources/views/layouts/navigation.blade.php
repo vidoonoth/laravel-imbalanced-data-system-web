@@ -2,9 +2,7 @@
     @php
         $homeUrl = Auth::user()->can('dashboard.view')
             ? route('dashboard')
-            : (Auth::user()->can('detection.run')
-                ? route('detection')
-                : route('profile.show'));
+            : route('profile.show');
     @endphp
 
     <!-- Primary Navigation Menu -->
@@ -23,16 +21,6 @@
                     @can('dashboard.view')
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                             {{ __('Dashboard') }}
-                        </x-nav-link>
-                    @endcan
-                    @can('detection.run')
-                        <x-nav-link :href="route('detection')" :active="request()->routeIs('detection')">
-                            {{ __('Detection') }}
-                        </x-nav-link>
-                    @endcan
-                    @can('detection-history.view')
-                        <x-nav-link :href="route('detection.history')" :active="request()->routeIs('detection.history*')">
-                            {{ __('Riwayat') }}
                         </x-nav-link>
                     @endcan
                     @can('users.manage')
@@ -103,16 +91,6 @@
             @can('dashboard.view')
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                     {{ __('Dashboard') }}
-                </x-responsive-nav-link>
-            @endcan
-            @can('detection.run')
-                <x-responsive-nav-link :href="route('detection')" :active="request()->routeIs('detection')">
-                    {{ __('Detection') }}
-                </x-responsive-nav-link>
-            @endcan
-            @can('detection-history.view')
-                <x-responsive-nav-link :href="route('detection.history')" :active="request()->routeIs('detection.history*')">
-                    {{ __('Riwayat') }}
                 </x-responsive-nav-link>
             @endcan
             @can('users.manage')

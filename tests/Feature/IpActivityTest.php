@@ -1,32 +1,14 @@
 <?php
 
 use App\Models\DetectionResult;
-use App\Models\DetectionScan;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
-function ipActivityScan(User $user, array $overrides = []): DetectionScan
-{
-    return DetectionScan::create(array_merge([
-        'user_id' => $user->id,
-        'original_filename' => 'network-log.csv',
-        'status' => 'success',
-        'total_samples' => 3,
-        'normal_count' => 1,
-        'attack_count' => 2,
-        'normal_percentage' => 33.3333,
-        'attack_percentage' => 66.6667,
-        'started_at' => Carbon::parse('2026-05-15 08:00:00'),
-        'completed_at' => Carbon::parse('2026-05-15 08:05:00'),
-    ], $overrides));
-}
-
-function ipActivityRecord(DetectionScan $scan, array $overrides = []): DetectionResult
+function ipActivityRecord(array $overrides = []): DetectionResult
 {
     return DetectionResult::create(array_merge([
-        'detection_scan_id' => $scan->id,
         'row_index' => 1,
         'update_time' => Carbon::parse('2026-05-15 08:10:00'),
         'log_type' => 'traffic',
@@ -46,12 +28,8 @@ function ipActivityRecord(DetectionScan $scan, array $overrides = []): Detection
 
 test('ip activity page shows shared activity details', function () {
     $user = User::factory()->create();
-    $otherUser = User::factory()->create();
 
-    $ownedScan = ipActivityScan($user, ['original_filename' => 'owned-traffic.csv']);
-    $otherScan = ipActivityScan($otherUser, ['original_filename' => 'other-user.csv']);
-
-    ipActivityRecord($ownedScan, [
+    ipActivityRecord([
         'row_index' => 1,
         'update_time' => Carbon::parse('2026-05-15 08:15:00'),
         'event_name' => 'Port Scan',
@@ -66,7 +44,7 @@ test('ip activity page shows shared activity details', function () {
         ],
     ]);
 
-    ipActivityRecord($ownedScan, [
+    ipActivityRecord([
         'row_index' => 2,
         'update_time' => Carbon::parse('2026-05-15 09:20:00'),
         'event_name' => 'Login Attempt',
@@ -81,7 +59,7 @@ test('ip activity page shows shared activity details', function () {
         ],
     ]);
 
-    ipActivityRecord($otherScan, [
+    ipActivityRecord([
         'source_ip' => '10.10.10.10',
         'event_name' => 'Data Exfiltration',
         'prediction' => 1,
@@ -97,7 +75,6 @@ test('ip activity page shows shared activity details', function () {
         ->assertOk()
         ->assertSee('Detail Aktivitas IP')
         ->assertSee('10.10.10.10')
-        ->assertSee('owned-traffic.csv')
         ->assertSee('Port Scan')
         ->assertSee('Login Attempt')
         ->assertSee('/admin')
@@ -105,16 +82,13 @@ test('ip activity page shows shared activity details', function () {
         ->assertSee('blocked')
         ->assertSee('Malware')
         ->assertSee('Normal')
-        ->assertSee('other-user.csv')
         ->assertSee('Data Exfiltration');
 });
 
 test('ip activity page shows activity from another users scan', function () {
     $user = User::factory()->create();
-    $otherUser = User::factory()->create();
-    $otherScan = ipActivityScan($otherUser);
 
-    ipActivityRecord($otherScan, [
+    ipActivityRecord([
         'source_ip' => '10.20.30.50',
         'geo_src' => 'IDN',
         'event_name' => 'Other User Alert',
@@ -132,9 +106,8 @@ test('ip activity page shows activity from another users scan', function () {
 
 test('ip activity page returns not found without an existing ip', function () {
     $user = User::factory()->create();
-    $scan = ipActivityScan($user);
 
-    ipActivityRecord($scan, [
+    ipActivityRecord([
         'source_ip' => '203.0.113.10',
         'prediction' => 1,
         'prediction_label' => 'Malware',
@@ -153,10 +126,8 @@ test('ip activity page returns not found without an existing ip', function () {
 
 test('dashboard shows shared detection data from another user', function () {
     $viewer = User::factory()->create();
-    $uploader = User::factory()->create();
-    $scan = ipActivityScan($uploader, ['original_filename' => 'shared-network.csv']);
 
-    ipActivityRecord($scan, [
+    ipActivityRecord([
         'source_ip' => '10.10.10.10',
         'geo_src' => 'IDN',
         'prediction' => 1,
@@ -170,17 +141,15 @@ test('dashboard shows shared detection data from another user', function () {
 
     $response
         ->assertOk()
-        ->assertSee('shared-network.csv')
         ->assertSee('10.10.10.10')
         ->assertSee('Top IP Mencurigakan')
-        ->assertSee('Deteksi Terbaru');
+        ->assertSee('Deteksi Terakhir');
 });
 
 test('dashboard shows detail link for top suspicious ip', function () {
     $user = User::factory()->create();
-    $scan = ipActivityScan($user);
 
-    ipActivityRecord($scan, [
+    ipActivityRecord([
         'source_ip' => '10.20.30.25',
         'geo_src' => 'IDN',
         'prediction' => 1,
@@ -212,9 +181,8 @@ test('dashboard shows api geolocation for top suspicious ip', function () {
     ]));
 
     $user = User::factory()->create();
-    $scan = ipActivityScan($user);
 
-    ipActivityRecord($scan, [
+    ipActivityRecord([
         'source_ip' => '8.8.8.8',
         'prediction' => 1,
         'prediction_label' => 'Malware',
@@ -248,9 +216,8 @@ test('ip activity page shows api geolocation', function () {
     ]));
 
     $user = User::factory()->create();
-    $scan = ipActivityScan($user);
 
-    ipActivityRecord($scan, [
+    ipActivityRecord([
         'source_ip' => '1.1.1.1',
         'prediction' => 1,
         'prediction_label' => 'Malware',
@@ -296,9 +263,8 @@ test('ip activity refreshes cached api location without coordinates', function (
     ]));
 
     $user = User::factory()->create();
-    $scan = ipActivityScan($user);
 
-    ipActivityRecord($scan, [
+    ipActivityRecord([
         'source_ip' => $ipAddress,
         'prediction' => 1,
         'prediction_label' => 'Malware',
@@ -323,9 +289,8 @@ test('private ip uses geo source fallback without api request', function () {
     Http::fake();
 
     $user = User::factory()->create();
-    $scan = ipActivityScan($user);
 
-    ipActivityRecord($scan, [
+    ipActivityRecord([
         'source_ip' => '10.10.10.10',
         'geo_src' => 'IDN',
         'prediction' => 1,
@@ -339,8 +304,7 @@ test('private ip uses geo source fallback without api request', function () {
 
     $response
         ->assertOk()
-        ->assertSee('Lokasi: IDN')
-        ->assertSee('Log');
+        ->assertSee('Lokasi: IDN');
 
     Http::assertNothingSent();
 });
@@ -354,9 +318,8 @@ test('geolocation api failure keeps ip activity page available', function () {
     ], 429));
 
     $user = User::factory()->create();
-    $scan = ipActivityScan($user);
 
-    ipActivityRecord($scan, [
+    ipActivityRecord([
         'source_ip' => '9.9.9.9',
         'prediction' => 1,
         'prediction_label' => 'Malware',
