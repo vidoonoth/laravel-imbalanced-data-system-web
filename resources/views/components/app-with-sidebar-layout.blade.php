@@ -80,6 +80,18 @@
                         </a>
                     @endcan
 
+                    <!-- Laporan -->
+                    @can('report.view')
+                        <a href="{{ route('report.index') }}" data-nav-link
+                            class="flex items-center space-x-3 px-4 py-3 rounded-lg {{ request()->routeIs('report.*') ? 'bg-gray-200' : 'hover:bg-gray-400' }} transition cursor-pointer">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span class="whitespace-nowrap">Laporan</span>
+                        </a>
+                    @endcan
+
                     <!-- User Management -->
                     @can('users.manage')
                         <a href="{{ route('admin.users.index') }}" data-nav-link

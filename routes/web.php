@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\PermissionController as AdminPermissionController
 use App\Http\Controllers\DetectionController;
 use App\Http\Controllers\MLController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -35,6 +36,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/riwayat-deteksi/{scan}', [DetectionController::class, 'show'])
         ->middleware('permission:detection-history.view')
         ->name('detection.history.show');
+
+    // Laporan
+    Route::get('/laporan', [ReportController::class, 'index'])
+        ->middleware('permission:report.view')
+        ->name('report.index');
+    Route::get('/laporan/export-pdf', [ReportController::class, 'exportPdf'])
+        ->middleware('permission:report.view')
+        ->name('report.export.pdf');
 
     Route::prefix('admin')
         ->name('admin.')

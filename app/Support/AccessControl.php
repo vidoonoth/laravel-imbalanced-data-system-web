@@ -28,6 +28,11 @@ class AccessControl
                 'group' => 'Monitoring',
                 'description' => 'Melihat ringkasan deteksi dan statistik traffic.',
             ],
+            'report.view' => [
+                'label' => 'Laporan',
+                'group' => 'Monitoring',
+                'description' => 'Melihat dan mengekspor laporan deteksi malware.',
+            ],
             'detection.run' => [
                 'label' => 'Detection',
                 'group' => 'Deteksi',
