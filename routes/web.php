@@ -24,6 +24,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/ip-activity', [DetectionController::class, 'ipActivity'])
         ->middleware('permission:dashboard.view')
         ->name('dashboard.ip-activity');
+    Route::get('/dashboard/ip-location', [DetectionController::class, 'ipLocation'])
+        ->middleware('permission:dashboard.view')
+        ->name('dashboard.ip-location');
 
     // Laporan
     Route::get('/laporan', [ReportController::class, 'index'])

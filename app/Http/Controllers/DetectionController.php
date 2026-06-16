@@ -84,10 +84,6 @@ class DetectionController extends Controller
         $totalActivities = (clone $baseQuery)->count();
         $totalAlerts = (clone $baseQuery)->where('prediction', 1)->count();
         $avgAlertConfidence = (clone $baseQuery)->where('prediction', 1)->avg('confidence');
-        $fallbackGeoCode = (clone $baseQuery)
-            ->whereNotNull('geo_src')
-            ->where('geo_src', '<>', '')
-            ->value('geo_src');
 
         $timeRecords = (clone $baseQuery)->get(['update_time', 'created_at']);
         $activityTimes = $timeRecords
@@ -118,7 +114,6 @@ class DetectionController extends Controller
 
         return view('ip-activity', [
             'ipAddress' => $ipAddress,
-            'ipLocation' => $this->ipGeolocation->lookup($ipAddress, $fallbackGeoCode),
             'summary' => [
                 'total_activities' => $totalActivities,
                 'total_alerts' => $totalAlerts,
@@ -156,10 +151,53 @@ class DetectionController extends Controller
         ]);
     }
 
+    public function ipLocation(Request $request)
+    {
+        $ipAddress = trim((string) $request->query('ip', ''));
+        abort_if($ipAddress === '', 404);
+
+        $baseQuery = $this->ipActivityQuery($ipAddress);
+        $totalActivities = (clone $baseQuery)->count();
+        $totalAlerts = (clone $baseQuery)->where('prediction', 1)->count();
+
+        abort_unless($totalActivities > 0, 404);
+
+        $latestRecord = (clone $baseQuery)
+            ->orderByDesc('update_time')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->first(['update_time', 'created_at']);
+        $latestAlert = (clone $baseQuery)
+            ->where('prediction', 1)
+            ->orderByDesc('confidence')
+            ->orderByDesc('id')
+            ->first(['event_name', 'confidence', 'update_time', 'created_at']);
+
+        return view('ip-location', [
+            'pageTitle' => $totalAlerts > 0 ? 'Lokasi IP Mencurigakan' : 'Lokasi IP',
+            'ipAddress' => $ipAddress,
+            'ipLocation' => $this->ipGeolocation->lookup($ipAddress, $this->fallbackGeoCode($baseQuery)),
+            'summary' => [
+                'total_activities' => $totalActivities,
+                'total_alerts' => $totalAlerts,
+                'latest_seen' => $latestRecord?->update_time ?: $latestRecord?->created_at,
+                'latest_alert' => $latestAlert,
+            ],
+        ]);
+    }
+
     private function ipActivityQuery(string $ipAddress): Builder
     {
         return DetectionResult::query()
             ->where('source_ip', $ipAddress);
+    }
+
+    private function fallbackGeoCode(Builder $query): ?string
+    {
+        return (clone $query)
+            ->whereNotNull('geo_src')
+            ->where('geo_src', '<>', '')
+            ->value('geo_src');
     }
 
     private function topColumnValues(Builder $query, string $column, int $limit = 5)

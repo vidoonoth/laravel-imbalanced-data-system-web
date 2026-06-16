@@ -5,10 +5,16 @@
                 <h2 class="font-semibold text-2xl text-gray-800">Detail Aktivitas IP</h2>
                 <p class="text-sm text-gray-500 mt-1">Riwayat source IP {{ $ipAddress }} dari hasil deteksi tersimpan.</p>
             </div>
-            <a href="{{ route('dashboard') }}"
-                class="inline-flex justify-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-semibold">
-                Kembali ke Dashboard
-            </a>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('dashboard.ip-location', ['ip' => $ipAddress]) }}"
+                    class="inline-flex justify-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-semibold">
+                    Lihat Lokasi
+                </a>
+                <a href="{{ route('dashboard') }}"
+                    class="inline-flex justify-center px-4 py-2 bg-gray-800 border border-gray-800 text-white rounded-lg hover:bg-gray-700 transition text-sm font-semibold">
+                    Kembali ke Dashboard
+                </a>
+            </div>
         </div>
     </x-slot>
 
@@ -24,29 +30,6 @@
         $statusTitle = $topResponseStatuses->isNotEmpty() ? 'Status Respons Dominan' : 'Disposisi Dominan';
         $suspiciousItems = $topSuspiciousEvents->isNotEmpty() ? $topSuspiciousEvents : $topSuspiciousActions;
         $suspiciousTitle = $topSuspiciousEvents->isNotEmpty() ? 'Event Mencurigakan' : 'Action Mencurigakan';
-        $ipLocationLabel = $ipLocation['label'] ?? 'Lokasi tidak tersedia';
-        $ipLocationSource = $ipLocation['source'] ?? 'unavailable';
-        $ipLatitude = is_numeric($ipLocation['latitude'] ?? null) ? (float) $ipLocation['latitude'] : null;
-        $ipLongitude = is_numeric($ipLocation['longitude'] ?? null) ? (float) $ipLocation['longitude'] : null;
-        $hasMapCoordinates = $ipLatitude !== null && $ipLongitude !== null;
-        $mapEmbedUrl = null;
-        $mapViewUrl = null;
-        $mapCoordinateLabel = '-';
-
-        if ($hasMapCoordinates) {
-            $latitude = number_format($ipLatitude, 6, '.', '');
-            $longitude = number_format($ipLongitude, 6, '.', '');
-            $mapDelta = 0.08;
-            $bbox = implode(',', [
-                number_format($ipLongitude - $mapDelta, 6, '.', ''),
-                number_format($ipLatitude - $mapDelta, 6, '.', ''),
-                number_format($ipLongitude + $mapDelta, 6, '.', ''),
-                number_format($ipLatitude + $mapDelta, 6, '.', ''),
-            ]);
-            $mapEmbedUrl = "https://www.openstreetmap.org/export/embed.html?bbox={$bbox}&layer=mapnik&marker={$latitude},{$longitude}";
-            $mapViewUrl = "https://www.openstreetmap.org/?mlat={$latitude}&mlon={$longitude}#map=10/{$latitude}/{$longitude}";
-            $mapCoordinateLabel = "{$latitude}, {$longitude}";
-        }
     @endphp
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
@@ -138,72 +121,6 @@
                 @endforelse
             </div>
         </div>
-    </div>
-
-    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden mb-6">
-        <div class="p-5 border-b border-gray-200 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div class="min-w-0">
-                <p class="text-sm text-gray-500">Lokasi Asal IP</p>
-                <h3 class="text-xl font-bold text-gray-800 mt-1 truncate" title="{{ $ipLocationLabel }}">{{ $ipLocationLabel }}</h3>
-                <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                    @if ($ipLocationSource === 'api')
-                        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded font-semibold">data GeoIP</span>
-                    @elseif ($ipLocationSource === 'log')
-                        <span class="px-2 py-1 bg-gray-100 text-gray-600 rounded font-semibold">kode geo dari log</span>
-                    @else
-                        <span class="px-2 py-1 bg-gray-100 text-gray-600 rounded font-semibold">belum tersedia</span>
-                    @endif
-                    <span>Koordinat: {{ $mapCoordinateLabel }}</span>
-                </div>
-            </div>
-
-            @if ($mapViewUrl)
-                <a href="{{ $mapViewUrl }}" target="_blank" rel="noopener noreferrer"
-                    class="inline-flex justify-center px-3 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-xs font-semibold">
-                    Buka OpenStreetMap
-                </a>
-            @endif
-        </div>
-
-        @if ($hasMapCoordinates)
-            <div class="grid grid-cols-1 lg:grid-cols-3">
-                <div class="lg:col-span-2 h-80 bg-gray-100">
-                    <iframe
-                        title="Peta lokasi asal IP {{ $ipAddress }}"
-                        src="{{ $mapEmbedUrl }}"
-                        class="w-full h-full border-0"
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
-                </div>
-                <div class="p-5 border-t lg:border-t-0 lg:border-l border-gray-200">
-                    <dl class="space-y-4 text-sm">
-                        <div>
-                            <dt class="text-gray-500">Negara</dt>
-                            <dd class="font-semibold text-gray-800 mt-1">{{ $ipLocation['country'] ?? $ipLocation['country_code'] ?? '-' }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-gray-500">Region/Kota</dt>
-                            <dd class="font-semibold text-gray-800 mt-1">
-                                {{ collect([$ipLocation['region'] ?? null, $ipLocation['city'] ?? null])->filter()->implode(', ') ?: '-' }}
-                            </dd>
-                        </div>
-                        <div>
-                            <dt class="text-gray-500">Latitude</dt>
-                            <dd class="font-semibold text-gray-800 mt-1">{{ number_format($ipLatitude, 6, '.', '') }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-gray-500">Longitude</dt>
-                            <dd class="font-semibold text-gray-800 mt-1">{{ number_format($ipLongitude, 6, '.', '') }}</dd>
-                        </div>
-                    </dl>
-                </div>
-            </div>
-        @else
-            <div class="p-6 bg-gray-50 text-sm text-gray-500">
-                Peta belum tersedia karena data koordinat tidak ditemukan untuk IP ini.
-            </div>
-        @endif
     </div>
 
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden mb-6">

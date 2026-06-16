@@ -82,7 +82,9 @@ test('ip activity page shows shared activity details', function () {
         ->assertSee('blocked')
         ->assertSee('Malware')
         ->assertSee('Normal')
-        ->assertSee('Data Exfiltration');
+        ->assertSee('Data Exfiltration')
+        ->assertSee('Lihat Lokasi')
+        ->assertSee(route('dashboard.ip-location', ['ip' => '10.10.10.10']), false);
 });
 
 test('ip activity page shows activity from another users scan', function () {
@@ -121,6 +123,16 @@ test('ip activity page returns not found without an existing ip', function () {
     $this
         ->actingAs($user)
         ->get(route('dashboard.ip-activity', ['ip' => '203.0.113.99']))
+        ->assertNotFound();
+
+    $this
+        ->actingAs($user)
+        ->get(route('dashboard.ip-location'))
+        ->assertNotFound();
+
+    $this
+        ->actingAs($user)
+        ->get(route('dashboard.ip-location', ['ip' => '203.0.113.99']))
         ->assertNotFound();
 });
 
@@ -166,7 +178,9 @@ test('dashboard shows detail link for top suspicious ip', function () {
         ->assertSee('Top IP Mencurigakan')
         ->assertSee('10.20.30.25')
         ->assertSee('Detail')
-        ->assertSee(route('dashboard.ip-activity', ['ip' => '10.20.30.25']), false);
+        ->assertSee('Lihat Lokasi')
+        ->assertSee(route('dashboard.ip-activity', ['ip' => '10.20.30.25']), false)
+        ->assertSee(route('dashboard.ip-location', ['ip' => '10.20.30.25']), false);
 });
 
 test('dashboard shows api geolocation for top suspicious ip', function () {
@@ -202,7 +216,7 @@ test('dashboard shows api geolocation for top suspicious ip', function () {
     Http::assertSent(fn ($request) => str_starts_with($request->url(), 'https://ipwho.is/8.8.8.8'));
 });
 
-test('ip activity page shows api geolocation', function () {
+test('ip location page shows api geolocation', function () {
     Cache::flush();
 
     Http::fake(fn ($request) => Http::response([
@@ -226,10 +240,11 @@ test('ip activity page shows api geolocation', function () {
 
     $response = $this
         ->actingAs($user)
-        ->get(route('dashboard.ip-activity', ['ip' => '1.1.1.1']));
+        ->get(route('dashboard.ip-location', ['ip' => '1.1.1.1']));
 
     $response
         ->assertOk()
+        ->assertSee('Lokasi IP Mencurigakan')
         ->assertSee('Lokasi Asal IP')
         ->assertSee('Australia, Queensland, South Brisbane')
         ->assertSee('data GeoIP')
@@ -238,7 +253,7 @@ test('ip activity page shows api geolocation', function () {
         ->assertSee('openstreetmap.org/export/embed.html', false);
 });
 
-test('ip activity refreshes cached api location without coordinates', function () {
+test('ip location refreshes cached api location without coordinates', function () {
     Cache::flush();
 
     $ipAddress = '1.0.0.1';
@@ -273,7 +288,7 @@ test('ip activity refreshes cached api location without coordinates', function (
 
     $response = $this
         ->actingAs($user)
-        ->get(route('dashboard.ip-activity', ['ip' => $ipAddress]));
+        ->get(route('dashboard.ip-location', ['ip' => $ipAddress]));
 
     $response
         ->assertOk()
@@ -309,7 +324,7 @@ test('private ip uses geo source fallback without api request', function () {
     Http::assertNothingSent();
 });
 
-test('geolocation api failure keeps ip activity page available', function () {
+test('geolocation api failure keeps ip location page available', function () {
     Cache::flush();
 
     Http::fake(fn ($request) => Http::response([
@@ -328,10 +343,11 @@ test('geolocation api failure keeps ip activity page available', function () {
 
     $response = $this
         ->actingAs($user)
-        ->get(route('dashboard.ip-activity', ['ip' => '9.9.9.9']));
+        ->get(route('dashboard.ip-location', ['ip' => '9.9.9.9']));
 
     $response
         ->assertOk()
+        ->assertSee('Lokasi IP Mencurigakan')
         ->assertSee('Lokasi Asal IP')
         ->assertSee('Lokasi tidak tersedia')
         ->assertSee('belum tersedia')

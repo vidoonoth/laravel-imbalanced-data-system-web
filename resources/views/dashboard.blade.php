@@ -246,22 +246,13 @@
                         $locationSource = $location['source'] ?? 'unavailable';
                         $canViewIpActivity = auth()->user()->can('dashboard.view');
                     @endphp
-                    @if ($canViewIpActivity)
-                        <a href="{{ route('dashboard.ip-activity', ['ip' => $ip->source_ip]) }}"
-                            class="block border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:bg-blue-50 transition"
-                            aria-label="Lihat detail aktivitas IP {{ $ip->source_ip }}">
-                    @else
-                        <div class="block border border-gray-200 rounded-lg p-3">
-                    @endif
+                    <div class="border border-gray-200 rounded-lg p-3">
                         <div class="flex items-center justify-between gap-3">
                             <p class="font-semibold text-gray-800 truncate">{{ $ip->source_ip }}</p>
                             <div class="flex items-center gap-2 shrink-0">
                                 <span class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded font-semibold">
                                     {{ number_format($ip->total, 0, ',', '.') }}
                                 </span>
-                                @if ($canViewIpActivity)
-                                    <span class="text-xs font-semibold text-blue-600">Detail</span>
-                                @endif
                             </div>
                         </div>
                         <p class="text-xs text-gray-500 mt-1">
@@ -275,11 +266,21 @@
                                 <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded font-semibold">Log</span>
                             @endif
                         </div>
-                    @if ($canViewIpActivity)
-                        </a>
-                    @else
+                        @if ($canViewIpActivity)
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <a href="{{ route('dashboard.ip-activity', ['ip' => $ip->source_ip]) }}"
+                                    class="inline-flex justify-center px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-xs font-semibold"
+                                    aria-label="Lihat detail aktivitas IP {{ $ip->source_ip }}">
+                                    Detail
+                                </a>
+                                <a href="{{ route('dashboard.ip-location', ['ip' => $ip->source_ip]) }}"
+                                    class="inline-flex justify-center px-3 py-1.5 bg-blue-600 border border-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-xs font-semibold"
+                                    aria-label="Lihat lokasi IP {{ $ip->source_ip }}">
+                                    Lihat Lokasi
+                                </a>
+                            </div>
+                        @endif
                         </div>
-                    @endif
                 @empty
                     <div class="p-8 bg-gray-50 rounded-lg text-center text-sm text-gray-500">
                         Belum ada IP dengan prediksi malware.
