@@ -2,6 +2,7 @@
 
 use App\Models\DetectionResult;
 use App\Models\User;
+use App\Support\AccessControl;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -181,6 +182,48 @@ test('dashboard shows detail link for top suspicious ip', function () {
         ->assertSee('Lihat Lokasi')
         ->assertSee(route('dashboard.ip-activity', ['ip' => '10.20.30.25']), false)
         ->assertSee(route('dashboard.ip-location', ['ip' => '10.20.30.25']), false);
+});
+
+test('dashboard hides cards without dashboard card permissions', function () {
+    $user = User::factory()->create();
+    $user->syncPermissions(['dashboard.view']);
+
+    ipActivityRecord([
+        'source_ip' => '10.20.30.25',
+        'geo_src' => 'IDN',
+        'prediction' => 1,
+        'prediction_label' => 'Malware',
+        'confidence' => 0.88,
+    ]);
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('dashboard'));
+
+    $response
+        ->assertOk()
+        ->assertDontSee('data-dashboard-card="detection"', false)
+        ->assertDontSee('data-dashboard-card="detection-summary"', false)
+        ->assertDontSee('data-dashboard-card="detection-chart"', false)
+        ->assertDontSee('data-dashboard-card="suspicious-ip"', false)
+        ->assertDontSee('data-dashboard-card="suspicious-ip-list"', false);
+
+    $user->syncPermissions([
+        'dashboard.view',
+        AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD,
+    ]);
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('dashboard'));
+
+    $response
+        ->assertOk()
+        ->assertSee('data-dashboard-card="detection"', false)
+        ->assertSee('data-dashboard-card="detection-summary"', false)
+        ->assertSee('data-dashboard-card="detection-chart"', false)
+        ->assertDontSee('data-dashboard-card="suspicious-ip"', false)
+        ->assertDontSee('data-dashboard-card="suspicious-ip-list"', false);
 });
 
 test('dashboard shows api geolocation for top suspicious ip', function () {

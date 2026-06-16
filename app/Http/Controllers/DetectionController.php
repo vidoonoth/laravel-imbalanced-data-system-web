@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DetectionResult;
 
 use App\Services\IpGeolocationService;
+use App\Support\AccessControl;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,8 +16,12 @@ class DetectionController extends Controller
     {
     }
 
-    public function dashboard()
+    public function dashboard(Request $request)
     {
+        $user = $request->user();
+        $canViewDashboardDetectionCard = $user?->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD) ?? false;
+        $canViewDashboardSuspiciousIpCard = $user?->can(AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD) ?? false;
+
         $totalTraffic = DetectionResult::count();
         $normalTotal = DetectionResult::where('prediction', 0)->count();
         $malwareTotal = DetectionResult::where('prediction', 1)->count();
@@ -29,35 +34,39 @@ class DetectionController extends Controller
             ->latest('id')
             ->first();
 
-        $suspiciousIpCount = DetectionResult::query()
-            ->where('prediction', 1)
-            ->whereNotNull('source_ip')
-            ->distinct()
-            ->count('source_ip');
+        $suspiciousIpCount = $canViewDashboardSuspiciousIpCard
+            ? DetectionResult::query()
+                ->where('prediction', 1)
+                ->whereNotNull('source_ip')
+                ->distinct()
+                ->count('source_ip')
+            : 0;
 
         $recentDetections = DetectionResult::query()
             ->latest('id')
             ->limit(8)
             ->get();
 
-        $topSuspiciousIps = DetectionResult::query()
-            ->select(
-                'source_ip',
-                DB::raw('COUNT(*) as total'),
-                DB::raw('AVG(confidence) as avg_confidence'),
-                DB::raw("MIN(NULLIF(geo_src, '')) as geo_src")
-            )
-            ->where('prediction', 1)
-            ->whereNotNull('source_ip')
-            ->groupBy('source_ip')
-            ->orderByDesc('total')
-            ->limit(5)
-            ->get()
-            ->map(function (DetectionResult $ip) {
-                $ip->setAttribute('location', $this->ipGeolocation->lookup($ip->source_ip, $ip->geo_src));
+        $topSuspiciousIps = $canViewDashboardSuspiciousIpCard
+            ? DetectionResult::query()
+                ->select(
+                    'source_ip',
+                    DB::raw('COUNT(*) as total'),
+                    DB::raw('AVG(confidence) as avg_confidence'),
+                    DB::raw("MIN(NULLIF(geo_src, '')) as geo_src")
+                )
+                ->where('prediction', 1)
+                ->whereNotNull('source_ip')
+                ->groupBy('source_ip')
+                ->orderByDesc('total')
+                ->limit(5)
+                ->get()
+                ->map(function (DetectionResult $ip) {
+                    $ip->setAttribute('location', $this->ipGeolocation->lookup($ip->source_ip, $ip->geo_src));
 
-                return $ip;
-            });
+                    return $ip;
+                })
+            : collect();
 
         return view('dashboard', [
             'totalTraffic' => $totalTraffic,
@@ -69,6 +78,8 @@ class DetectionController extends Controller
             'suspiciousIpCount' => $suspiciousIpCount,
             'recentDetections' => $recentDetections,
             'topSuspiciousIps' => $topSuspiciousIps,
+            'canViewDashboardDetectionCard' => $canViewDashboardDetectionCard,
+            'canViewDashboardSuspiciousIpCard' => $canViewDashboardSuspiciousIpCard,
         ]);
     }
 

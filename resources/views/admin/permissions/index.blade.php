@@ -1,3 +1,14 @@
+@php
+    $permissionDisplayLabels = [
+        'dashboard.view' => 'dashboard',
+        'report.view' => 'report',
+        'users.manage' => 'kelola data user',
+        'permissions.manage' => 'kelola hak akses menu',
+        'dashboard.detection-card.view' => 'deteksi',
+        'dashboard.suspicious-ip-card.view' => 'ip mencurigakan',
+    ];
+@endphp
+
 <x-app-with-sidebar-layout>
     <x-slot name="header">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -64,7 +75,7 @@
                                 <div class="flex flex-wrap gap-2 max-w-2xl">
                                     @forelse ($permissionNames as $permission)
                                         <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
-                                            {{ $permission }}
+                                            {{ $permissionDisplayLabels[$permission] ?? $permission }}
                                         </span>
                                     @empty
                                         <span class="text-gray-500 text-xs">Belum ada akses</span>

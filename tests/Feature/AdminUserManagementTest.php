@@ -49,6 +49,8 @@ test('admin can create network administrator user with limited feature access', 
 
     expect($user->hasRole(AccessControl::ROLE_USER))->toBeTrue()
         ->and($user->can('dashboard.view'))->toBeTrue()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD))->toBeTrue()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD))->toBeTrue()
         ->and($user->can('report.view'))->toBeTrue()
         ->and($user->can(AccessControl::PERMISSION_MANAGE_USERS))->toBeFalse();
 
@@ -72,6 +74,77 @@ test('admin permission validation errors render without crashing', function () {
         ])
         ->assertOk()
         ->assertSee('The selected permissions.0 is invalid.');
+});
+
+test('permission index shows readable access names', function () {
+    $admin = adminAccount();
+
+    $this
+        ->actingAs($admin)
+        ->get(route('admin.permissions.index'))
+        ->assertOk()
+        ->assertSee('dashboard')
+        ->assertSee('report')
+        ->assertSee('kelola data user')
+        ->assertSee('kelola hak akses menu')
+        ->assertSee('deteksi')
+        ->assertSee('ip mencurigakan')
+        ->assertDontSee('dashboard.view')
+        ->assertDontSee('report.view')
+        ->assertDontSee('users.manage')
+        ->assertDontSee('permissions.manage')
+        ->assertDontSee('dashboard.detection-card.view')
+        ->assertDontSee('dashboard.suspicious-ip-card.view');
+});
+
+test('admin can manage dashboard card permissions', function () {
+    $admin = adminAccount();
+    $user = User::factory()->create();
+    AccessControl::assignDefaultUserAccess($user);
+
+    $this
+        ->actingAs($admin)
+        ->get(route('admin.permissions.edit', $user))
+        ->assertOk()
+        ->assertSeeInOrder(['Monitoring', 'Administrasi', 'Laporan'])
+        ->assertSee('Dashboard')
+        ->assertSee('Laporan')
+        ->assertSee('Deteksi Malware')
+        ->assertSee('IP Mencurigakan')
+        ->assertDontSee('Menjalankan deteksi malware dari file CSV.')
+        ->assertDontSee('Melihat riwayat dan detail hasil deteksi.');
+
+    expect(AccessControl::permissions()['report.view']['group'])->toBe('Laporan');
+
+    $this
+        ->actingAs($admin)
+        ->put(route('admin.permissions.update', $user), [
+            'permissions' => [
+                'dashboard.view',
+                AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD,
+            ],
+        ])
+        ->assertRedirect(route('admin.permissions.index'));
+
+    $user->refresh();
+
+    expect($user->can('dashboard.view'))->toBeTrue()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD))->toBeTrue()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD))->toBeFalse();
+
+    $this
+        ->actingAs($admin)
+        ->put(route('admin.permissions.update', $user), [
+            'permissions' => [
+                AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD,
+            ],
+        ])
+        ->assertRedirect(route('admin.permissions.index'));
+
+    $user->refresh();
+
+    expect($user->can('dashboard.view'))->toBeFalse()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD))->toBeFalse();
 });
 
 test('admin can update feature access without changing password', function () {
@@ -120,6 +193,8 @@ test('admin role feature access can be customized', function () {
     expect($targetAdmin->hasRole(AccessControl::ROLE_ADMIN))->toBeTrue()
         ->and($targetAdmin->can(AccessControl::PERMISSION_MANAGE_USERS))->toBeTrue()
         ->and($targetAdmin->can('dashboard.view'))->toBeTrue()
+        ->and($targetAdmin->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD))->toBeFalse()
+        ->and($targetAdmin->can(AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD))->toBeFalse()
         ->and($targetAdmin->can('report.view'))->toBeFalse();
 });
 
@@ -151,4 +226,3 @@ test('admin cannot demote the active account', function () {
 
     expect($admin->fresh()->hasRole(AccessControl::ROLE_ADMIN))->toBeTrue();
 });
-

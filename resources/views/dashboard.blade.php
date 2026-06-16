@@ -30,7 +30,7 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+    <div class="grid gap-4 mb-6" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));">
         <div class="bg-white rounded-lg border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-gray-600 text-sm font-medium">Total Data Traffic</p>
@@ -56,29 +56,33 @@
             <p class="text-xs text-gray-500 mt-1">{{ number_format($normalPercentage, 2, ',', '.') }}%</p>
         </div>
 
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-gray-600 text-sm font-medium">Malware</p>
-                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
+        @if ($canViewDashboardDetectionCard)
+            <div class="bg-white rounded-lg border border-gray-200 p-6" data-dashboard-card="detection">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-gray-600 text-sm font-medium">Malware</p>
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <p class="text-2xl font-bold text-gray-800">{{ number_format($malwareTotal, 0, ',', '.') }}</p>
+                <p class="text-xs text-gray-500 mt-1">{{ number_format($malwarePercentage, 2, ',', '.') }}%</p>
             </div>
-            <p class="text-2xl font-bold text-gray-800">{{ number_format($malwareTotal, 0, ',', '.') }}</p>
-            <p class="text-xs text-gray-500 mt-1">{{ number_format($malwarePercentage, 2, ',', '.') }}%</p>
-        </div>
+        @endif
 
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-gray-600 text-sm font-medium">IP Mencurigakan</p>
-                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
+        @if ($canViewDashboardSuspiciousIpCard)
+            <div class="bg-white rounded-lg border border-gray-200 p-6" data-dashboard-card="suspicious-ip">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-gray-600 text-sm font-medium">IP Mencurigakan</p>
+                    <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </div>
+                <p class="text-2xl font-bold text-gray-800">{{ number_format($suspiciousIpCount, 0, ',', '.') }}</p>
+                <p class="text-xs text-gray-500 mt-1">source IP malware</p>
             </div>
-            <p class="text-2xl font-bold text-gray-800">{{ number_format($suspiciousIpCount, 0, ',', '.') }}</p>
-            <p class="text-xs text-gray-500 mt-1">source IP malware</p>
-        </div>
+        @endif
 
         <div class="bg-white rounded-lg border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-2">
@@ -93,151 +97,156 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 items-start">       
+    <div class="grid gap-6 mb-6 items-start" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));">
 
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 class="text-sm font-semibold text-gray-800 mb-4">Akumulasi Deteksi</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="flex items-center justify-center">
-                    <div class="relative w-44 h-44">
-                        <svg viewBox="0 0 100 100" class="w-full h-full">
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" stroke-width="18" />
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="#22c55e" stroke-width="18"
-                                stroke-dasharray="{{ $normalArc }} {{ $circumference }}"
-                                transform="rotate(-90 50 50)" />
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="#ef4444" stroke-width="18"
-                                stroke-dasharray="{{ $malwareArc }} {{ $circumference }}"
-                                stroke-dashoffset="-{{ $normalArc }}" transform="rotate(-90 50 50)" />
-                        </svg>
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <div class="text-center">
-                                <p class="text-2xl font-bold text-gray-800">{{ number_format($totalTraffic, 0, ',', '.') }}</p>
-                                <p class="text-xs text-gray-500">total data</p>
+        @if ($canViewDashboardDetectionCard)
+            <div class="bg-white rounded-lg border border-gray-200 p-6" data-dashboard-card="detection-summary">
+                <h3 class="text-sm font-semibold text-gray-800 mb-4">Akumulasi Deteksi</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex items-center justify-center">
+                        <div class="relative w-44 h-44">
+                            <svg viewBox="0 0 100 100" class="w-full h-full">
+                                <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" stroke-width="18" />
+                                <circle cx="50" cy="50" r="40" fill="none" stroke="#22c55e" stroke-width="18"
+                                    stroke-dasharray="{{ $normalArc }} {{ $circumference }}"
+                                    transform="rotate(-90 50 50)" />
+                                <circle cx="50" cy="50" r="40" fill="none" stroke="#ef4444" stroke-width="18"
+                                    stroke-dasharray="{{ $malwareArc }} {{ $circumference }}"
+                                    stroke-dashoffset="-{{ $normalArc }}" transform="rotate(-90 50 50)" />
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-gray-800">{{ number_format($totalTraffic, 0, ',', '.') }}</p>
+                                    <p class="text-xs text-gray-500">total data</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="space-y-3 flex flex-col justify-center">
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="text-gray-600">Normal</span>
-                            <span class="font-semibold text-green-700">{{ number_format($normalPercentage, 2, ',', '.') }}%</span>
+                    <div class="space-y-3 flex flex-col justify-center">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600">Normal</span>
+                                <span class="font-semibold text-green-700">{{ number_format($normalPercentage, 2, ',', '.') }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: {{ min($normalPercentage, 100) }}%;"></div>
+                            </div>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-green-500 h-2 rounded-full" style="width: {{ min($normalPercentage, 100) }}%;"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="text-gray-600">Malware</span>
-                            <span class="font-semibold text-red-700">{{ number_format($malwarePercentage, 2, ',', '.') }}%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-red-500 h-2 rounded-full" style="width: {{ min($malwarePercentage, 100) }}%;"></div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600">Malware</span>
+                                <span class="font-semibold text-red-700">{{ number_format($malwarePercentage, 2, ',', '.') }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-red-500 h-2 rounded-full" style="width: {{ min($malwarePercentage, 100) }}%;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        @endif
 
-        {{-- Deteksi Malware Bar Chart --}}
-        @php
-            $barChartMax = max($totalTraffic, 1);
-            // Calculate nice Y-axis steps
-            $rawStep = $barChartMax / 5;
-            $magnitude = pow(10, floor(log10(max($rawStep, 1))));
-            $niceStep = ceil($rawStep / $magnitude) * $magnitude;
-            $barChartCeil = $niceStep * 5;
-            if ($barChartCeil < $barChartMax) {
-                $barChartCeil = $niceStep * 6;
-            }
-            $yAxisSteps = [];
-            for ($i = 5; $i >= 0; $i--) {
-                $yAxisSteps[] = $niceStep * $i;
-            }
+        @if ($canViewDashboardDetectionCard)
+            {{-- Deteksi Malware Bar Chart --}}
+            @php
+                $barChartMax = max($totalTraffic, 1);
+                // Calculate nice Y-axis steps
+                $rawStep = $barChartMax / 5;
+                $magnitude = pow(10, floor(log10(max($rawStep, 1))));
+                $niceStep = ceil($rawStep / $magnitude) * $magnitude;
+                $barChartCeil = $niceStep * 5;
+                if ($barChartCeil < $barChartMax) {
+                    $barChartCeil = $niceStep * 6;
+                }
+                $yAxisSteps = [];
+                for ($i = 5; $i >= 0; $i--) {
+                    $yAxisSteps[] = $niceStep * $i;
+                }
 
-            $totalBarHeight = $barChartCeil > 0 ? ($totalTraffic / $barChartCeil) * 100 : 0;
-            $normalBarHeight = $barChartCeil > 0 ? ($normalTotal / $barChartCeil) * 100 : 0;
-            $malwareBarHeight = $barChartCeil > 0 ? ($malwareTotal / $barChartCeil) * 100 : 0;
-        @endphp
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 class="text-sm font-semibold text-gray-800 mb-4">Deteksi Malware</h3>
-            @if ($totalTraffic > 0)
-                <div class="flex h-56">
-                    {{-- Y-Axis Labels --}}
-                    <div class="flex flex-col justify-between pr-3 text-right flex-shrink-0 -mt-1.5 -mb-1.5">
-                        @foreach ($yAxisSteps as $step)
-                            <span class="text-xs text-gray-400 leading-none">{{ number_format($step, 0, ',', '.') }}</span>
-                        @endforeach
-                    </div>
-                    {{-- Chart Area --}}
-                    <div class="flex-1 flex flex-col">
-                        <div class="flex-1 border-l border-b border-gray-200 relative">
-                            {{-- Grid Lines --}}
-                            @for ($i = 1; $i <= 4; $i++)
-                                <div class="absolute w-full border-t border-gray-100" style="top: {{ ($i / 5) * 100 }}%;"></div>
-                            @endfor
-                            <div class="absolute w-full border-t border-gray-100" style="top: 0;"></div>
+                $totalBarHeight = $barChartCeil > 0 ? ($totalTraffic / $barChartCeil) * 100 : 0;
+                $normalBarHeight = $barChartCeil > 0 ? ($normalTotal / $barChartCeil) * 100 : 0;
+                $malwareBarHeight = $barChartCeil > 0 ? ($malwareTotal / $barChartCeil) * 100 : 0;
+            @endphp
+            <div class="bg-white rounded-lg border border-gray-200 p-6" data-dashboard-card="detection-chart">
+                <h3 class="text-sm font-semibold text-gray-800 mb-4">Deteksi Malware</h3>
+                @if ($totalTraffic > 0)
+                    <div class="flex h-56">
+                        {{-- Y-Axis Labels --}}
+                        <div class="flex flex-col justify-between pr-3 text-right flex-shrink-0 -mt-1.5 -mb-1.5">
+                            @foreach ($yAxisSteps as $step)
+                                <span class="text-xs text-gray-400 leading-none">{{ number_format($step, 0, ',', '.') }}</span>
+                            @endforeach
+                        </div>
+                        {{-- Chart Area --}}
+                        <div class="flex-1 flex flex-col">
+                            <div class="flex-1 border-l border-b border-gray-200 relative">
+                                {{-- Grid Lines --}}
+                                @for ($i = 1; $i <= 4; $i++)
+                                    <div class="absolute w-full border-t border-gray-100" style="top: {{ ($i / 5) * 100 }}%;"></div>
+                                @endfor
+                                <div class="absolute w-full border-t border-gray-100" style="top: 0;"></div>
 
-                            {{-- Bars --}}
-                            <div class="absolute inset-0 flex items-end justify-around px-2 gap-2 pb-0">
-                                {{-- Total Data Bar --}}
-                                <div class="flex-1 flex flex-col items-center justify-end h-full max-w-20">
-                                    <div class="w-full rounded-t-md bg-blue-500 transition-all duration-700 ease-out relative group"
-                                        style="height: {{ max($totalBarHeight, 1) }}%;">
-                                        <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
-                                            {{ number_format($totalTraffic, 0, ',', '.') }}
+                                {{-- Bars --}}
+                                <div class="absolute inset-0 flex items-end justify-around px-2 gap-2 pb-0">
+                                    {{-- Total Data Bar --}}
+                                    <div class="flex-1 flex flex-col items-center justify-end h-full max-w-20">
+                                        <div class="w-full rounded-t-md bg-blue-500 transition-all duration-700 ease-out relative group"
+                                            style="height: {{ max($totalBarHeight, 1) }}%;">
+                                            <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
+                                                {{ number_format($totalTraffic, 0, ',', '.') }}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                {{-- Normal Bar --}}
-                                <div class="flex-1 flex flex-col items-center justify-end h-full max-w-20">
-                                    <div class="w-full rounded-t-md bg-green-500 transition-all duration-700 ease-out relative group"
-                                        style="height: {{ max($normalBarHeight, 1) }}%;">
-                                        <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
-                                            {{ number_format($normalTotal, 0, ',', '.') }}
+                                    {{-- Normal Bar --}}
+                                    <div class="flex-1 flex flex-col items-center justify-end h-full max-w-20">
+                                        <div class="w-full rounded-t-md bg-green-500 transition-all duration-700 ease-out relative group"
+                                            style="height: {{ max($normalBarHeight, 1) }}%;">
+                                            <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
+                                                {{ number_format($normalTotal, 0, ',', '.') }}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                {{-- Malware Bar --}}
-                                <div class="flex-1 flex flex-col items-center justify-end h-full max-w-20">
-                                    <div class="w-full rounded-t-md bg-red-500 transition-all duration-700 ease-out relative group"
-                                        style="height: {{ max($malwareBarHeight, 1) }}%;">
-                                        <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
-                                            {{ number_format($malwareTotal, 0, ',', '.') }}
+                                    {{-- Malware Bar --}}
+                                    <div class="flex-1 flex flex-col items-center justify-end h-full max-w-20">
+                                        <div class="w-full rounded-t-md bg-red-500 transition-all duration-700 ease-out relative group"
+                                            style="height: {{ max($malwareBarHeight, 1) }}%;">
+                                            <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
+                                                {{ number_format($malwareTotal, 0, ',', '.') }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        {{-- X-Axis Labels --}}
-                        <div class="flex justify-around px-2 mt-2.5">
-                            <span class="flex-1 text-center text-xs text-gray-600 font-medium max-w-20">Total<br>Data</span>
-                            <span class="flex-1 text-center text-xs text-gray-600 font-medium max-w-20">Normal</span>
-                            <span class="flex-1 text-center text-xs text-gray-600 font-medium max-w-20">Malware</span>
+                            {{-- X-Axis Labels --}}
+                            <div class="flex justify-around px-2 mt-2.5">
+                                <span class="flex-1 text-center text-xs text-gray-600 font-medium max-w-20">Total<br>Data</span>
+                                <span class="flex-1 text-center text-xs text-gray-600 font-medium max-w-20">Normal</span>
+                                <span class="flex-1 text-center text-xs text-gray-600 font-medium max-w-20">Malware</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                {{-- Legend --}}
-                <div class="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-gray-100">
-                    <span class="flex items-center gap-1.5 text-xs text-gray-600">
-                        <span class="w-2.5 h-2.5 bg-blue-500 rounded-sm"></span> Total Data
-                    </span>
-                    <span class="flex items-center gap-1.5 text-xs text-gray-600">
-                        <span class="w-2.5 h-2.5 bg-green-500 rounded-sm"></span> Normal
-                    </span>
-                    <span class="flex items-center gap-1.5 text-xs text-gray-600">
-                        <span class="w-2.5 h-2.5 bg-red-500 rounded-sm"></span> Malware
-                    </span>
-                </div>
-            @else
-                <div class="h-56 flex items-center justify-center bg-gray-50 rounded-lg text-sm text-gray-500">
-                    Data chart akan muncul setelah deteksi pertama.
-                </div>
-            @endif
-        </div>
+                    {{-- Legend --}}
+                    <div class="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-gray-100">
+                        <span class="flex items-center gap-1.5 text-xs text-gray-600">
+                            <span class="w-2.5 h-2.5 bg-blue-500 rounded-sm"></span> Total Data
+                        </span>
+                        <span class="flex items-center gap-1.5 text-xs text-gray-600">
+                            <span class="w-2.5 h-2.5 bg-green-500 rounded-sm"></span> Normal
+                        </span>
+                        <span class="flex items-center gap-1.5 text-xs text-gray-600">
+                            <span class="w-2.5 h-2.5 bg-red-500 rounded-sm"></span> Malware
+                        </span>
+                    </div>
+                @else
+                    <div class="h-56 flex items-center justify-center bg-gray-50 rounded-lg text-sm text-gray-500">
+                        Data chart akan muncul setelah deteksi pertama.
+                    </div>
+                @endif
+            </div>
+        @endif
 
-         <div class="bg-white rounded-lg border border-gray-200 p-6">
+        @if ($canViewDashboardSuspiciousIpCard)
+        <div class="bg-white rounded-lg border border-gray-200 p-6" data-dashboard-card="suspicious-ip-list">
             <h3 class="text-sm font-semibold text-gray-800 mb-4">Top IP Mencurigakan</h3>
             <div class="space-y-3">
                 @forelse ($topSuspiciousIps as $ip)
@@ -288,6 +297,7 @@
                 @endforelse
             </div>
         </div>
+        @endif
 
 
     </div>

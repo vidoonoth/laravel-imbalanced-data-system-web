@@ -62,10 +62,7 @@ class PermissionController extends Controller
         ]);
 
         $role = $user->roles->pluck('name')->first() ?: AccessControl::ROLE_USER;
-        $allowedPermissions = collect($validated['permissions'] ?? [])
-            ->intersect(AccessControl::permissionNames())
-            ->values()
-            ->all();
+        $allowedPermissions = AccessControl::normalizeSelectedPermissions($validated['permissions'] ?? []);
 
         if ($role === AccessControl::ROLE_ADMIN) {
             $user->syncPermissions(array_values(array_diff($allowedPermissions, [

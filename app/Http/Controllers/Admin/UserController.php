@@ -168,10 +168,7 @@ class UserController extends Controller
      */
     private function syncUserAccess(User $user, string $role, array $permissions): void
     {
-        $allowedPermissions = collect($permissions)
-            ->intersect(AccessControl::permissionNames())
-            ->values()
-            ->all();
+        $allowedPermissions = AccessControl::normalizeSelectedPermissions($permissions);
 
         if ($role === AccessControl::ROLE_ADMIN) {
             $user->syncRoles([AccessControl::ROLE_ADMIN]);

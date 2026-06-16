@@ -1,5 +1,17 @@
 @php
-    $groupedPermissions = collect($permissions)->groupBy('group', true);
+    $groupOrder = [
+        'Monitoring' => 1,
+        'Administrasi' => 2,
+        'Laporan' => 3,
+    ];
+    $permissionCollection = collect($permissions);
+    $groupedPermissions = $permissionCollection
+        ->filter(fn ($meta) => ! isset($meta['parent']) || $meta['parent'] === '')
+        ->groupBy('group', true)
+        ->sortBy(fn ($items, $group) => $groupOrder[$group] ?? 99);
+    $childPermissions = $permissionCollection
+        ->filter(fn ($meta) => isset($meta['parent']) && $meta['parent'] !== '')
+        ->groupBy(fn ($meta) => $meta['parent'], true);
 @endphp
 
 <x-app-with-sidebar-layout>
@@ -49,21 +61,46 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                     @foreach ($groupedPermissions as $group => $items)
-                        <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="border border-gray-200 rounded-lg p-4 h-fit">
                             <p class="text-sm font-semibold text-gray-800 mb-3">{{ $group }}</p>
                             <div class="space-y-3">
                                 @foreach ($items as $permission => $meta)
-                                    <label class="flex items-start gap-3">
-                                        <input type="checkbox" name="permissions[]" value="{{ $permission }}"
-                                            @checked(in_array($permission, $selectedPermissions, true))
-                                            class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                        <span>
-                                            <span class="block text-sm font-medium text-gray-800">{{ $meta['label'] }}</span>
-                                            <span class="block text-xs text-gray-500">{{ $meta['description'] }}</span>
-                                        </span>
-                                    </label>
+                                    @php
+                                        $children = $childPermissions->get($permission, collect());
+                                        $hasChildren = $children->isNotEmpty();
+                                        $isPermissionSelected = in_array($permission, $selectedPermissions, true);
+                                    @endphp
+                                    <div @if ($hasChildren) x-data="{ enabled: {{ $isPermissionSelected ? 'true' : 'false' }} }" @endif>
+                                        <label class="flex items-start gap-3">
+                                            <input type="checkbox" name="permissions[]" value="{{ $permission }}"
+                                                @checked($isPermissionSelected)
+                                                @if ($hasChildren) x-model="enabled" @endif
+                                                class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <span>
+                                                <span class="block text-sm font-medium text-gray-800">{{ $meta['label'] }}</span>
+                                                <span class="block text-xs text-gray-500">{{ $meta['description'] }}</span>
+                                            </span>
+                                        </label>
+
+                                        @if ($hasChildren)
+                                            <div class="ml-7 mt-3 space-y-3 border-l border-gray-200 pl-4" x-show="enabled">
+                                                @foreach ($children as $childPermission => $childMeta)
+                                                    <label class="flex items-start gap-3">
+                                                        <input type="checkbox" name="permissions[]" value="{{ $childPermission }}"
+                                                            @checked(in_array($childPermission, $selectedPermissions, true))
+                                                            :disabled="!enabled"
+                                                            class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                                        <span>
+                                                            <span class="block text-sm font-medium text-gray-800">{{ $childMeta['label'] }}</span>
+                                                            <span class="block text-xs text-gray-500">{{ $childMeta['description'] }}</span>
+                                                        </span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
                                 @endforeach
                             </div>
                         </div>
