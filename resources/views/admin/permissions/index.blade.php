@@ -10,6 +10,9 @@
 @endphp
 
 <x-app-with-sidebar-layout>
+    <x-slot name="breadcrumbs">
+        <a href="{{ route('admin.permissions.index') }}" class="hover:text-gray-900">Hak Akses Menu</a>
+    </x-slot>
     <x-slot name="header">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>

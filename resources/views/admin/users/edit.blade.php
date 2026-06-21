@@ -1,4 +1,9 @@
 <x-app-with-sidebar-layout>
+    <x-slot name="breadcrumbs">
+        <a href="{{ route('admin.users.index') }}" class="hover:text-gray-900">Kelola Data User</a>
+        <span class="text-gray-400">/</span>
+        <span class="text-gray-900 font-medium">Edit User</span>
+    </x-slot>
     <x-slot name="header">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>

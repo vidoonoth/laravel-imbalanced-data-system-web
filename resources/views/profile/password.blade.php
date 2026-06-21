@@ -1,8 +1,6 @@
 <x-app-with-sidebar-layout>
-    <x-slot name="breadcrumbs">
-        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : route('profile.show') }}" class="hover:text-gray-900">Home</a>
-        <span class="text-gray-400">/</span>
-        <a href="{{ route('profile.show') }}" class="hover:text-gray-900">Profile</a>
+    <x-slot name="breadcrumbs">        
+        <a href="{{ route('profile.show') }}" class="hover:text-gray-900">Profil</a>
         <span class="text-gray-400">/</span>
         <span class="text-gray-900 font-medium">Ubah Kata Sandi</span>
     </x-slot>

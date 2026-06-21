@@ -1,9 +1,7 @@
 <x-app-with-sidebar-layout>
 
     <x-slot name="breadcrumbs">
-        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : route('profile.show') }}" class="hover:text-gray-900">Dashboard</a>
-        <span class="text-gray-400">/</span>
-        <span class="text-gray-900 font-medium">Kelola Data User</span>
+        <a href="{{ route('admin.users.index') }}" class="hover:text-gray-900">Kelola Data User</a>        
     </x-slot>
 
     <x-slot name="header">

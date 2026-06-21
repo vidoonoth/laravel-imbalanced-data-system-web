@@ -1,9 +1,14 @@
 <x-app-with-sidebar-layout>
+    <x-slot name="breadcrumbs">
+        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : route('profile.show') }}" class="hover:text-gray-900">Dashboard</a>        
+        <span class="text-gray-400">/</span>
+        <span class="text-gray-900 font-medium">Detail Aktivitas IP</span>
+    </x-slot>
     <x-slot name="header">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h2 class="font-semibold text-2xl text-gray-800">Detail Aktivitas IP</h2>
-                <p class="text-sm text-gray-500 mt-1">Riwayat source IP {{ $ipAddress }} dari hasil deteksi tersimpan.</p>
+                <p class="text-sm text-gray-500 mt-1">Riwayat aktivitas source IP {{ $ipAddress }} dari hasil deteksi tersimpan.</p>
             </div>
             <div class="flex flex-wrap gap-2">
                 <a href="{{ route('dashboard.ip-location', ['ip' => $ipAddress]) }}"
