@@ -3,5 +3,11 @@
 use App\Http\Controllers\Api\DetectionApiController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/detection/results', [DetectionApiController::class, 'store'])
-    ->middleware('auth.apikey');
+Route::middleware('auth.apikey')->group(function () {
+    Route::post('/detection/results', [DetectionApiController::class, 'store']);
+
+    Route::get('/dashboard', [DetectionApiController::class, 'dashboard']);
+    Route::get('/dashboard/suspicious-ips', [DetectionApiController::class, 'suspiciousIps']);
+    Route::get('/dashboard/suspicious-ips/detail', [DetectionApiController::class, 'suspiciousIpDetail']);
+    Route::get('/dashboard/suspicious-ips/location', [DetectionApiController::class, 'suspiciousIpLocation']);
+});

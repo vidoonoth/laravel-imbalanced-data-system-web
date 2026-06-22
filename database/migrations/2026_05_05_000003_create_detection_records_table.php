@@ -17,7 +17,7 @@ return new class extends Migration
 
         Schema::create('detection_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('detection_scan_id')->constrained()->cascadeOnDelete();
+            $table->dateTime('detected_at')->nullable()->index();
             $table->unsignedInteger('row_index')->default(0);
 
             $table->dateTime('update_time')->nullable()->index();
