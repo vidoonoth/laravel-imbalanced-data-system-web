@@ -20,9 +20,9 @@
 
 <body class="font-sans antialiased bg-gray-50">
     @php
-        $homeUrl = Auth::user()->can('dashboard.view')
-            ? route('dashboard')
-            : route('profile.show');
+        $homeUrl = route(\App\Support\AccessControl::homeRouteNameFor(Auth::user()));
+        $dashboardDetectionPermission = \App\Support\AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION;
+        $dashboardRawPermission = \App\Support\AccessControl::PERMISSION_VIEW_DASHBOARD_RAW;
     @endphp
 
     <div class="flex h-screen bg-gray-100" x-data="{ sidebarOpen: true }">
@@ -42,15 +42,27 @@
 
                 <!-- Navigation Links -->
                 <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-2">
-                    <!-- Dashboard Overview -->
-                    @can('dashboard.view')
+                    <!-- Dashboard Detection -->
+                    @can($dashboardDetectionPermission)
                         <a href="{{ route('dashboard') }}" data-nav-link
                             class="flex items-center space-x-3 px-4 py-3 rounded-lg {{ request()->routeIs('dashboard') ? 'bg-gray-200' : 'hover:bg-gray-400' }} transition cursor-pointer">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 9l7-4"></path>
                             </svg>
-                            <span class="whitespace-nowrap">Dashboard</span>
+                            <span class="whitespace-nowrap">Dashboard Deteksi</span>
+                        </a>
+                    @endcan
+
+                    <!-- Dashboard Raw Data -->
+                    @can($dashboardRawPermission)
+                        <a href="{{ route('dashboard.raw') }}" data-nav-link
+                            class="flex items-center space-x-3 px-4 py-3 rounded-lg {{ request()->routeIs('dashboard.raw') ? 'bg-gray-200' : 'hover:bg-gray-400' }} transition cursor-pointer">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 7h16M4 12h16M4 17h16"></path>
+                            </svg>
+                            <span class="whitespace-nowrap">Dashboard Raw</span>
                         </a>
                     @endcan
 

@@ -1,6 +1,6 @@
 <x-app-with-sidebar-layout>
     <x-slot name="breadcrumbs">
-        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : route('profile.show') }}" class="hover:text-gray-900">Dashboard</a>        
+        <a href="{{ route('dashboard') }}" class="hover:text-gray-900">Dashboard Deteksi</a>
     </x-slot>
 
     <x-slot name="header">
@@ -253,7 +253,7 @@
                     @php
                         $location = $ip->location ?? ['label' => 'Lokasi tidak tersedia', 'source' => 'unavailable'];
                         $locationSource = $location['source'] ?? 'unavailable';
-                        $canViewIpActivity = auth()->user()->can('dashboard.view');
+                        $canViewIpActivity = $canViewDashboardDetection;
                     @endphp
                     <div class="border border-gray-200 rounded-lg p-3">
                         <div class="flex items-center justify-between gap-3">

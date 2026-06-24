@@ -1,6 +1,8 @@
 @php
     $permissionDisplayLabels = [
         'dashboard.view' => 'dashboard',
+        'dashboard.detection.view' => 'dashboard hasil deteksi',
+        'dashboard.raw.view' => 'dashboard raw data',
         'report.view' => 'report',
         'users.manage' => 'kelola data user',
         'permissions.manage' => 'kelola hak akses menu',

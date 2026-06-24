@@ -3,9 +3,11 @@
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\PermissionController as AdminPermissionController;
 use App\Http\Controllers\DetectionController;
+use App\Http\Controllers\RawDatasetController;
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Support\AccessControl;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -19,13 +21,16 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard Overview
     Route::get('/dashboard', [DetectionController::class, 'dashboard'])
-        ->middleware('permission:dashboard.view')
+        ->middleware('permission:'.AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION)
         ->name('dashboard');
+    Route::get('/dashboard/raw', [RawDatasetController::class, 'dashboard'])
+        ->middleware('permission:'.AccessControl::PERMISSION_VIEW_DASHBOARD_RAW)
+        ->name('dashboard.raw');
     Route::get('/dashboard/ip-activity', [DetectionController::class, 'ipActivity'])
-        ->middleware('permission:dashboard.view')
+        ->middleware('permission:'.AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION)
         ->name('dashboard.ip-activity');
     Route::get('/dashboard/ip-location', [DetectionController::class, 'ipLocation'])
-        ->middleware('permission:dashboard.view')
+        ->middleware('permission:'.AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION)
         ->name('dashboard.ip-location');
 
     // Laporan

@@ -49,6 +49,8 @@ test('admin can create network administrator user with limited feature access', 
 
     expect($user->hasRole(AccessControl::ROLE_USER))->toBeTrue()
         ->and($user->can('dashboard.view'))->toBeTrue()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION))->toBeTrue()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_RAW))->toBeFalse()
         ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD))->toBeTrue()
         ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD))->toBeTrue()
         ->and($user->can('report.view'))->toBeTrue()
@@ -84,12 +86,15 @@ test('permission index shows readable access names', function () {
         ->get(route('admin.permissions.index'))
         ->assertOk()
         ->assertSee('dashboard')
+        ->assertSee('dashboard hasil deteksi')
         ->assertSee('report')
         ->assertSee('kelola data user')
         ->assertSee('kelola hak akses menu')
         ->assertSee('deteksi')
         ->assertSee('ip mencurigakan')
         ->assertDontSee('dashboard.view')
+        ->assertDontSee('dashboard.detection.view')
+        ->assertDontSee('dashboard.raw.view')
         ->assertDontSee('report.view')
         ->assertDontSee('users.manage')
         ->assertDontSee('permissions.manage')
@@ -108,6 +113,8 @@ test('admin can manage dashboard card permissions', function () {
         ->assertOk()
         ->assertSeeInOrder(['Monitoring', 'Administrasi', 'Laporan'])
         ->assertSee('Dashboard')
+        ->assertSee('Dashboard Hasil Deteksi')
+        ->assertSee('Dashboard Raw Data')
         ->assertSee('Laporan')
         ->assertSee('Deteksi Malware')
         ->assertSee('IP Mencurigakan')
@@ -129,6 +136,8 @@ test('admin can manage dashboard card permissions', function () {
     $user->refresh();
 
     expect($user->can('dashboard.view'))->toBeTrue()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION))->toBeTrue()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_RAW))->toBeFalse()
         ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD))->toBeTrue()
         ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD))->toBeFalse();
 
@@ -144,7 +153,46 @@ test('admin can manage dashboard card permissions', function () {
     $user->refresh();
 
     expect($user->can('dashboard.view'))->toBeFalse()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION))->toBeFalse()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_RAW))->toBeFalse()
         ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD))->toBeFalse();
+});
+
+test('dashboard raw access is exclusive from detection dashboard access', function () {
+    $admin = adminAccount();
+    $user = User::factory()->create();
+    AccessControl::assignDefaultUserAccess($user);
+
+    $this
+        ->actingAs($admin)
+        ->put(route('admin.permissions.update', $user), [
+            'permissions' => [
+                'dashboard.view',
+                AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION,
+                AccessControl::PERMISSION_VIEW_DASHBOARD_RAW,
+                AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD,
+                AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD,
+            ],
+        ])
+        ->assertRedirect(route('admin.permissions.index'));
+
+    $user->refresh();
+
+    expect($user->can('dashboard.view'))->toBeTrue()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_RAW))->toBeTrue()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION))->toBeFalse()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD))->toBeFalse()
+        ->and($user->can(AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD))->toBeFalse();
+
+    $this
+        ->actingAs($user)
+        ->get(route('dashboard.raw'))
+        ->assertOk();
+
+    $this
+        ->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertForbidden();
 });
 
 test('admin can update feature access without changing password', function () {
@@ -193,6 +241,8 @@ test('admin role feature access can be customized', function () {
     expect($targetAdmin->hasRole(AccessControl::ROLE_ADMIN))->toBeTrue()
         ->and($targetAdmin->can(AccessControl::PERMISSION_MANAGE_USERS))->toBeTrue()
         ->and($targetAdmin->can('dashboard.view'))->toBeTrue()
+        ->and($targetAdmin->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION))->toBeTrue()
+        ->and($targetAdmin->can(AccessControl::PERMISSION_VIEW_DASHBOARD_RAW))->toBeFalse()
         ->and($targetAdmin->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD))->toBeFalse()
         ->and($targetAdmin->can(AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD))->toBeFalse()
         ->and($targetAdmin->can('report.view'))->toBeFalse();

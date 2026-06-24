@@ -12,6 +12,9 @@
     $childPermissions = $permissionCollection
         ->filter(fn ($meta) => isset($meta['parent']) && $meta['parent'] !== '')
         ->groupBy(fn ($meta) => $meta['parent'], true);
+    $dashboardDetectionPermission = \App\Support\AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION;
+    $dashboardRawPermission = \App\Support\AccessControl::PERMISSION_VIEW_DASHBOARD_RAW;
+    $dashboardDetectionDetailPermissions = \App\Support\AccessControl::dashboardDetectionDetailPermissions();
 @endphp
 
 <x-app-with-sidebar-layout>
@@ -55,7 +58,11 @@
         </div>
     </div>
 
-    <form method="POST" action="{{ route('admin.permissions.update', $user) }}" class="space-y-6">
+    <form method="POST" action="{{ route('admin.permissions.update', $user) }}" class="space-y-6"
+        x-data="{
+            dashboardDetection: {{ in_array($dashboardDetectionPermission, $selectedPermissions, true) ? 'true' : 'false' }},
+            dashboardRaw: {{ in_array($dashboardRawPermission, $selectedPermissions, true) ? 'true' : 'false' }}
+        }">
         @csrf
         @method('PUT')
 
@@ -111,7 +118,23 @@
                                                         name="permissions[]"
                                                         value="{{ $childPermission }}"
                                                         @checked(in_array($childPermission, $selectedPermissions, true))
-                                                        :disabled="!enabled"
+                                                        @if ($childPermission === $dashboardDetectionPermission)
+                                                            x-model="dashboardDetection"
+                                                            @change="if (dashboardDetection) dashboardRaw = false"
+                                                            :disabled="!enabled || dashboardRaw"
+                                                        @elseif ($childPermission === $dashboardRawPermission)
+                                                            x-model="dashboardRaw"
+                                                            @change="if (dashboardRaw) {
+                                                                dashboardDetection = false;
+                                                                $root.querySelectorAll('[data-dashboard-detection-child]').forEach((input) => input.checked = false);
+                                                            }"
+                                                            :disabled="!enabled || dashboardDetection"
+                                                        @elseif (in_array($childPermission, $dashboardDetectionDetailPermissions, true))
+                                                            data-dashboard-detection-child
+                                                            :disabled="!enabled || !dashboardDetection || dashboardRaw"
+                                                        @else
+                                                            :disabled="!enabled"
+                                                        @endif
                                                         class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                                     >
                                                     <span class="min-w-0">

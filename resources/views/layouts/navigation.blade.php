@@ -1,8 +1,8 @@
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     @php
-        $homeUrl = Auth::user()->can('dashboard.view')
-            ? route('dashboard')
-            : route('profile.show');
+        $homeUrl = route(\App\Support\AccessControl::homeRouteNameFor(Auth::user()));
+        $dashboardDetectionPermission = \App\Support\AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION;
+        $dashboardRawPermission = \App\Support\AccessControl::PERMISSION_VIEW_DASHBOARD_RAW;
     @endphp
 
     <!-- Primary Navigation Menu -->
@@ -18,9 +18,14 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    @can('dashboard.view')
+                    @can($dashboardDetectionPermission)
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                            {{ __('Dashboard') }}
+                            {{ __('Dashboard Deteksi') }}
+                        </x-nav-link>
+                    @endcan
+                    @can($dashboardRawPermission)
+                        <x-nav-link :href="route('dashboard.raw')" :active="request()->routeIs('dashboard.raw')">
+                            {{ __('Dashboard Raw') }}
                         </x-nav-link>
                     @endcan
                     @can('users.manage')
@@ -88,9 +93,14 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            @can('dashboard.view')
+            @can($dashboardDetectionPermission)
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
+                    {{ __('Dashboard Deteksi') }}
+                </x-responsive-nav-link>
+            @endcan
+            @can($dashboardRawPermission)
+                <x-responsive-nav-link :href="route('dashboard.raw')" :active="request()->routeIs('dashboard.raw')">
+                    {{ __('Dashboard Raw') }}
                 </x-responsive-nav-link>
             @endcan
             @can('users.manage')

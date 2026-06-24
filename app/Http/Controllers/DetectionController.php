@@ -21,6 +21,7 @@ class DetectionController extends Controller
         $user = $request->user();
         $canViewDashboardDetectionCard = $user?->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD) ?? false;
         $canViewDashboardSuspiciousIpCard = $user?->can(AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD) ?? false;
+        $canViewDashboardDetection = $user?->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION) ?? false;
 
         $totalTraffic = DetectionResult::count();
         $normalTotal = DetectionResult::where('prediction', 0)->count();
@@ -80,6 +81,7 @@ class DetectionController extends Controller
             'topSuspiciousIps' => $topSuspiciousIps,
             'canViewDashboardDetectionCard' => $canViewDashboardDetectionCard,
             'canViewDashboardSuspiciousIpCard' => $canViewDashboardSuspiciousIpCard,
+            'canViewDashboardDetection' => $canViewDashboardDetection,
         ]);
     }
 

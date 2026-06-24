@@ -186,7 +186,10 @@ test('dashboard shows detail link for top suspicious ip', function () {
 
 test('dashboard hides cards without dashboard card permissions', function () {
     $user = User::factory()->create();
-    $user->syncPermissions(['dashboard.view']);
+    $user->syncPermissions([
+        'dashboard.view',
+        AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION,
+    ]);
 
     ipActivityRecord([
         'source_ip' => '10.20.30.25',
@@ -210,6 +213,7 @@ test('dashboard hides cards without dashboard card permissions', function () {
 
     $user->syncPermissions([
         'dashboard.view',
+        AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION,
         AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD,
     ]);
 
