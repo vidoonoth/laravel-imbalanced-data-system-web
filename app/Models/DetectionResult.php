@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DetectionResult extends Model
 {
-    protected $table = 'detection_records';
+    protected $table = 'detection_results';
 
     protected $fillable = [
         'detected_at',

@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (! Schema::hasTable('detection_records') || Schema::hasColumn('detection_records', 'detected_at')) {
+        if (! Schema::hasTable('detection_results') || Schema::hasColumn('detection_results', 'detected_at')) {
             return;
         }
 
-        Schema::table('detection_records', function (Blueprint $table) {
+        Schema::table('detection_results', function (Blueprint $table) {
             $table->dateTime('detected_at')->nullable()->index();
         });
     }
@@ -25,11 +25,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (! Schema::hasTable('detection_records') || ! Schema::hasColumn('detection_records', 'detected_at')) {
+        if (! Schema::hasTable('detection_results') || ! Schema::hasColumn('detection_results', 'detected_at')) {
             return;
         }
 
-        Schema::table('detection_records', function (Blueprint $table) {
+        Schema::table('detection_results', function (Blueprint $table) {
             $table->dropColumn('detected_at');
         });
     }

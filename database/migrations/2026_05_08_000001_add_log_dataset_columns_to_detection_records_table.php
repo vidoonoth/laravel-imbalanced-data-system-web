@@ -11,76 +11,76 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (! Schema::hasTable('detection_records')) {
+        if (! Schema::hasTable('detection_results')) {
             return;
         }
 
-        Schema::table('detection_records', function (Blueprint $table) {
-            if (! Schema::hasColumn('detection_records', 'update_time')) {
+        Schema::table('detection_results', function (Blueprint $table) {
+            if (! Schema::hasColumn('detection_results', 'update_time')) {
                 $table->dateTime('update_time')->nullable()->index();
             }
 
-            if (! Schema::hasColumn('detection_records', 'sn')) {
+            if (! Schema::hasColumn('detection_results', 'sn')) {
                 $table->string('sn', 64)->nullable();
             }
 
-            if (! Schema::hasColumn('detection_records', 'log_type')) {
+            if (! Schema::hasColumn('detection_results', 'log_type')) {
                 $table->string('log_type', 64)->nullable()->index();
             }
 
-            if (! Schema::hasColumn('detection_records', 'log')) {
+            if (! Schema::hasColumn('detection_results', 'log')) {
                 $table->longText('log')->nullable();
             }
 
-            if (! Schema::hasColumn('detection_records', 'event_name')) {
+            if (! Schema::hasColumn('detection_results', 'event_name')) {
                 $table->string('event_name', 128)->nullable();
             }
 
-            if (! Schema::hasColumn('detection_records', 'disposition')) {
+            if (! Schema::hasColumn('detection_results', 'disposition')) {
                 $table->string('disposition', 32)->nullable()->index();
             }
 
-            if (! Schema::hasColumn('detection_records', 'priority')) {
+            if (! Schema::hasColumn('detection_results', 'priority')) {
                 $table->unsignedTinyInteger('priority')->nullable();
             }
 
-            if (! Schema::hasColumn('detection_records', 'source_interface')) {
+            if (! Schema::hasColumn('detection_results', 'source_interface')) {
                 $table->string('source_interface', 64)->nullable();
             }
 
-            if (! Schema::hasColumn('detection_records', 'destination_interface')) {
+            if (! Schema::hasColumn('detection_results', 'destination_interface')) {
                 $table->string('destination_interface', 64)->nullable();
             }
 
-            if (! Schema::hasColumn('detection_records', 'policy')) {
+            if (! Schema::hasColumn('detection_results', 'policy')) {
                 $table->string('policy')->nullable();
             }
 
-            if (! Schema::hasColumn('detection_records', 'pckt_len')) {
+            if (! Schema::hasColumn('detection_results', 'pckt_len')) {
                 $table->unsignedInteger('pckt_len')->nullable();
             }
 
-            if (! Schema::hasColumn('detection_records', 'ttl')) {
+            if (! Schema::hasColumn('detection_results', 'ttl')) {
                 $table->unsignedSmallInteger('ttl')->nullable();
             }
 
-            if (! Schema::hasColumn('detection_records', 'sent_bytes')) {
+            if (! Schema::hasColumn('detection_results', 'sent_bytes')) {
                 $table->unsignedBigInteger('sent_bytes')->nullable();
             }
 
-            if (! Schema::hasColumn('detection_records', 'rcvd_bytes')) {
+            if (! Schema::hasColumn('detection_results', 'rcvd_bytes')) {
                 $table->unsignedBigInteger('rcvd_bytes')->nullable();
             }
 
-            if (! Schema::hasColumn('detection_records', 'geo_src')) {
+            if (! Schema::hasColumn('detection_results', 'geo_src')) {
                 $table->string('geo_src', 16)->nullable();
             }
 
-            if (! Schema::hasColumn('detection_records', 'geo_dst')) {
+            if (! Schema::hasColumn('detection_results', 'geo_dst')) {
                 $table->string('geo_dst', 16)->nullable();
             }
 
-            if (! Schema::hasColumn('detection_records', 'action')) {
+            if (! Schema::hasColumn('detection_results', 'action')) {
                 $table->string('action')->nullable();
             }
         });
@@ -91,11 +91,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (! Schema::hasTable('detection_records')) {
+        if (! Schema::hasTable('detection_results')) {
             return;
         }
 
-        Schema::table('detection_records', function (Blueprint $table) {
+        Schema::table('detection_results', function (Blueprint $table) {
             $columns = [
                 'update_time',
                 'sn',
@@ -117,7 +117,7 @@ return new class extends Migration
             ];
 
             foreach ($columns as $column) {
-                if (Schema::hasColumn('detection_records', $column)) {
+                if (Schema::hasColumn('detection_results', $column)) {
                     $table->dropColumn($column);
                 }
             }
