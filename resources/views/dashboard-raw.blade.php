@@ -112,6 +112,10 @@
                         <p class="text-xs text-gray-400 font-semibold uppercase">Path</p>
                         <p class="text-gray-800 mt-1 break-all">{{ $latestImport->source_path }}</p>
                     </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-semibold uppercase">Jumlah Kolom CSV</p>
+                        <p class="text-gray-800 mt-1">{{ $payloadColumns->count() }} kolom</p>
+                    </div>
                 </div>
             @else
                 <div class="p-8 bg-gray-50 rounded-lg text-center text-sm text-gray-500">
@@ -121,37 +125,102 @@
         </div>
     </div>
 
+    {{-- Raw Data Table with Filters --}}
     <div class="bg-white rounded-lg border border-gray-200">
         <div class="p-4 border-b border-gray-200">
-            <h3 class="text-sm font-semibold text-gray-800">Raw Data CSV</h3>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-800">Isi Raw Data CSV</h3>
+                    <p class="text-xs text-gray-500 mt-1">Menampilkan seluruh isi file CSV yang sudah diimport dari VPS (semua file digabungkan).</p>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span>{{ number_format($datasets->total(), 0, ',', '.') }} baris</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Filters --}}
+        <div class="p-4 bg-gray-50 border-b border-gray-200">
+            <form method="GET" action="{{ route('dashboard.raw') }}" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                <div class="flex-1 min-w-0">
+                    <label for="filter-search" class="block text-xs font-semibold text-gray-600 mb-1">Cari Data</label>
+                    <input
+                        type="text"
+                        id="filter-search"
+                        name="search"
+                        value="{{ $filters['search'] ?? '' }}"
+                        placeholder="Cari berdasarkan IP, port, protocol..."
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                </div>
+                <div class="sm:w-56">
+                    <label for="filter-file" class="block text-xs font-semibold text-gray-600 mb-1">Filter File CSV</label>
+                    <select
+                        id="filter-file"
+                        name="file"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    >
+                        <option value="">Semua File</option>
+                        @foreach ($completedImports as $importOption)
+                            <option value="{{ $importOption->id }}" {{ ($filters['file'] ?? '') == $importOption->id ? 'selected' : '' }}>
+                                {{ $importOption->source_filename }} ({{ number_format($importOption->rows_imported, 0, ',', '.') }} baris)
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
+                        <svg class="w-4 h-4 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        Filter
+                    </button>
+                    @if (($filters['search'] ?? '') !== '' || ($filters['file'] ?? 0) > 0)
+                        <a href="{{ route('dashboard.raw') }}" class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                            Reset
+                        </a>
+                    @endif
+                </div>
+            </form>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">File</th>
-                        <th class="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">Baris</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap sticky left-0 bg-gray-50 z-10">#</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">File Sumber</th>
                         @foreach ($payloadColumns as $column)
                             <th class="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">{{ $column }}</th>
                         @endforeach
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    @forelse ($datasets as $dataset)
+                    @forelse ($datasets as $index => $dataset)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-800 whitespace-nowrap">
-                                {{ $dataset->import?->source_filename ?? '-' }}
+                            <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-xs sticky left-0 bg-white z-10">
+                                {{ $datasets->firstItem() + $index }}
                             </td>
-                            <td class="px-4 py-3 text-gray-600 whitespace-nowrap">
-                                {{ number_format($dataset->row_number, 0, ',', '.') }}
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded font-medium">
+                                    {{ $dataset->import?->source_filename ?? '-' }}
+                                </span>
                             </td>
                             @foreach ($payloadColumns as $column)
                                 @php
-                                    $value = ($dataset->payload ?? [])[$column] ?? '-';
-                                    $displayValue = is_array($value) ? json_encode($value) : $value;
+                                    $value = ($dataset->payload ?? [])[$column] ?? null;
+                                    if ($value === null || $value === '') {
+                                        $displayValue = '-';
+                                        $cellClass = 'text-gray-400';
+                                    } else {
+                                        $displayValue = is_array($value) ? json_encode($value) : (string) $value;
+                                        $cellClass = 'text-gray-700';
+                                    }
                                 @endphp
-                                <td class="px-4 py-3 text-gray-700 max-w-xs truncate">
+                                <td class="px-4 py-3 {{ $cellClass }} max-w-xs truncate" title="{{ $displayValue }}">
                                     {{ $displayValue }}
                                 </td>
                             @endforeach
@@ -159,7 +228,11 @@
                     @empty
                         <tr>
                             <td colspan="{{ 2 + $payloadColumns->count() }}" class="px-6 py-10 text-center text-gray-500">
-                                Belum ada raw data.
+                                @if (($filters['search'] ?? '') !== '' || ($filters['file'] ?? 0) > 0)
+                                    Tidak ada data yang sesuai dengan filter.
+                                @else
+                                    Belum ada raw data.
+                                @endif
                             </td>
                         </tr>
                     @endforelse
@@ -167,8 +240,14 @@
             </table>
         </div>
 
-        <div class="p-4 border-t border-gray-200">
-            {{ $datasets->links() }}
+        <div class="p-4 border-t border-gray-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="text-xs text-gray-500">
+                Menampilkan {{ $datasets->firstItem() ?? 0 }} - {{ $datasets->lastItem() ?? 0 }} dari {{ number_format($datasets->total(), 0, ',', '.') }} baris
+            </div>
+            <div>
+                {{ $datasets->links() }}
+            </div>
         </div>
     </div>
+
 </x-app-with-sidebar-layout>

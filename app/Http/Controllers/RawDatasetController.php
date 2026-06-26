@@ -11,18 +11,46 @@ class RawDatasetController extends Controller
 {
     public function dashboard(Request $request): View
     {
-        $datasets = Dataset::query()
-            ->with('import')
-            ->latest('id')
-            ->paginate(25)
-            ->withQueryString();
-
-        $payloadColumns = $datasets
-            ->getCollection()
+        // Collect all unique payload keys from completed imports for column headers
+        $allPayloadColumns = Dataset::query()
+            ->join('dataset_imports', 'datasets.dataset_import_id', '=', 'dataset_imports.id')
+            ->where('dataset_imports.status', DatasetImport::STATUS_COMPLETED)
+            ->limit(100)
+            ->get(['datasets.payload'])
             ->flatMap(fn (Dataset $dataset) => array_keys($dataset->payload ?? []))
             ->unique()
-            ->take(8)
             ->values();
+
+        // Build query with optional filters
+        $datasetsQuery = Dataset::query()
+            ->with('import')
+            ->join('dataset_imports', 'datasets.dataset_import_id', '=', 'dataset_imports.id')
+            ->where('dataset_imports.status', DatasetImport::STATUS_COMPLETED)
+            ->select('datasets.*');
+
+        // Filter by import file
+        if ($request->filled('file')) {
+            $datasetsQuery->where('datasets.dataset_import_id', $request->integer('file'));
+        }
+
+        // Search within payload fields
+        if ($request->filled('search')) {
+            $searchTerm = $request->string('search')->toString();
+            $datasetsQuery->where(function ($query) use ($searchTerm, $allPayloadColumns) {
+                foreach ($allPayloadColumns as $column) {
+                    $query->orWhereRaw(
+                        "JSON_UNQUOTE(JSON_EXTRACT(datasets.payload, ?)) LIKE ?",
+                        ['$.' . $column, '%' . $searchTerm . '%']
+                    );
+                }
+            });
+        }
+
+        $datasets = $datasetsQuery
+            ->orderBy('datasets.dataset_import_id', 'asc')
+            ->orderBy('datasets.row_number', 'asc')
+            ->paginate(50)
+            ->withQueryString();
 
         $latestImport = DatasetImport::query()
             ->where('status', DatasetImport::STATUS_COMPLETED)
@@ -30,8 +58,16 @@ class RawDatasetController extends Controller
             ->latest('id')
             ->first();
 
+        $completedImports = DatasetImport::query()
+            ->where('status', DatasetImport::STATUS_COMPLETED)
+            ->orderBy('source_filename', 'asc')
+            ->get(['id', 'source_filename', 'rows_imported']);
+
         return view('dashboard-raw', [
-            'totalRawRows' => Dataset::query()->count(),
+            'totalRawRows' => Dataset::query()
+                ->join('dataset_imports', 'datasets.dataset_import_id', '=', 'dataset_imports.id')
+                ->where('dataset_imports.status', DatasetImport::STATUS_COMPLETED)
+                ->count(),
             'completedImportCount' => DatasetImport::query()
                 ->where('status', DatasetImport::STATUS_COMPLETED)
                 ->count(),
@@ -45,7 +81,12 @@ class RawDatasetController extends Controller
                 ->limit(5)
                 ->get(),
             'datasets' => $datasets,
-            'payloadColumns' => $payloadColumns,
+            'payloadColumns' => $allPayloadColumns,
+            'completedImports' => $completedImports,
+            'filters' => [
+                'file' => $request->integer('file'),
+                'search' => $request->string('search')->toString(),
+            ],
         ]);
     }
 }
