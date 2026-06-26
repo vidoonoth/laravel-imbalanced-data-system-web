@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\DetectionResult;
+use App\Models\Dataset;
+use App\Models\DatasetImport;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
@@ -24,6 +26,56 @@ function apiDetectionRecord(array $overrides = []): DetectionResult
         'prediction_label' => 'Normal',
         'confidence' => 0.25,
         'raw_record' => [],
+    ], $overrides));
+}
+
+function apiDatasetImport(): DatasetImport
+{
+    return DatasetImport::create([
+        'source_fingerprint' => hash('sha256', 'test-host|/var/www/syslog-datasets/test.csv'),
+        'source_host' => '103.245.38.142',
+        'source_path' => '/var/www/syslog-datasets/test.csv',
+        'source_filename' => 'test.csv',
+        'status' => DatasetImport::STATUS_COMPLETED,
+        'rows_imported' => 2,
+        'started_at' => now(),
+        'finished_at' => now(),
+    ]);
+}
+
+function apiDataset(array $payload = [], array $overrides = []): Dataset
+{
+    $import = $overrides['import'] ?? apiDatasetImport();
+    unset($overrides['import']);
+
+    return Dataset::create(array_merge([
+        'dataset_import_id' => $import->id,
+        'row_number' => 1,
+        'row_hash' => hash('sha256', json_encode($payload)),
+        'payload' => array_merge([
+            'timestamp' => '2026-06-23 10:07:01',
+            'date' => '2026-06-23',
+            'hour' => 10,
+            'day_of_week' => 'Tuesday',
+            'log_type' => 'tcp-udp-proxy',
+            'event_type' => null,
+            'action' => 'Allow',
+            'protocol' => 'tcp',
+            'src_ip' => '10.0.164.42',
+            'src_port' => 38364,
+            'dst_ip' => '57.144.192.3',
+            'dst_port' => 443,
+            'src_country' => null,
+            'dst_country' => null,
+            'policy_name' => 'TCP-UDP-Proxi-Internet-MHS-00',
+            'application' => null,
+            'url' => null,
+            'url_category' => null,
+            'severity' => null,
+            'is_blocked' => 0,
+            'is_allowed' => 1,
+            'message' => 'ProxyAllow: HTTPS Request categories',
+        ], $payload),
     ], $overrides));
 }
 
@@ -83,6 +135,95 @@ test('detection api stores ml pipeline results', function () {
         ->and($record->prediction_label)->toBe('Malware')
         ->and((float) $record->probability_attack)->toBe(0.97)
         ->and($record->raw_record['source_file'])->toBe('dataset.csv');
+});
+
+test('dataset pending api returns raw datasets without detection results', function () {
+    Config::set('services.ml_pipeline.api_key', 'test-ml-key');
+
+    $import = apiDatasetImport();
+    $pendingDataset = apiDataset(['src_ip' => '10.0.164.42'], [
+        'import' => $import,
+        'row_number' => 1,
+    ]);
+    $detectedDataset = apiDataset(['src_ip' => '10.0.164.99'], [
+        'import' => $import,
+        'row_number' => 2,
+    ]);
+
+    apiDetectionRecord([
+        'dataset_id' => $detectedDataset->id,
+        'source_ip' => '10.0.164.99',
+    ]);
+
+    $response = $this
+        ->withToken('test-ml-key')
+        ->getJson('/api/datasets/pending?limit=10');
+
+    $response
+        ->assertOk()
+        ->assertJsonPath('status', 'success')
+        ->assertJsonPath('data.count', 1)
+        ->assertJsonPath('data.items.0.id', $pendingDataset->id)
+        ->assertJsonPath('data.items.0.payload.src_ip', '10.0.164.42')
+        ->assertJsonPath('data.items.0.source.filename', 'test.csv');
+});
+
+test('detection api updates an existing dataset detection instead of duplicating it', function () {
+    Config::set('services.ml_pipeline.api_key', 'test-ml-key');
+
+    $dataset = apiDataset();
+
+    $payload = [
+        'dataset_id' => $dataset->id,
+        'row_index' => $dataset->row_number,
+        'update_time' => '2026-06-23 10:07:01',
+        'log_type' => 'tcp-udp-proxy',
+        'log' => 'ProxyAllow: HTTPS Request categories',
+        'event_name' => 'proxyallow',
+        'disposition' => 'allowed',
+        'protocol' => 'tcp',
+        'source_ip' => '10.0.164.42',
+        'destination_ip' => '57.144.192.3',
+        'source_port' => 38364,
+        'destination_port' => 443,
+        'policy' => 'TCP-UDP-Proxi-Internet-MHS-00',
+        'action' => 'Allow',
+        'prediction' => 0,
+        'prediction_label' => 'Normal',
+        'confidence' => 0.91,
+        'probability_normal' => 0.91,
+        'probability_attack' => 0.09,
+        'raw_record' => ['dataset_id' => $dataset->id],
+    ];
+
+    $this
+        ->withToken('test-ml-key')
+        ->postJson('/api/detection/results', ['results' => [$payload]])
+        ->assertCreated();
+
+    $this
+        ->withToken('test-ml-key')
+        ->postJson('/api/detection/results', [
+            'results' => [
+                array_merge($payload, [
+                    'prediction' => 1,
+                    'prediction_label' => 'Malware',
+                    'confidence' => 0.97,
+                    'probability_normal' => 0.03,
+                    'probability_attack' => 0.97,
+                ]),
+            ],
+        ])
+        ->assertCreated();
+
+    expect(DetectionResult::query()->count())->toBe(1);
+
+    $record = DetectionResult::query()->firstOrFail();
+
+    expect($record->dataset_id)->toBe($dataset->id)
+        ->and($record->prediction)->toBe(1)
+        ->and($record->prediction_label)->toBe('Malware')
+        ->and((float) $record->probability_attack)->toBe(0.97);
 });
 
 test('detection api rejects an invalid api key', function () {

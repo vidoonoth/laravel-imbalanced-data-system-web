@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Dataset extends Model
 {
@@ -24,5 +25,10 @@ class Dataset extends Model
     public function import(): BelongsTo
     {
         return $this->belongsTo(DatasetImport::class, 'dataset_import_id');
+    }
+
+    public function detectionResult(): HasOne
+    {
+        return $this->hasOne(DetectionResult::class);
     }
 }

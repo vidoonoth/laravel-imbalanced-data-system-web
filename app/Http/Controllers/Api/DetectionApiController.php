@@ -190,6 +190,7 @@ class DetectionApiController extends Controller
             $validated = $request->validate([
                 'results' => 'required|array',
                 'results.*.prediction' => 'required|integer',
+                'results.*.dataset_id' => 'nullable|integer|exists:datasets,id',
             ]);
 
             $results = $request->input('results');
@@ -199,40 +200,24 @@ class DetectionApiController extends Controller
                 $rows = [];
 
                 foreach ($results as $result) {
-                    $rows[] = [
-                        'row_index' => $this->nullableInt($result['row_index'] ?? $result['index'] ?? null) ?? 0,
-                        'update_time' => $this->nullableDateTime($result['update_time'] ?? null),
-                        'sn' => $this->limitedString($result['sn'] ?? null, 64),
-                        'log_type' => $this->limitedString($result['log_type'] ?? null, 64),
-                        'log' => $this->nullableText($result['log'] ?? $result['raw_log'] ?? null),
-                        'event_name' => $this->limitedString($result['event_name'] ?? null, 128),
-                        'disposition' => $this->limitedString($result['disposition'] ?? null, 32),
-                        'priority' => $this->nullableInt($result['priority'] ?? null),
-                        'protocol' => $this->limitedString($result['protocol'] ?? null, 64),
-                        'source_ip' => $this->limitedString($result['source_ip'] ?? null, 64),
-                        'destination_ip' => $this->limitedString($result['destination_ip'] ?? null, 64),
-                        'source_port' => $this->nullableInt($result['source_port'] ?? null),
-                        'destination_port' => $this->nullableInt($result['destination_port'] ?? null),
-                        'source_interface' => $this->limitedString($result['source_interface'] ?? $result['source_intf'] ?? null, 64),
-                        'destination_interface' => $this->limitedString($result['destination_interface'] ?? $result['destination_intf'] ?? null, 64),
-                        'policy' => $this->limitedString($result['policy'] ?? null, 255),
-                        'pckt_len' => $this->nullableInt($result['pckt_len'] ?? null),
-                        'ttl' => $this->nullableInt($result['ttl'] ?? null),
-                        'sent_bytes' => $this->nullableInt($result['sent_bytes'] ?? null),
-                        'rcvd_bytes' => $this->nullableInt($result['rcvd_bytes'] ?? null),
-                        'geo_src' => $this->limitedString($result['geo_src'] ?? null, 16),
-                        'geo_dst' => $this->limitedString($result['geo_dst'] ?? null, 16),
-                        'action' => $this->limitedString($result['action'] ?? null, 255),
-                        'prediction' => $this->nullableInt($result['prediction'] ?? null),
-                        'prediction_label' => $this->limitedString($result['prediction_label'] ?? null, 32),
-                        'confidence' => $this->nullableFloat($result['confidence'] ?? null),
-                        'probability_normal' => $this->nullableFloat($result['probability_normal'] ?? null),
-                        'probability_attack' => $this->nullableFloat($result['probability_attack'] ?? null),
-                        'raw_record' => isset($result['raw_record']) ? (is_array($result['raw_record']) ? json_encode($result['raw_record']) : $result['raw_record']) : json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
-                        'detected_at' => $this->nullableDateTime($result['detected_at'] ?? null) ?? $timestamp,
-                        'created_at' => $timestamp,
-                        'updated_at' => $timestamp,
-                    ];
+                    $datasetId = $this->nullableInt($result['dataset_id'] ?? null);
+                    $row = $this->detectionRowFromResult($result, $timestamp);
+
+                    if ($datasetId !== null) {
+                        DetectionResult::query()->updateOrCreate(
+                            ['dataset_id' => $datasetId],
+                            $row
+                        );
+
+                        continue;
+                    }
+
+                    $row['raw_record'] = is_array($row['raw_record'])
+                        ? json_encode($row['raw_record'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+                        : $row['raw_record'];
+                    $row['created_at'] = $timestamp;
+                    $row['updated_at'] = $timestamp;
+                    $rows[] = $row;
 
                     if (count($rows) >= 500) {
                         DetectionResult::insert($rows);
@@ -257,6 +242,42 @@ class DetectionApiController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    private function detectionRowFromResult(array $result, $timestamp): array
+    {
+        return [
+            'row_index' => $this->nullableInt($result['row_index'] ?? $result['index'] ?? null) ?? 0,
+            'update_time' => $this->nullableDateTime($result['update_time'] ?? null),
+            'sn' => $this->limitedString($result['sn'] ?? null, 64),
+            'log_type' => $this->limitedString($result['log_type'] ?? null, 64),
+            'log' => $this->nullableText($result['log'] ?? $result['raw_log'] ?? null),
+            'event_name' => $this->limitedString($result['event_name'] ?? null, 128),
+            'disposition' => $this->limitedString($result['disposition'] ?? null, 32),
+            'priority' => $this->nullableInt($result['priority'] ?? null),
+            'protocol' => $this->limitedString($result['protocol'] ?? null, 64),
+            'source_ip' => $this->limitedString($result['source_ip'] ?? null, 64),
+            'destination_ip' => $this->limitedString($result['destination_ip'] ?? null, 64),
+            'source_port' => $this->nullableInt($result['source_port'] ?? null),
+            'destination_port' => $this->nullableInt($result['destination_port'] ?? null),
+            'source_interface' => $this->limitedString($result['source_interface'] ?? $result['source_intf'] ?? null, 64),
+            'destination_interface' => $this->limitedString($result['destination_interface'] ?? $result['destination_intf'] ?? null, 64),
+            'policy' => $this->limitedString($result['policy'] ?? null, 255),
+            'pckt_len' => $this->nullableInt($result['pckt_len'] ?? null),
+            'ttl' => $this->nullableInt($result['ttl'] ?? null),
+            'sent_bytes' => $this->nullableInt($result['sent_bytes'] ?? null),
+            'rcvd_bytes' => $this->nullableInt($result['rcvd_bytes'] ?? null),
+            'geo_src' => $this->limitedString($result['geo_src'] ?? null, 16),
+            'geo_dst' => $this->limitedString($result['geo_dst'] ?? null, 16),
+            'action' => $this->limitedString($result['action'] ?? null, 255),
+            'prediction' => $this->nullableInt($result['prediction'] ?? null),
+            'prediction_label' => $this->limitedString($result['prediction_label'] ?? null, 32),
+            'confidence' => $this->nullableFloat($result['confidence'] ?? null),
+            'probability_normal' => $this->nullableFloat($result['probability_normal'] ?? null),
+            'probability_attack' => $this->nullableFloat($result['probability_attack'] ?? null),
+            'raw_record' => $result['raw_record'] ?? $result,
+            'detected_at' => $this->nullableDateTime($result['detected_at'] ?? null) ?? $timestamp,
+        ];
     }
 
     private function nullableInt($value): ?int

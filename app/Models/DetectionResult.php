@@ -10,6 +10,7 @@ class DetectionResult extends Model
     protected $table = 'detection_results';
 
     protected $fillable = [
+        'dataset_id',
         'detected_at',
         'row_index',
         'update_time',
@@ -45,6 +46,7 @@ class DetectionResult extends Model
     protected function casts(): array
     {
         return [
+            'dataset_id' => 'integer',
             'detected_at' => 'datetime',
             'update_time' => 'datetime',
             'priority' => 'integer',
@@ -60,5 +62,10 @@ class DetectionResult extends Model
             'probability_attack' => 'decimal:6',
             'raw_record' => 'array',
         ];
+    }
+
+    public function dataset(): BelongsTo
+    {
+        return $this->belongsTo(Dataset::class);
     }
 }
