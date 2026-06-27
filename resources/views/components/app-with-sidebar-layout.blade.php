@@ -31,12 +31,12 @@
             :class="{ 'hidden': !sidebarOpen }">
             <div class="flex flex-col h-full">
                 <!-- Logo Section -->
-                <div class="p-4 border-b flex items-center justify-between flex-shrink-0">
+                <div class="p-[22px] border-b flex items-center justify-between flex-shrink-0">
                     <a href="{{ $homeUrl }}" class="flex items-center space-x-3">
                         <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0">
                             <img src="{{ asset('images/logo-polindra.png') }}" alt="Logo" class="w-full h-full object-contain">
                         </div>
-                        <span class="font-bold text-lg whitespace-nowrap">UPA TIK</span>
+                        <span class="font-bold text-xl whitespace-nowrap">UPA TIK</span>
                     </a>
                 </div>
 
@@ -103,7 +103,7 @@
                     @endcan
                 </nav>
 
-               
+
             </div>
         </aside>
 
@@ -132,11 +132,11 @@
                     </div>
 
                  <!-- User Profile Section -->
-                <div class="flex-shrink-0">
+                <div class="flex-shrink-0 bg-gray-200 rounded-xl">
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button
-                                class="flex items-center gap-3 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                                class="flex items-center gap-3 p-3 py-2 rounded-lg hover:bg-gray-300 transition text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                                 <div class="flex items-center space-x-3">
                                     @if(Auth::user()->avatar)
                                         <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
@@ -149,7 +149,7 @@
                                     @endif
                                     <div class="text-left">
                                         <p class="text-sm font-semibold truncate">{{ Auth::user()->name }}</p>
-                                        <p class="text-xs text-gray-400 truncate">{{ Auth::user()->email }}</p>
+                                        <p class="text-xs text-gray-700 truncate">{{ Auth::user()->email }}</p>
                                     </div>
                                 </div>
                                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"

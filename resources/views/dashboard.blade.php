@@ -1,15 +1,6 @@
 <x-app-with-sidebar-layout>
     <x-slot name="breadcrumbs">
-        <a href="{{ route('dashboard') }}" class="hover:text-gray-900">Dashboard Deteksi</a>
-    </x-slot>
-
-    <x-slot name="header">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h2 class="font-semibold text-2xl text-gray-800">Dashboard Deteksi Malware</h2>
-                <p class="text-sm text-gray-500 mt-1">Ringkasan hasil deteksi dari file yang sudah diproses.</p>
-            </div>            
-        </div>
+        <span class="text-gray-900 hover:text-gray-900 text-[23px] font-semibold">Dashboard Deteksi</span>
     </x-slot>
 
     @php

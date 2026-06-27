@@ -1,27 +1,6 @@
 <x-app-with-sidebar-layout>
     <x-slot name="breadcrumbs">
-        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : route('profile.show') }}" class="hover:text-gray-900">Dashboard</a>
-        <span class="mx-2 text-gray-400">/</span>
-        <span class="text-gray-900">Laporan</span>
-    </x-slot>
-
-    <x-slot name="header">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h2 class="font-semibold text-2xl text-gray-800">Laporan Deteksi Malware</h2>
-                <p class="text-sm text-gray-500 mt-1">Halaman ringkasan eksekutif, statistik deteksi harian, dan riwayat deteksi.</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <a href="{{ route('report.export.pdf', request()->query()) }}"
-                    class="inline-flex justify-center items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition text-sm font-semibold shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    Export PDF
-                </a>
-            </div>
-        </div>
+        <span class="text-gray-900 hover:text-gray-900 text-[23px] font-semibold">Laporan</span>
     </x-slot>
 
     <!-- Filter Form -->

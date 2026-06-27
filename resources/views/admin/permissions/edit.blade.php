@@ -19,21 +19,9 @@
 
 <x-app-with-sidebar-layout>
     <x-slot name="breadcrumbs">
-        <a href="{{ route('admin.permissions.index') }}" class="hover:text-gray-900">Hak Akses Menu</a>
+        <a href="{{ route('admin.permissions.index') }}" class="text-gray-600 hover:text-gray-900">Hak Akses Menu</a>
         <span class="text-gray-400">/</span>
-        <span class="text-gray-900 font-medium">Edit Hak Akses Menu</span>
-    </x-slot>
-    <x-slot name="header">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h2 class="font-semibold text-2xl text-gray-800">Edit Hak Akses Menu</h2>
-                <p class="text-sm text-gray-500 mt-1">Sesuaikan menu dan fitur yang bisa diakses oleh user ini.</p>
-            </div>
-            <a href="{{ route('admin.permissions.index') }}"
-                class="inline-flex justify-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-semibold">
-                Kembali
-            </a>
-        </div>
+        <span class="text-gray-900 text-[23px] font-semibold">Edit Hak Akses Menu</span>
     </x-slot>
 
     <!-- card info & edit form -->

@@ -13,15 +13,7 @@
 
 <x-app-with-sidebar-layout>
     <x-slot name="breadcrumbs">
-        <a href="{{ route('admin.permissions.index') }}" class="hover:text-gray-900">Hak Akses Menu</a>
-    </x-slot>
-    <x-slot name="header">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h2 class="font-semibold text-2xl text-gray-800">Hak Akses Menu</h2>
-                <p class="text-sm text-gray-500 mt-1">Kelola dan atur menu serta fitur yang dapat diakses oleh masing-masing user.</p>
-            </div>
-        </div>
+        <span class="text-gray-900 hover:text-gray-900 text-[23px] font-semibold">Hak Akses Menu</span>
     </x-slot>
 
     @if (session('status'))

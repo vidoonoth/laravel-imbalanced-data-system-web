@@ -1,19 +1,6 @@
 <x-app-with-sidebar-layout>
-
     <x-slot name="breadcrumbs">
-        <a href="{{ route('admin.users.index') }}" class="hover:text-gray-900">Kelola Data User</a>        
-    </x-slot>
-
-    <x-slot name="header">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h2 class="font-semibold text-2xl text-gray-800">Kelola Data User</h2>                
-            </div>
-            <a href="{{ route('admin.users.create') }}"
-                class="inline-flex justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
-                Tambah User
-            </a>
-        </div>
+        <span class="text-gray-900 hover:text-gray-900 text-[23px] font-semibold">Kelola Data User</span>
     </x-slot>
 
     @if (session('status'))
@@ -30,21 +17,27 @@
 
     <div class="bg-white rounded-lg border border-gray-200">
         <div class="p-4 border-b border-gray-200">
-            <form method="GET" action="{{ route('admin.users.index') }}" class="flex flex-col gap-3 sm:flex-row">
-                <input type="text" name="q" value="{{ $filters['q'] }}"
-                    placeholder="Cari nama atau email"
-                    class="w-full sm:max-w-sm rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                <button type="submit"
-                    class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition text-sm font-semibold">
-                    Cari
-                </button>
-                @if ($filters['q'] !== '')
-                    <a href="{{ route('admin.users.index') }}"
-                        class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-semibold text-center">
-                        Reset
-                    </a>
-                @endif
-            </form>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <form method="GET" action="{{ route('admin.users.index') }}" class="flex flex-col gap-3 sm:flex-row">
+                    <input type="text" name="q" value="{{ $filters['q'] }}"
+                        placeholder="Cari nama atau email"
+                        class="w-full sm:max-w-sm rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    <button type="submit"
+                        class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition text-sm font-semibold">
+                        Cari
+                    </button>
+                    @if ($filters['q'] !== '')
+                        <a href="{{ route('admin.users.index') }}"
+                            class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-semibold text-center">
+                            Reset
+                        </a>
+                    @endif
+                </form>
+                <a href="{{ route('admin.users.create') }}"
+                    class="inline-flex justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
+                    Tambah User
+                </a>
+            </div>
         </div>
 
         <div class="overflow-x-auto">

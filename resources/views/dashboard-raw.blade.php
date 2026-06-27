@@ -1,15 +1,6 @@
 <x-app-with-sidebar-layout>
     <x-slot name="breadcrumbs">
-        <a href="{{ route('dashboard.raw') }}" class="hover:text-gray-900">Dashboard Raw Data</a>
-    </x-slot>
-
-    <x-slot name="header">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h2 class="font-semibold text-2xl text-gray-800">Dashboard Raw Data</h2>
-                <p class="text-sm text-gray-500 mt-1">Ringkasan data mentah CSV yang diambil dari VPS tanpa penerapan deteksi malware.</p>
-            </div>
-        </div>
+        <a href="{{ route('dashboard.raw') }}" class="hover:text-gray-900 text-[23px] font-semibold">Dashboard Raw Data</a>
     </x-slot>
 
     @php

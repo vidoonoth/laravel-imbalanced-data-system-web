@@ -1,35 +1,6 @@
 <x-app-with-sidebar-layout>
     <x-slot name="breadcrumbs">      
-        <span class="text-gray-900 font-medium">Profil</span>
-    </x-slot>
-
-    <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-                <h2 class="font-semibold text-2xl text-gray-800">{{ __('Profile') }}</h2>
-                <p class="text-sm text-gray-500 mt-1">{{ __('Informasi akun dan pengaturan profil Anda.') }}</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <a href="{{ route('profile.edit') }}"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                        </path>
-                    </svg>
-                    {{ __('Edit Profile') }}
-                </a>
-                <a href="{{ route('profile.password') }}"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                        </path>
-                    </svg>
-                    {{ __('Ubah Kata Sandi') }}
-                </a>
-            </div>
-        </div>
+        <span class="text-gray-900 hover:text-gray-900 text-[23px] font-semibold">Profil</span>
     </x-slot>
 
     <div class="max-w-3xl space-y-6">
