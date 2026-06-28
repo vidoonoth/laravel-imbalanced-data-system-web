@@ -138,10 +138,12 @@ test('ip activity page returns not found without an existing ip', function () {
 });
 
 test('dashboard shows shared detection data from another user', function () {
+    Http::fake(fn () => Http::response(['success' => false], 429));
+
     $viewer = User::factory()->create();
 
     ipActivityRecord([
-        'source_ip' => '10.10.10.10',
+        'source_ip' => '8.8.4.4',
         'geo_src' => 'IDN',
         'prediction' => 1,
         'prediction_label' => 'Malware',
@@ -154,16 +156,18 @@ test('dashboard shows shared detection data from another user', function () {
 
     $response
         ->assertOk()
-        ->assertSee('10.10.10.10')
+        ->assertSee('8.8.4.4')
         ->assertSee('Top IP Mencurigakan')
         ->assertSee('Deteksi Terakhir');
 });
 
 test('dashboard shows detail link for top suspicious ip', function () {
+    Http::fake(fn () => Http::response(['success' => false], 429));
+
     $user = User::factory()->create();
 
     ipActivityRecord([
-        'source_ip' => '10.20.30.25',
+        'source_ip' => '8.8.8.8',
         'geo_src' => 'IDN',
         'prediction' => 1,
         'prediction_label' => 'Malware',
@@ -177,11 +181,11 @@ test('dashboard shows detail link for top suspicious ip', function () {
     $response
         ->assertOk()
         ->assertSee('Top IP Mencurigakan')
-        ->assertSee('10.20.30.25')
+        ->assertSee('8.8.8.8')
         ->assertSee('Detail')
         ->assertSee('Lihat Lokasi')
-        ->assertSee(route('dashboard.ip-activity', ['ip' => '10.20.30.25']), false)
-        ->assertSee(route('dashboard.ip-location', ['ip' => '10.20.30.25']), false);
+        ->assertSee(route('dashboard.ip-activity', ['ip' => '8.8.8.8']), false)
+        ->assertSee(route('dashboard.ip-location', ['ip' => '8.8.8.8']), false);
 });
 
 test('dashboard hides cards without dashboard card permissions', function () {
@@ -346,7 +350,7 @@ test('ip location refreshes cached api location without coordinates', function (
     Http::assertSent(fn ($request) => str_starts_with($request->url(), 'https://ipwho.is/1.0.0.1'));
 });
 
-test('private ip uses geo source fallback without api request', function () {
+test('dashboard hides private suspicious ip without api request', function () {
     Cache::flush();
     Http::fake();
 
@@ -366,7 +370,10 @@ test('private ip uses geo source fallback without api request', function () {
 
     $response
         ->assertOk()
-        ->assertSee('Lokasi: IDN');
+        ->assertSee('Top IP Mencurigakan')
+        ->assertSee('Belum ada IP dengan prediksi malware.')
+        ->assertDontSee('10.10.10.10')
+        ->assertDontSee('Lokasi: IDN');
 
     Http::assertNothingSent();
 });

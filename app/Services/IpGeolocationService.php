@@ -45,8 +45,10 @@ class IpGeolocationService
         return $fallbackLocation ?? $this->unavailableLocation();
     }
 
-    private function isPublicIp(string $ipAddress): bool
+    public function isPublicIp(?string $ipAddress): bool
     {
+        $ipAddress = trim((string) $ipAddress);
+
         return filter_var(
             $ipAddress,
             FILTER_VALIDATE_IP,

@@ -36,11 +36,7 @@ class DetectionController extends Controller
             ->first();
 
         $suspiciousIpCount = $canViewDashboardSuspiciousIpCard
-            ? DetectionResult::query()
-                ->where('prediction', 1)
-                ->whereNotNull('source_ip')
-                ->distinct()
-                ->count('source_ip')
+            ? $this->publicSuspiciousIpCount()
             : 0;
 
         $recentDetections = DetectionResult::query()
@@ -49,24 +45,7 @@ class DetectionController extends Controller
             ->get();
 
         $topSuspiciousIps = $canViewDashboardSuspiciousIpCard
-            ? DetectionResult::query()
-                ->select(
-                    'source_ip',
-                    DB::raw('COUNT(*) as total'),
-                    DB::raw('AVG(confidence) as avg_confidence'),
-                    DB::raw("MIN(NULLIF(geo_src, '')) as geo_src")
-                )
-                ->where('prediction', 1)
-                ->whereNotNull('source_ip')
-                ->groupBy('source_ip')
-                ->orderByDesc('total')
-                ->limit(5)
-                ->get()
-                ->map(function (DetectionResult $ip) {
-                    $ip->setAttribute('location', $this->ipGeolocation->lookup($ip->source_ip, $ip->geo_src));
-
-                    return $ip;
-                })
+            ? $this->topPublicSuspiciousIps()
             : collect();
 
         return view('dashboard', [
@@ -203,6 +182,42 @@ class DetectionController extends Controller
     {
         return DetectionResult::query()
             ->where('source_ip', $ipAddress);
+    }
+
+    private function publicSuspiciousIpCount(): int
+    {
+        return DetectionResult::query()
+            ->where('prediction', 1)
+            ->whereNotNull('source_ip')
+            ->distinct()
+            ->pluck('source_ip')
+            ->filter(fn (?string $ipAddress) => $this->ipGeolocation->isPublicIp($ipAddress))
+            ->count();
+    }
+
+    private function topPublicSuspiciousIps(int $limit = 5)
+    {
+        return DetectionResult::query()
+            ->select(
+                'source_ip',
+                DB::raw('COUNT(*) as total'),
+                DB::raw('AVG(confidence) as avg_confidence'),
+                DB::raw("MIN(NULLIF(geo_src, '')) as geo_src")
+            )
+            ->where('prediction', 1)
+            ->whereNotNull('source_ip')
+            ->groupBy('source_ip')
+            ->orderByDesc('total')
+            ->orderBy('source_ip')
+            ->get()
+            ->filter(fn (DetectionResult $ip) => $this->ipGeolocation->isPublicIp($ip->source_ip))
+            ->take($limit)
+            ->map(function (DetectionResult $ip) {
+                $ip->setAttribute('location', $this->ipGeolocation->lookup($ip->source_ip, $ip->geo_src));
+
+                return $ip;
+            })
+            ->values();
     }
 
     private function fallbackGeoCode(Builder $query): ?string
