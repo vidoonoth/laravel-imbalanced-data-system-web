@@ -3,18 +3,6 @@
         <span class="text-gray-900 dark:text-gray-100 hover:text-gray-900 text-[23px] font-semibold">Kelola Data User</span>
     </x-slot>
 
-    @if (session('status'))
-        <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 text-sm font-medium text-green-800">
-            {{ session('status') }}
-        </div>
-    @endif
-
-    @if ($errors->has('user'))
-        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 text-sm font-medium text-red-800">
-            {{ $errors->first('user') }}
-        </div>
-    @endif
-
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
         <div class="p-4 border-b border-gray-200">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -71,16 +59,18 @@
                                         class="px-3 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-xs font-semibold">
                                         Edit
                                     </a>
-                                    <form method="POST" action="{{ route('admin.users.destroy', $user) }}"
-                                        onsubmit="return confirm('Hapus user ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            @disabled($user->is(auth()->user()))
-                                            class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+                                    @if(!$user->is(auth()->user()))
+                                        <x-delete-modal :action="route('admin.users.destroy', $user)" title="Hapus User" message="Apakah Anda yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.">
+                                            <x-slot name="trigger">
+                                                Hapus
+                                            </x-slot>
+                                        </x-delete-modal>
+                                    @else
+                                        <button type="button" disabled
+                                            class="px-3 py-2 bg-red-600 text-white rounded-lg transition text-xs font-semibold opacity-50 cursor-not-allowed">
                                             Hapus
                                         </button>
-                                    </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

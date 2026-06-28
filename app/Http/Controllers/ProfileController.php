@@ -46,26 +46,32 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $user = $request->user();
-        $validated = $request->validated();
+        try {
+            $user = $request->user();
+            $validated = $request->validated();
 
-        if ($request->hasFile('avatar')) {
-            if ($user->avatar) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+            if ($request->hasFile('avatar')) {
+                if ($user->avatar) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+                }
+                $path = $request->file('avatar')->store('avatars', 'public');
+                $validated['avatar'] = $path;
             }
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $validated['avatar'] = $path;
+
+            $user->fill($validated);
+
+            if ($user->isDirty('email')) {
+                $user->email_verified_at = null;
+            }
+
+            $user->save();
+
+            return Redirect::route('profile.show')->with('success', 'Profil berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui profil. Silakan coba lagi.');
         }
-
-        $user->fill($validated);
-
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-        }
-
-        $user->save();
-
-        return Redirect::route('profile.show')->with('status', 'profile-updated');
     }
 
     /**

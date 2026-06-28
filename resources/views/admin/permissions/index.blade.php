@@ -16,12 +16,6 @@
         <span class="text-gray-900 dark:text-gray-100 hover:text-gray-900 text-[23px] font-semibold">Hak Akses Menu</span>
     </x-slot>
 
-    @if (session('status'))
-        <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 text-sm font-medium text-green-800">
-            {{ session('status') }}
-        </div>
-    @endif
-
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
         <div class="p-4 border-b border-gray-200 dark:border-gray-700">
             <form method="GET" action="{{ route('admin.permissions.index') }}" class="flex flex-col gap-3 sm:flex-row">

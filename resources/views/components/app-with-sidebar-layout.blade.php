@@ -217,6 +217,22 @@
         </div>
     </div>
 
+    @if (session('success'))
+        <x-notification type="success" message="{{ session('success') }}" />
+    @endif
+
+    @if (session('error'))
+        <x-notification type="error" message="{{ session('error') }}" />
+    @endif
+
+    @if (session('status') && !in_array(session('status'), ['profile-updated', 'password-updated']))
+        <x-notification type="success" message="{{ session('status') }}" />
+    @endif
+
+    @if ($errors->any() && !$errors->has('password') && !$errors->has('current_password'))
+        <x-notification type="error" message="{{ $errors->first() }}" />
+    @endif
+
     @vite(['resources/js/navigation.js'])
 </body>
 

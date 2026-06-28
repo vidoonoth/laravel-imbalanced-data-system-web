@@ -56,25 +56,31 @@ class PermissionController extends Controller
     {
         AccessControl::ensureRolesAndPermissions();
 
-        $validated = $request->validate([
-            'permissions' => ['array'],
-            'permissions.*' => [Rule::in(AccessControl::permissionNames())],
-        ]);
+        try {
+            $validated = $request->validate([
+                'permissions' => ['array'],
+                'permissions.*' => [Rule::in(AccessControl::permissionNames())],
+            ]);
 
-        $role = $user->roles->pluck('name')->first() ?: AccessControl::ROLE_USER;
-        $allowedPermissions = AccessControl::normalizeSelectedPermissions($validated['permissions'] ?? []);
+            $role = $user->roles->pluck('name')->first() ?: AccessControl::ROLE_USER;
+            $allowedPermissions = AccessControl::normalizeSelectedPermissions($validated['permissions'] ?? []);
 
-        if ($role === AccessControl::ROLE_ADMIN) {
-            $user->syncPermissions(array_values(array_diff($allowedPermissions, [
-                AccessControl::PERMISSION_MANAGE_USERS,
-                AccessControl::PERMISSION_MANAGE_PERMISSIONS
-            ])));
-        } else {
-            $user->syncPermissions($allowedPermissions);
+            if ($role === AccessControl::ROLE_ADMIN) {
+                $user->syncPermissions(array_values(array_diff($allowedPermissions, [
+                    AccessControl::PERMISSION_MANAGE_USERS,
+                    AccessControl::PERMISSION_MANAGE_PERMISSIONS
+                ])));
+            } else {
+                $user->syncPermissions($allowedPermissions);
+            }
+
+            return redirect()
+                ->route('admin.permissions.index')
+                ->with('success', 'Hak akses user berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui hak akses. Silakan coba lagi.');
         }
-
-        return redirect()
-            ->route('admin.permissions.index')
-            ->with('status', 'Hak akses user berhasil diperbarui.');
     }
 }

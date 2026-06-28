@@ -239,7 +239,7 @@
         @if ($canViewDashboardSuspiciousIpCard)
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-dashboard-card="suspicious-ip-list">
             <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-4">Top IP Mencurigakan</h3>
-            <div class="space-y-3">
+            <div class="space-y-3 max-h-72 overflow-y-auto pr-2">
                 @forelse ($topSuspiciousIps as $ip)
                     @php
                         $location = $ip->location ?? ['label' => 'Lokasi tidak tersedia', 'source' => 'unavailable'];

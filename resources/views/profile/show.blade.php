@@ -4,11 +4,6 @@
     </x-slot>
 
     <div class="max-w-3xl space-y-6">
-        @if (session('status') === 'profile-updated')
-            <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-sm font-medium text-green-800">
-                Profil dan foto profil Anda berhasil diperbarui.
-            </div>
-        @endif
         {{-- Profile Card --}}
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
             <div class="flex items-center gap-5 mb-8">

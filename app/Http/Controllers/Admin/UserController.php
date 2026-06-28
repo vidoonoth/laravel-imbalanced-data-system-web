@@ -54,23 +54,29 @@ class UserController extends Controller
     {
         AccessControl::ensureRolesAndPermissions();
 
-        $validated = $this->validatedUserData($request);
+        try {
+            $validated = $this->validatedUserData($request);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+            ]);
 
-        $defaultPermissions = $validated['role'] === AccessControl::ROLE_ADMIN
-            ? AccessControl::defaultAdminPermissions()
-            : AccessControl::defaultUserPermissions();
+            $defaultPermissions = $validated['role'] === AccessControl::ROLE_ADMIN
+                ? AccessControl::defaultAdminPermissions()
+                : AccessControl::defaultUserPermissions();
 
-        $this->syncUserAccess($user, $validated['role'], $defaultPermissions);
+            $this->syncUserAccess($user, $validated['role'], $defaultPermissions);
 
-        return redirect()
-            ->route('admin.users.index')
-            ->with('status', 'User berhasil dibuat.');
+            return redirect()
+                ->route('admin.users.index')
+                ->with('success', 'User berhasil dibuat.');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal membuat user. Silakan coba lagi.');
+        }
     }
 
     public function edit(User $user): View
@@ -88,44 +94,54 @@ class UserController extends Controller
     {
         AccessControl::ensureRolesAndPermissions();
 
-        $validated = $this->validatedUserData($request, $user);
+        try {
+            $validated = $this->validatedUserData($request, $user);
 
-        if ($user->is($request->user()) && $validated['role'] !== AccessControl::ROLE_ADMIN) {
+            if ($user->is($request->user()) && $validated['role'] !== AccessControl::ROLE_ADMIN) {
+                return back()
+                    ->withInput()
+                    ->with('error', 'Role admin pada akun yang sedang digunakan tidak dapat dilepas.');
+            }
+
+            $user->fill([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+            ]);
+
+            if (! empty($validated['password'])) {
+                $user->password = Hash::make($validated['password']);
+            }
+
+            $user->save();
+
+            $currentPermissions = $user->permissions->pluck('name')->all();
+            $this->syncUserAccess($user, $validated['role'], $currentPermissions);
+
+            return redirect()
+                ->route('admin.users.index')
+                ->with('success', 'User berhasil diperbarui.');
+        } catch (\Exception $e) {
             return back()
-                ->withErrors(['role' => 'Role admin pada akun yang sedang digunakan tidak dapat dilepas.'])
-                ->withInput();
+                ->withInput()
+                ->with('error', 'Gagal memperbarui user. Silakan coba lagi.');
         }
-
-        $user->fill([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-        ]);
-
-        if (! empty($validated['password'])) {
-            $user->password = Hash::make($validated['password']);
-        }
-
-        $user->save();
-
-        $currentPermissions = $user->permissions->pluck('name')->all();
-        $this->syncUserAccess($user, $validated['role'], $currentPermissions);
-
-        return redirect()
-            ->route('admin.users.index')
-            ->with('status', 'User berhasil diperbarui.');
     }
 
     public function destroy(Request $request, User $user): RedirectResponse
     {
         if ($user->is($request->user())) {
-            return back()->withErrors(['user' => 'Akun yang sedang digunakan tidak dapat dihapus.']);
+            return back()->with('error', 'Akun yang sedang digunakan tidak dapat dihapus.');
         }
 
-        $user->delete();
+        try {
+            $user->delete();
 
-        return redirect()
-            ->route('admin.users.index')
-            ->with('status', 'User berhasil dihapus.');
+            return redirect()
+                ->route('admin.users.index')
+                ->with('success', 'User berhasil dihapus.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menghapus user. Silakan coba lagi.');
+        }
     }
 
     /**
