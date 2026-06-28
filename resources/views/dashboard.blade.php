@@ -3,6 +3,51 @@
         <span class="text-gray-900 dark:text-gray-100 hover:text-gray-900 text-[23px] font-semibold">Dashboard Deteksi</span>
     </x-slot>
 
+    <style>
+        /* Custom Scrollbar untuk Top IP Mencurigakan */
+        [data-dashboard-card="suspicious-ip-list"] .space-y-3::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        [data-dashboard-card="suspicious-ip-list"] .space-y-3::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 10px;
+        }
+        
+        [data-dashboard-card="suspicious-ip-list"] .space-y-3::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        
+        [data-dashboard-card="suspicious-ip-list"] .space-y-3::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+        
+        /* Dark mode scrollbar */
+        .dark [data-dashboard-card="suspicious-ip-list"] .space-y-3::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        
+        .dark [data-dashboard-card="suspicious-ip-list"] .space-y-3::-webkit-scrollbar-thumb {
+            background: #4b5563;
+        }
+        
+        .dark [data-dashboard-card="suspicious-ip-list"] .space-y-3::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        /* Firefox scrollbar */
+        [data-dashboard-card="suspicious-ip-list"] .space-y-3 {
+            scrollbar-width: thin;
+            scrollbar-color: #d1d5db #f3f4f6;
+        }
+        
+        .dark [data-dashboard-card="suspicious-ip-list"] .space-y-3 {
+            scrollbar-color: #4b5563 #1f2937;
+        }
+    </style>
+
     @php
         $lastScanTime = $latestDetection?->detected_at?->timezone('Asia/Jakarta')->format('H:i:s') ?? '-';
         $lastScanDate = $latestDetection?->detected_at?->timezone('Asia/Jakarta')->format('d/m/Y') ?? 'Belum ada deteksi';
@@ -246,44 +291,54 @@
                         $locationSource = $location['source'] ?? 'unavailable';
                         $canViewIpActivity = $canViewDashboardDetection;
                     @endphp
-                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-                        <div class="flex items-center justify-between gap-3">
-                            <p class="font-semibold text-gray-800 dark:text-gray-100 truncate">{{ $ip->source_ip }}</p>
-                            <div class="flex items-center gap-2 shrink-0">
-                                <span class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded font-semibold">
-                                    {{ number_format($ip->total, 0, ',', '.') }}
-                                </span>
-                            </div>
+                    <div class="group border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md dark:hover:shadow-lg transition-all duration-200 bg-white dark:bg-gray-800/50">
+                        <div class="flex items-center justify-between gap-3 mb-2">
+                            <p class="font-semibold text-gray-900 dark:text-gray-100 truncate text-base">{{ $ip->source_ip }}</p>
+                            <span class="px-2.5 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs rounded-full font-bold shrink-0">
+                                {{ number_format($ip->total, 0, ',', '.') }}
+                            </span>
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            Rata-rata confidence {{ number_format(((float) $ip->avg_confidence) * 100, 2, ',', '.') }}%
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
+                            <span class="font-medium">Confidence:</span> {{ number_format(((float) $ip->avg_confidence) * 100, 2, ',', '.') }}%
                         </p>
-                        <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                            <span class="min-w-0 max-w-full truncate">Lokasi: {{ $location['label'] ?? 'Lokasi tidak tersedia' }}</span>
+                        <div class="flex flex-wrap items-center gap-2 text-xs mb-3">
+                            <span class="text-gray-600 dark:text-gray-400 min-w-0 max-w-full truncate">
+                                <span class="font-medium">Lokasi:</span> {{ $location['label'] ?? 'Lokasi tidak tersedia' }}
+                            </span>
                             @if ($locationSource === 'api')
-                                <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-semibold">GeoIP</span>
+                                <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full font-semibold">GeoIP</span>
                             @elseif ($locationSource === 'log')
-                                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded font-semibold">Log</span>
+                                <span class="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full font-semibold">Log</span>
                             @endif
                         </div>
                         @if ($canViewIpActivity)
-                            <div class="mt-3 flex flex-wrap gap-2">
+                            <div class="flex flex-wrap gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
                                 <a href="{{ route('dashboard.ip-activity', ['ip' => $ip->source_ip]) }}"
-                                    class="inline-flex justify-center px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition text-xs font-semibold"
+                                    class="inline-flex justify-center px-3 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all text-xs font-semibold"
                                     aria-label="Lihat detail aktivitas IP {{ $ip->source_ip }}">
+                                    <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                    </svg>
                                     Detail
                                 </a>
                                 <a href="{{ route('dashboard.ip-location', ['ip' => $ip->source_ip]) }}"
-                                    class="inline-flex justify-center px-3 py-1.5 bg-blue-600 border border-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-xs font-semibold"
+                                    class="inline-flex justify-center px-3 py-1.5 bg-blue-600 dark:bg-blue-600 border border-blue-600 dark:border-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 hover:border-blue-700 dark:hover:border-blue-700 transition-all text-xs font-semibold"
                                     aria-label="Lihat lokasi IP {{ $ip->source_ip }}">
-                                    Lihat Lokasi
+                                    <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Lokasi
                                 </a>
                             </div>
                         @endif
-                        </div>
+                    </div>
                 @empty
-                    <div class="p-8 bg-gray-50 dark:bg-gray-700 rounded-lg text-center text-sm text-gray-500 dark:text-gray-400">
-                        Belum ada IP dengan prediksi malware.
+                    <div class="p-8 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center text-sm text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600">
+                        <svg class="w-12 h-12 mx-auto mb-3 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                        </svg>
+                        <p class="font-medium">Belum ada IP dengan prediksi malware</p>
                     </div>
                 @endforelse
             </div>

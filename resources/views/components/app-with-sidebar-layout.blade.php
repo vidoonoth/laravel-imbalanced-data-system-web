@@ -16,13 +16,104 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
+    <style>
+        /* ===== CUSTOM SCROLLBAR UNTUK MAIN CONTENT ===== */
+        #main-content::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        #main-content::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 10px;
+        }
+
+        #main-content::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+            border: 2px solid #f3f4f6;
+            transition: background 0.2s;
+        }
+
+        #main-content::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        /* Dark mode - Main Content */
+        .dark #main-content::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+
+        .dark #main-content::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-color: #1f2937;
+        }
+
+        .dark #main-content::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        /* ===== CUSTOM SCROLLBAR UNTUK SIDEBAR NAVIGATION ===== */
+        aside nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        aside nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        aside nav::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+
+        aside nav::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        /* Dark mode - Sidebar */
+        .dark aside nav::-webkit-scrollbar-thumb {
+            background: #4b5563;
+        }
+
+        .dark aside nav::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        /* Firefox scrollbar support */
+        #main-content {
+            scrollbar-width: thin;
+            scrollbar-color: #d1d5db #f3f4f6;
+        }
+
+        .dark #main-content {
+            scrollbar-color: #4b5563 #1f2937;
+        }
+
+        aside nav {
+            scrollbar-width: thin;
+            scrollbar-color: #d1d5db transparent;
+        }
+
+        .dark aside nav {
+            scrollbar-color: #4b5563 transparent;
+        }
+
+        /* Smooth scrolling */
+        #main-content,
+        aside nav {
+            scroll-behavior: smooth;
+        }
+    </style>
+
     <script>
         function themeManager() {
             return {
                 isDark: false,
                 init() {
-                    this.isDark = localStorage.getItem('theme') === 'dark' || 
+                    this.isDark = localStorage.getItem('theme') === 'dark' ||
                         (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
                 },
                 toggleTheme() {
@@ -152,11 +243,11 @@
                         <x-theme-toggle />
 
                      <!-- User Profile Section -->
-                        <div class="flex-shrink-0 bg-gray-200 dark:bg-gray-700 rounded-xl">
+                        <div class="flex-shrink-0 bg-blue-100 dark:bg-gray-700 rounded-xl">
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button
-                                class="flex items-center gap-3 p-3 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                                class="flex items-center gap-3 p-3 py-2 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-600 transition text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                                 <div class="flex items-center space-x-3">
                                     @if(Auth::user()->avatar)
                                         <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" class="w-10 h-10 rounded-full object-cover flex-shrink-0">

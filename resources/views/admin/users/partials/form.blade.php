@@ -14,6 +14,7 @@
         <div>
             <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama</label>
             <input id="name" name="name" type="text" value="{{ old('name', $user?->name) }}" required autofocus
+                placeholder="Masukkan nama lengkap"
                 class="mt-1 block w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
@@ -21,6 +22,7 @@
         <div>
             <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
             <input id="email" name="email" type="email" value="{{ old('email', $user?->email) }}" required
+                placeholder="Masukkan alamat email"
                 class="mt-1 block w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
@@ -44,6 +46,7 @@
                 {{ $isEditing ? 'Password Baru' : 'Password' }}
             </label>
             <input id="password" name="password" type="password" autocomplete="new-password"
+                placeholder="Masukkan password"
                 @required(! $isEditing) @disabled($isEditing && ! $isChangingPassword)
                 class="mt-1 block w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
             @if ($isEditing)
@@ -55,6 +58,7 @@
         <div>
             <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Konfirmasi Password</label>
             <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password"
+                placeholder="Konfirmasi password"
                 @required(! $isEditing) @disabled($isEditing && ! $isChangingPassword)
                 class="mt-1 block w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
         </div>

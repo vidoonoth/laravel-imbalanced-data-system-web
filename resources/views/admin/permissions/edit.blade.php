@@ -29,15 +29,15 @@
     <!-- User Details Information (Read Only) -->
     <div class="bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-lg p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-            <p class="text-xs text-gray-400 dark:text-gray-500 font-semibold uppercase">Nama User</p>
+            <p class="text-xs text-gray-400 dark:text-gray-300 font-semibold uppercase">Nama User</p>
             <p class="text-sm font-semibold text-gray-800 dark:text-gray-100 mt-1">{{ $user->name }}</p>
         </div>
         <div>
-            <p class="text-xs text-gray-400 dark:text-gray-500 font-semibold uppercase">Email</p>
+            <p class="text-xs text-gray-400 dark:text-gray-300 font-semibold uppercase">Email</p>
             <p class="text-sm font-semibold text-gray-800 dark:text-gray-100 mt-1">{{ $user->email }}</p>
         </div>
         <div>
-            <p class="text-xs text-gray-400 font-semibold uppercase">Role</p>
+            <p class="text-xs text-gray-400 dark:text-gray-300 font-semibold uppercase">Role</p>
             <p class="mt-1">
                 <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $selectedRole === 'admin' ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">
                     {{ ucfirst($selectedRole) }}

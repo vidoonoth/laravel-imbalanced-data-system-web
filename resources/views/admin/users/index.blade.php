@@ -4,19 +4,19 @@
     </x-slot>
 
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <div class="p-4 border-b border-gray-200">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <form method="GET" action="{{ route('admin.users.index') }}" class="flex flex-col gap-3 sm:flex-row">
                     <input type="text" name="q" value="{{ $filters['q'] }}"
                         placeholder="Cari nama atau email"
-                        class="w-full sm:max-w-sm rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                        class="w-full sm:max-w-sm rounded-lg border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white dark:placeholder-white focus:border-blue-500 focus:ring-blue-500">
                     <button type="submit"
-                        class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition text-sm font-semibold">
+                        class="px-4 py-2 bg-gray-800 text-white dark:bg-gray-600 rounded-lg hover:bg-gray-900 hover:dark:bg-gray-700 transition text-sm font-semibold">
                         Cari
                     </button>
                     @if ($filters['q'] !== '')
                         <a href="{{ route('admin.users.index') }}"
-                            class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-semibold text-center">
+                            class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition text-sm font-semibold text-center">
                             Reset
                         </a>
                     @endif
@@ -30,7 +30,7 @@
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
-                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
                     <tr>
                         <th class="px-6 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">User</th>
                         <th class="px-6 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Role</th>
@@ -49,14 +49,14 @@
                             </td>
                             <td class="px-6 py-4">
                                 <span
-                                    class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold {{ $roleName === 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700' }}">
+                                    class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold {{ $roleName === 'admin' ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">
                                     {{ ucfirst($roleName) }}
                                 </span>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex justify-end gap-2">
                                     <a href="{{ route('admin.users.edit', $user) }}"
-                                        class="px-3 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-xs font-semibold">
+                                        class="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition text-xs font-semibold">
                                         Edit
                                     </a>
                                     @if(!$user->is(auth()->user()))
@@ -76,7 +76,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="px-6 py-10 text-center text-gray-500">
+                            <td colspan="3" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
                                 Tidak ada user ditemukan.
                             </td>
                         </tr>
@@ -85,7 +85,7 @@
             </table>
         </div>
 
-        <div class="p-4 border-t border-gray-200">
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700">
             {{ $users->links() }}
         </div>
     </div>
