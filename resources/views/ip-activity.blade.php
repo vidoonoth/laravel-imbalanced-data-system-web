@@ -20,31 +20,31 @@
     @endphp
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
-        <div class="bg-white rounded-lg border border-gray-200 p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
             <p class="text-sm text-gray-500">Jumlah Request</p>
-            <p class="text-2xl font-bold text-gray-800 mt-2">{{ number_format($summary['total_activities'], 0, ',', '.') }}</p>
-            <p class="text-xs text-gray-500 mt-1">record aktivitas source IP</p>
+            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-2">{{ number_format($summary['total_activities'], 0, ',', '.') }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">record aktivitas source IP</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
             <p class="text-sm text-gray-500">Alert Malware</p>
             <p class="text-2xl font-bold text-red-700 mt-2">{{ number_format($summary['total_alerts'], 0, ',', '.') }}</p>
-            <p class="text-xs text-gray-500 mt-1">record dengan prediksi malware</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">record dengan prediksi malware</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
             <p class="text-sm text-gray-500">Rata-rata Confidence Alert</p>
-            <p class="text-2xl font-bold text-gray-800 mt-2">{{ $avgAlertConfidence }}</p>
-            <p class="text-xs text-gray-500 mt-1">dihitung dari alert malware</p>
+            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-2">{{ $avgAlertConfidence }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">dihitung dari alert malware</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
             <p class="text-sm text-gray-500">Kemunculan IP</p>
             <p class="text-sm font-semibold text-gray-800 mt-2">{{ $firstSeen }}</p>
-            <p class="text-xs text-gray-500 mt-1">terakhir {{ $lastSeen }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">terakhir {{ $lastSeen }}</p>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 class="text-sm font-semibold text-gray-800 mb-4">Event Dominan</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-4">Event Dominan</h3>
             <div class="space-y-3">
                 @forelse ($topEvents as $item)
                     @php
@@ -65,8 +65,8 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 class="text-sm font-semibold text-gray-800 mb-4">{{ $statusTitle }}</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ $statusTitle }}</h3>
             <div class="space-y-3">
                 @forelse ($statusItems as $item)
                     @php
@@ -87,8 +87,8 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 class="text-sm font-semibold text-gray-800 mb-4">{{ $frequentAccessTitle }}</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ $frequentAccessTitle }}</h3>
             <div class="space-y-3">
                 @forelse ($frequentAccesses as $item)
                     @php
@@ -110,10 +110,10 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden mb-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
         <div class="p-5 border-b border-gray-200 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h3 class="text-lg font-semibold text-gray-800">Alert Terkait</h3>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Alert Terkait</h3>
                 <p class="text-sm text-gray-500">Record malware terbaru dengan confidence tertinggi untuk IP ini.</p>
             </div>
             <span class="text-sm text-gray-500">{{ number_format($alerts->count(), 0, ',', '.') }} alert ditampilkan</span>
@@ -121,7 +121,7 @@
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
-                <thead class="bg-gray-50 border-b border-gray-200">
+                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                     <tr>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700">Waktu</th>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700">Event</th>
@@ -131,7 +131,7 @@
                         <th class="px-5 py-3 text-left font-semibold text-gray-700">Confidence</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse ($alerts as $alert)
                         @php
                             $alertTime = $alert->update_time
@@ -140,12 +140,12 @@
                             $alertDestination = trim(($alert->destination_ip ?? '-') . ($alert->destination_port !== null ? ':' . $alert->destination_port : ''));
                         @endphp
                         <tr class="bg-red-50 hover:bg-red-100">
-                            <td class="px-5 py-4 text-gray-800 whitespace-nowrap">{{ $alertTime ?? '-' }}</td>
-                            <td class="px-5 py-4 text-gray-700">{{ $alert->event_name ?? '-' }}</td>
-                            <td class="px-5 py-4 text-gray-700">{{ $alert->disposition ?? '-' }}</td>
-                            <td class="px-5 py-4 text-gray-700">{{ $alertDestination !== '' ? $alertDestination : '-' }}</td>
-                            <td class="px-5 py-4 text-gray-700">{{ $alert->action ?? '-' }}</td>
-                            <td class="px-5 py-4 text-gray-700">
+                            <td class="px-5 py-4 text-gray-800 dark:text-gray-200 whitespace-nowrap">{{ $alertTime ?? '-' }}</td>
+                            <td class="px-5 py-4 text-gray-700 dark:text-gray-300">{{ $alert->event_name ?? '-' }}</td>
+                            <td class="px-5 py-4 text-gray-700 dark:text-gray-300">{{ $alert->disposition ?? '-' }}</td>
+                            <td class="px-5 py-4 text-gray-700 dark:text-gray-300">{{ $alertDestination !== '' ? $alertDestination : '-' }}</td>
+                            <td class="px-5 py-4 text-gray-700 dark:text-gray-300">{{ $alert->action ?? '-' }}</td>
+                            <td class="px-5 py-4 text-gray-700 dark:text-gray-300">
                                 {{ $alert->confidence !== null ? number_format(((float) $alert->confidence) * 100, 2, ',', '.') . '%' : '-' }}
                             </td>
                         </tr>
@@ -161,10 +161,10 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="p-5 border-b border-gray-200 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h3 class="text-lg font-semibold text-gray-800">Riwayat Aktivitas</h3>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Riwayat Aktivitas</h3>
                 <p class="text-sm text-gray-500">Semua record dari source IP {{ $ipAddress }}.</p>
             </div>
             <span class="text-sm text-gray-500">{{ number_format($activities->total(), 0, ',', '.') }} record</span>
@@ -172,7 +172,7 @@
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
-                <thead class="bg-gray-50 border-b border-gray-200">
+                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                     <tr>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700">Waktu</th>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700">Event</th>
@@ -185,7 +185,7 @@
                         <th class="px-5 py-3 text-left font-semibold text-gray-700">Prediksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse ($activities as $activity)
                         @php
                             $activityTime = $activity->update_time
@@ -194,14 +194,14 @@
                             $destination = trim(($activity->destination_ip ?? '-') . ($activity->destination_port !== null ? ':' . $activity->destination_port : ''));
                         @endphp
                         <tr class="hover:bg-gray-50 {{ (int) $activity->prediction === 1 ? 'bg-red-50' : '' }}">
-                            <td class="px-5 py-4 text-gray-800 whitespace-nowrap">{{ $activityTime ?? '-' }}</td>
-                            <td class="px-5 py-4 text-gray-700">{{ $activity->event_name ?? '-' }}</td>
-                            <td class="px-5 py-4 text-gray-700">{{ $activity->disposition ?? '-' }}</td>
-                            <td class="px-5 py-4 text-gray-700">{{ $activity->source_ip ?? '-' }}</td>
-                            <td class="px-5 py-4 text-gray-700">{{ $destination !== '' ? $destination : '-' }}</td>
-                            <td class="px-5 py-4 text-gray-700">{{ $activity->protocol ?? '-' }}</td>
-                            <td class="px-5 py-4 text-gray-700">{{ $activity->action ?? '-' }}</td>
-                            <td class="px-5 py-4 text-gray-700">
+                            <td class="px-5 py-4 text-gray-800 dark:text-gray-200 whitespace-nowrap">{{ $activityTime ?? '-' }}</td>
+                            <td class="px-5 py-4 text-gray-700 dark:text-gray-300">{{ $activity->event_name ?? '-' }}</td>
+                            <td class="px-5 py-4 text-gray-700 dark:text-gray-300">{{ $activity->disposition ?? '-' }}</td>
+                            <td class="px-5 py-4 text-gray-700 dark:text-gray-300">{{ $activity->source_ip ?? '-' }}</td>
+                            <td class="px-5 py-4 text-gray-700 dark:text-gray-300">{{ $destination !== '' ? $destination : '-' }}</td>
+                            <td class="px-5 py-4 text-gray-700 dark:text-gray-300">{{ $activity->protocol ?? '-' }}</td>
+                            <td class="px-5 py-4 text-gray-700 dark:text-gray-300">{{ $activity->action ?? '-' }}</td>
+                            <td class="px-5 py-4 text-gray-700 dark:text-gray-300">
                                 {{ $activity->confidence !== null ? number_format(((float) $activity->confidence) * 100, 2, ',', '.') . '%' : '-' }}
                             </td>
                             <td class="px-5 py-4">

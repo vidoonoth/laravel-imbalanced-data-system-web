@@ -12,14 +12,14 @@
             </div>
         @endif
         {{-- Change Password Form --}}
-        <div class="bg-white rounded-lg border border-gray-200 p-6 sm:p-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
             <div class="max-w-xl">
                 @include('profile.partials.update-password-form')
             </div>
         </div>
 
         {{-- Delete Account --}}
-        <div class="bg-white rounded-lg border border-gray-200 p-6 sm:p-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
             <div class="max-w-xl">
                 @include('profile.partials.delete-user-form')
             </div>

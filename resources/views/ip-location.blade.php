@@ -38,29 +38,29 @@
     @endphp
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-lg border border-gray-200 p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
             <p class="text-sm text-gray-500">Source IP</p>
-            <p class="text-2xl font-bold text-gray-800 mt-2 truncate" title="{{ $ipAddress }}">{{ $ipAddress }}</p>
-            <p class="text-xs text-gray-500 mt-1">source IP dari hasil deteksi</p>
+            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-2 truncate" title="{{ $ipAddress }}">{{ $ipAddress }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">source IP dari hasil deteksi</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
             <p class="text-sm text-gray-500">Lokasi</p>
             <p class="text-lg font-bold text-gray-800 mt-2 truncate" title="{{ $ipLocationLabel }}">{{ $ipLocationLabel }}</p>
-            <p class="text-xs text-gray-500 mt-1">Koordinat {{ $mapCoordinateLabel }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Koordinat {{ $mapCoordinateLabel }}</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
             <p class="text-sm text-gray-500">Alert Malware</p>
             <p class="text-2xl font-bold text-red-700 mt-2">{{ number_format($summary['total_alerts'], 0, ',', '.') }}</p>
-            <p class="text-xs text-gray-500 mt-1">{{ number_format($summary['total_activities'], 0, ',', '.') }} total record IP</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ number_format($summary['total_activities'], 0, ',', '.') }} total record IP</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
             <p class="text-sm text-gray-500">Alert Tertinggi</p>
             <p class="text-sm font-semibold text-gray-800 mt-2 truncate" title="{{ $latestAlertName }}">{{ $latestAlertName }}</p>
-            <p class="text-xs text-gray-500 mt-1">confidence {{ $latestAlertConfidence }} | terakhir {{ $latestSeen }} WIB</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">confidence {{ $latestAlertConfidence }} | terakhir {{ $latestSeen }} WIB</p>
         </div>
     </div>
 
-    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden mb-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
         <div class="p-5 border-b border-gray-200 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="min-w-0">
                 <p class="text-sm text-gray-500">Lokasi Asal IP</p>

@@ -1,6 +1,6 @@
 <x-app-with-sidebar-layout>
     <x-slot name="breadcrumbs">
-        <span class="text-gray-900 hover:text-gray-900 text-[23px] font-semibold">Dashboard Deteksi</span>
+        <span class="text-gray-900 dark:text-gray-100 hover:text-gray-900 text-[23px] font-semibold">Dashboard Deteksi</span>
     </x-slot>
 
     @php
@@ -15,84 +15,84 @@
         <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-5">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <p class="font-semibold text-blue-900">Belum ada data deteksi </p>                   
-                </div>                
+                    <p class="font-semibold text-blue-900">Belum ada data deteksi </p>
+                </div>
             </div>
         </div>
     @endif
 
     <div class="grid gap-4 mb-6" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));">
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between mb-2">
-                <p class="text-gray-600 text-sm font-medium">Total Data Traffic</p>
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <p class="text-gray-600 dark:text-gray-100 text-sm font-medium">Total Data Traffic</p>
+                <svg class="w-5 h-5 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
                     </path>
                 </svg>
             </div>
-            <p class="text-2xl font-bold text-gray-800">{{ number_format($totalTraffic, 0, ',', '.') }}</p>
-            <p class="text-xs text-gray-500 mt-1">data terdeteksi</p>
+            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ number_format($totalTraffic, 0, ',', '.') }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">data terdeteksi</p>
         </div>
 
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between mb-2">
-                <p class="text-gray-600 text-sm font-medium">Normal</p>
+                <p class="text-gray-600 dark:text-gray-100 text-sm font-medium">Normal</p>
                 <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                 </svg>
             </div>
-            <p class="text-2xl font-bold text-gray-800">{{ number_format($normalTotal, 0, ',', '.') }}</p>
-            <p class="text-xs text-gray-500 mt-1">{{ number_format($normalPercentage, 2, ',', '.') }}%</p>
+            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ number_format($normalTotal, 0, ',', '.') }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ number_format($normalPercentage, 2, ',', '.') }}%</p>
         </div>
 
         @if ($canViewDashboardDetectionCard)
-            <div class="bg-white rounded-lg border border-gray-200 p-6" data-dashboard-card="detection">
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-dashboard-card="detection">
                 <div class="flex items-center justify-between mb-2">
-                    <p class="text-gray-600 text-sm font-medium">Malware</p>
+                    <p class="text-gray-600 dark:text-gray-100 text-sm font-medium">Malware</p>
                     <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <p class="text-2xl font-bold text-gray-800">{{ number_format($malwareTotal, 0, ',', '.') }}</p>
-                <p class="text-xs text-gray-500 mt-1">{{ number_format($malwarePercentage, 2, ',', '.') }}%</p>
+                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ number_format($malwareTotal, 0, ',', '.') }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ number_format($malwarePercentage, 2, ',', '.') }}%</p>
             </div>
         @endif
 
         @if ($canViewDashboardSuspiciousIpCard)
-            <div class="bg-white rounded-lg border border-gray-200 p-6" data-dashboard-card="suspicious-ip">
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-dashboard-card="suspicious-ip">
                 <div class="flex items-center justify-between mb-2">
-                    <p class="text-gray-600 text-sm font-medium">IP Mencurigakan</p>
+                    <p class="text-gray-600 dark:text-gray-100 text-sm font-medium">IP Mencurigakan</p>
                     <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
                 </div>
-                <p class="text-2xl font-bold text-gray-800">{{ number_format($suspiciousIpCount, 0, ',', '.') }}</p>
-                <p class="text-xs text-gray-500 mt-1">source IP malware</p>
+                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ number_format($suspiciousIpCount, 0, ',', '.') }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">source IP malware</p>
             </div>
         @endif
 
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between mb-2">
-                <p class="text-gray-600 text-sm font-medium">Deteksi Terakhir</p>
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <p class="text-gray-600 dark:text-gray-100 text-sm font-medium">Deteksi Terakhir</p>
+                <svg class="w-5 h-5 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
             </div>
-            <p class="text-2xl font-bold text-gray-800">{{ $lastScanTime }}</p>
-            <p class="text-xs text-gray-500 mt-1">{{ $lastScanDate }} WIB</p>
+            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $lastScanTime }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $lastScanDate }} WIB</p>
         </div>
     </div>
 
     <div class="grid gap-6 mb-6 items-start" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));">
 
         @if ($canViewDashboardDetectionCard)
-            <div class="bg-white rounded-lg border border-gray-200 p-6" data-dashboard-card="detection-summary">
-                <h3 class="text-sm font-semibold text-gray-800 mb-4">Akumulasi Deteksi</h3>
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-dashboard-card="detection-summary">
+                <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-4">Akumulasi Deteksi</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="flex items-center justify-center">
                         <div class="relative w-44 h-44">
@@ -107,8 +107,8 @@
                             </svg>
                             <div class="absolute inset-0 flex items-center justify-center">
                                 <div class="text-center">
-                                    <p class="text-2xl font-bold text-gray-800">{{ number_format($totalTraffic, 0, ',', '.') }}</p>
-                                    <p class="text-xs text-gray-500">total data</p>
+                                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ number_format($totalTraffic, 0, ',', '.') }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">total data</p>
                                 </div>
                             </div>
                         </div>
@@ -116,19 +116,19 @@
                     <div class="space-y-3 flex flex-col justify-center">
                         <div>
                             <div class="flex justify-between text-sm mb-1">
-                                <span class="text-gray-600">Normal</span>
+                                <span class="text-gray-600 dark:text-gray-400">Normal</span>
                                 <span class="font-semibold text-green-700">{{ number_format($normalPercentage, 2, ',', '.') }}%</span>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                                 <div class="bg-green-500 h-2 rounded-full" style="width: {{ min($normalPercentage, 100) }}%;"></div>
                             </div>
                         </div>
                         <div>
                             <div class="flex justify-between text-sm mb-1">
-                                <span class="text-gray-600">Malware</span>
+                                <span class="text-gray-600 dark:text-gray-400">Malware</span>
                                 <span class="font-semibold text-red-700">{{ number_format($malwarePercentage, 2, ',', '.') }}%</span>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                                 <div class="bg-red-500 h-2 rounded-full" style="width: {{ min($malwarePercentage, 100) }}%;"></div>
                             </div>
                         </div>
@@ -158,8 +158,8 @@
                 $normalBarHeight = $barChartCeil > 0 ? ($normalTotal / $barChartCeil) * 100 : 0;
                 $malwareBarHeight = $barChartCeil > 0 ? ($malwareTotal / $barChartCeil) * 100 : 0;
             @endphp
-            <div class="bg-white rounded-lg border border-gray-200 p-6" data-dashboard-card="detection-chart">
-                <h3 class="text-sm font-semibold text-gray-800 mb-4">Deteksi Malware</h3>
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-dashboard-card="detection-chart">
+                <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-4">Deteksi Malware</h3>
                 @if ($totalTraffic > 0)
                     <div class="flex h-56">
                         {{-- Y-Axis Labels --}}
@@ -237,8 +237,8 @@
         @endif
 
         @if ($canViewDashboardSuspiciousIpCard)
-        <div class="bg-white rounded-lg border border-gray-200 p-6" data-dashboard-card="suspicious-ip-list">
-            <h3 class="text-sm font-semibold text-gray-800 mb-4">Top IP Mencurigakan</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-dashboard-card="suspicious-ip-list">
+            <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-4">Top IP Mencurigakan</h3>
             <div class="space-y-3">
                 @forelse ($topSuspiciousIps as $ip)
                     @php
@@ -246,16 +246,16 @@
                         $locationSource = $location['source'] ?? 'unavailable';
                         $canViewIpActivity = $canViewDashboardDetection;
                     @endphp
-                    <div class="border border-gray-200 rounded-lg p-3">
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
                         <div class="flex items-center justify-between gap-3">
-                            <p class="font-semibold text-gray-800 truncate">{{ $ip->source_ip }}</p>
+                            <p class="font-semibold text-gray-800 dark:text-gray-100 truncate">{{ $ip->source_ip }}</p>
                             <div class="flex items-center gap-2 shrink-0">
                                 <span class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded font-semibold">
                                     {{ number_format($ip->total, 0, ',', '.') }}
                                 </span>
                             </div>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                             Rata-rata confidence {{ number_format(((float) $ip->avg_confidence) * 100, 2, ',', '.') }}%
                         </p>
                         <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
@@ -269,7 +269,7 @@
                         @if ($canViewIpActivity)
                             <div class="mt-3 flex flex-wrap gap-2">
                                 <a href="{{ route('dashboard.ip-activity', ['ip' => $ip->source_ip]) }}"
-                                    class="inline-flex justify-center px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-xs font-semibold"
+                                    class="inline-flex justify-center px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition text-xs font-semibold"
                                     aria-label="Lihat detail aktivitas IP {{ $ip->source_ip }}">
                                     Detail
                                 </a>
@@ -282,7 +282,7 @@
                         @endif
                         </div>
                 @empty
-                    <div class="p-8 bg-gray-50 rounded-lg text-center text-sm text-gray-500">
+                    <div class="p-8 bg-gray-50 dark:bg-gray-700 rounded-lg text-center text-sm text-gray-500 dark:text-gray-400">
                         Belum ada IP dengan prediksi malware.
                     </div>
                 @endforelse
@@ -293,5 +293,5 @@
 
     </div>
 
-    
+
 </x-app-with-sidebar-layout>

@@ -10,7 +10,7 @@
             </div>
         @endif
         {{-- Profile Card --}}
-        <div class="bg-white rounded-lg border border-gray-200 p-6 sm:p-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
             <div class="flex items-center gap-5 mb-8">
                 @if($user->avatar)
                     <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar" class="w-20 h-20 rounded-full object-cover flex-shrink-0 shadow-md">

@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="max-w-3xl">
-        <div class="bg-white rounded-lg border border-gray-200 p-6 sm:p-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
             <div class="max-w-xl">
                 @include('profile.partials.update-profile-information-form')
             </div>

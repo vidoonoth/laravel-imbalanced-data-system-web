@@ -1,6 +1,6 @@
 <x-app-with-sidebar-layout>
     <x-slot name="breadcrumbs">
-        <span class="text-gray-900 hover:text-gray-900 text-[23px] font-semibold">Kelola Data User</span>
+        <span class="text-gray-900 dark:text-gray-100 hover:text-gray-900 text-[23px] font-semibold">Kelola Data User</span>
     </x-slot>
 
     @if (session('status'))
@@ -15,7 +15,7 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-lg border border-gray-200">
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
         <div class="p-4 border-b border-gray-200">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <form method="GET" action="{{ route('admin.users.index') }}" class="flex flex-col gap-3 sm:flex-row">
@@ -42,22 +42,22 @@
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
-                <thead class="bg-gray-50 border-b border-gray-200">
+                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                     <tr>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-700">User</th>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-700">Role</th>
-                        <th class="px-6 py-3 text-right font-semibold text-gray-700">Aksi</th>
+                        <th class="px-6 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">User</th>
+                        <th class="px-6 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Role</th>
+                        <th class="px-6 py-3 text-right font-semibold text-gray-700 dark:text-gray-300">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse ($users as $user)
                         @php
                             $roleName = $user->roles->pluck('name')->first() ?? 'user';
                         @endphp
-                        <tr class="hover:bg-gray-50">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td class="px-6 py-4">
-                                <p class="font-semibold text-gray-900">{{ $user->name }}</p>
-                                <p class="text-gray-500">{{ $user->email }}</p>
+                                <p class="font-semibold text-gray-900 dark:text-gray-100">{{ $user->name }}</p>
+                                <p class="text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
                             </td>
                             <td class="px-6 py-4">
                                 <span
