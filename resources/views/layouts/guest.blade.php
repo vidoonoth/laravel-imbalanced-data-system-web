@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="themeManager()" x-init="init()" :class="{ 'dark': isDark }">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,6 +13,22 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        <script>
+            function themeManager() {
+                return {
+                    isDark: false,
+                    init() {
+                        this.isDark = localStorage.getItem('theme') === 'dark' ||
+                            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                    },
+                    toggleTheme() {
+                        this.isDark = !this.isDark;
+                        localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
+                    }
+                }
+            }
+        </script>
     </head>
     <body class="font-sans text-gray-900 antialiased">
         @if (request()->routeIs('login', 'password.request', 'password.reset'))
