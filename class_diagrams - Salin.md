@@ -198,43 +198,7 @@ classDiagram
 
 ---
 
-## 7. Halaman Register
-
-Halaman pendaftaran bagi pengguna baru untuk membuat akun di dalam sistem.
-
-```mermaid
-classDiagram
-    class Route_Register {
-        <<Route>>
-        +GET /register [name: register]
-        +POST /register
-    }
-
-    class View_Register {
-        <<View>>
-        +auth/register.blade.php
-    }
-
-    class RegisteredUserController {
-        +create() View
-        +store(Request request) RedirectResponse
-    }
-
-    class User {
-        +int id
-        +string name
-        +string email
-        +string password
-    }
-
-    Route_Register --> RegisteredUserController : memicu method
-    RegisteredUserController --> View_Register : merender form pendaftaran
-    RegisteredUserController --> User : membuat user baru di database
-```
-
----
-
-## 8. Halaman Forgot Password
+## 7. Halaman Forgot Password
 
 Halaman untuk meminta link reset password melalui email ketika pengguna lupa kata sandi mereka.
 

@@ -76,14 +76,6 @@
                             Masuk ke Sistem
                         </button>
                     </form>
-
-                    <div class="mt-6 border-t border-white/70 pt-5 text-center text-sm text-slate-600">
-                        Belum punya akun?
-                        <a href="{{ route('register') }}"
-                            class="font-semibold text-cyan-700 transition hover:text-cyan-900 focus:outline-none focus:ring-4 focus:ring-cyan-100">
-                            Daftar sekarang
-                        </a>
-                    </div>
                 </div>
             </section>
         </div>
