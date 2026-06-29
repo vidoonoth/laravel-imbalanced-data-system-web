@@ -195,33 +195,6 @@ test('dashboard raw access is exclusive from detection dashboard access', functi
         ->assertForbidden();
 });
 
-test('admin can update feature access without changing password', function () {
-    $admin = adminAccount();
-    $user = User::factory()->create([
-        'name' => 'Operator Hak Akses',
-        'email' => 'akses@example.com',
-        'password' => Hash::make('old-password'),
-    ]);
-
-    AccessControl::assignDefaultUserAccess($user);
-
-    $this
-        ->actingAs($admin)
-        ->put(route('admin.users.update', $user), [
-            'name' => 'Operator Hak Akses',
-            'email' => 'akses@example.com',
-            'role' => AccessControl::ROLE_USER,
-            'password' => 'browser-autofill-value',
-        ])
-        ->assertRedirect(route('admin.users.index'));
-
-    $user->refresh();
-
-    expect($user->can('dashboard.view'))->toBeTrue()
-        ->and(Hash::check('old-password', $user->password))->toBeTrue()
-        ->and(Hash::check('browser-autofill-value', $user->password))->toBeFalse();
-});
-
 test('admin role feature access can be customized', function () {
     $admin = adminAccount();
     $targetAdmin = adminAccount([
@@ -246,33 +219,4 @@ test('admin role feature access can be customized', function () {
         ->and($targetAdmin->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD))->toBeFalse()
         ->and($targetAdmin->can(AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD))->toBeFalse()
         ->and($targetAdmin->can('report.view'))->toBeFalse();
-});
-
-test('admin cannot demote the active account', function () {
-    $admin = adminAccount([
-        'name' => 'Root Admin',
-        'email' => 'root@example.com',
-    ]);
-
-    $this
-        ->actingAs($admin)
-        ->get(route('admin.users.edit', $admin))
-        ->assertOk()
-        ->assertSee('Dashboard')
-        ->assertSee('Laporan')
-        ->assertSee('User')
-        ->assertSee('Hak Akses Menu');
-
-    $this
-        ->actingAs($admin)
-        ->put(route('admin.users.update', $admin), [
-            'name' => 'Root Admin',
-            'email' => 'root@example.com',
-            'password' => null,
-            'password_confirmation' => null,
-            'role' => AccessControl::ROLE_USER,
-        ])
-        ->assertSessionHasErrors('role');
-
-    expect($admin->fresh()->hasRole(AccessControl::ROLE_ADMIN))->toBeTrue();
 });

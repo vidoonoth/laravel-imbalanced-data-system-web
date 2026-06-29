@@ -7,8 +7,6 @@
 
     @include('admin.users.partials.form', [
         'action' => route('admin.users.store'),
-        'method' => 'POST',
-        'user' => null,
         'submitLabel' => 'Simpan User',
     ])
 </x-app-with-sidebar-layout>

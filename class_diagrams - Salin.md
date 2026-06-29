@@ -80,8 +80,6 @@ classDiagram
         +GET /admin/users [name: admin.users.index]
         +GET /admin/users/create [name: admin.users.create]
         +POST /admin/users [name: admin.users.store]
-        +GET /admin/users/{user}/edit [name: admin.users.edit]
-        +PUT /admin/users/{user} [name: admin.users.update]
         +DELETE /admin/users/{user} [name: admin.users.destroy]
     }
 
@@ -89,17 +87,14 @@ classDiagram
         <<View>>
         +admin/users/index.blade.php
         +admin/users/create.blade.php
-        +admin/users/edit.blade.php
     }
 
     class AdminUserController {
         +index(Request request) View
         +create() View
         +store(Request request) RedirectResponse
-        +edit(User user) View
-        +update(Request request, User user) RedirectResponse
         +destroy(Request request, User user) RedirectResponse
-        -validatedUserData(Request request, User user) array
+        -validatedUserData(Request request) array
         -syncUserAccess(User user, string role, array permissions) void
     }
 

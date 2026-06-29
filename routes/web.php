@@ -45,7 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('admin.')
         ->group(function () {
             Route::middleware('permission:users.manage')->group(function () {
-                Route::resource('users', AdminUserController::class)->except('show');
+                Route::resource('users', AdminUserController::class)->except(['show', 'edit', 'update']);
             });
 
             Route::middleware('permission:permissions.manage')->group(function () {

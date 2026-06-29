@@ -79,54 +79,6 @@ class UserController extends Controller
         }
     }
 
-    public function edit(User $user): View
-    {
-        AccessControl::ensureRolesAndPermissions();
-
-        return view('admin.users.edit', [
-            'user' => $user->load(['roles']),
-            'roles' => AccessControl::roles(),
-            'selectedRole' => $user->roles->pluck('name')->first() ?: AccessControl::ROLE_USER,
-        ]);
-    }
-
-    public function update(Request $request, User $user): RedirectResponse
-    {
-        AccessControl::ensureRolesAndPermissions();
-
-        try {
-            $validated = $this->validatedUserData($request, $user);
-
-            if ($user->is($request->user()) && $validated['role'] !== AccessControl::ROLE_ADMIN) {
-                return back()
-                    ->withInput()
-                    ->with('error', 'Role admin pada akun yang sedang digunakan tidak dapat dilepas.');
-            }
-
-            $user->fill([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-            ]);
-
-            if (! empty($validated['password'])) {
-                $user->password = Hash::make($validated['password']);
-            }
-
-            $user->save();
-
-            $currentPermissions = $user->permissions->pluck('name')->all();
-            $this->syncUserAccess($user, $validated['role'], $currentPermissions);
-
-            return redirect()
-                ->route('admin.users.index')
-                ->with('success', 'User berhasil diperbarui.');
-        } catch (\Exception $e) {
-            return back()
-                ->withInput()
-                ->with('error', 'Gagal memperbarui user. Silakan coba lagi.');
-        }
-    }
-
     public function destroy(Request $request, User $user): RedirectResponse
     {
         if ($user->is($request->user())) {
@@ -145,25 +97,10 @@ class UserController extends Controller
     }
 
     /**
-     * @return array{name: string, email: string, password?: string|null, role: string}
+     * @return array{name: string, email: string, password: string, role: string}
      */
-    private function validatedUserData(Request $request, ?User $user = null): array
+    private function validatedUserData(Request $request): array
     {
-        $passwordRules = ['required', 'confirmed', Rules\Password::defaults()];
-
-        if ($user) {
-            if (! $request->boolean('change_password')) {
-                $request->merge([
-                    'password' => null,
-                    'password_confirmation' => null,
-                ]);
-            }
-
-            $passwordRules = $request->boolean('change_password')
-                ? ['required', 'confirmed', Rules\Password::defaults()]
-                : ['nullable'];
-        }
-
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -172,9 +109,9 @@ class UserController extends Controller
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($user),
+                Rule::unique(User::class),
             ],
-            'password' => $passwordRules,
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => ['required', Rule::in(AccessControl::roles())],
         ]);
     }
@@ -200,15 +137,5 @@ class UserController extends Controller
         $user->syncPermissions($allowedPermissions);
     }
 
-    /**
-     * @return list<string>
-     */
-    private function effectivePermissionNames(User $user): array
-    {
-        return $user->getAllPermissions()
-            ->pluck('name')
-            ->unique()
-            ->values()
-            ->all();
-    }
+
 }

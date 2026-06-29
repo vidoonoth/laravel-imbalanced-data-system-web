@@ -55,10 +55,6 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex justify-end gap-2">
-                                    <a href="{{ route('admin.users.edit', $user) }}"
-                                        class="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition text-xs font-semibold">
-                                        Edit
-                                    </a>
                                     @if(!$user->is(auth()->user()))
                                         <x-delete-modal :action="route('admin.users.destroy', $user)" title="Hapus User" message="Apakah Anda yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.">
                                             <x-slot name="trigger">

@@ -49,7 +49,17 @@
     <form method="POST" action="{{ route('admin.permissions.update', $user) }}" class="space-y-6"
         x-data="{
             dashboardDetection: {{ in_array($dashboardDetectionPermission, $selectedPermissions, true) ? 'true' : 'false' }},
-            dashboardRaw: {{ in_array($dashboardRawPermission, $selectedPermissions, true) ? 'true' : 'false' }}
+            dashboardRaw: {{ in_array($dashboardRawPermission, $selectedPermissions, true) ? 'true' : 'false' }},
+            updateDashboardSelection(type) {
+                if (type === 'detection' && this.dashboardDetection) {
+                    this.dashboardRaw = false;
+                } else if (type === 'raw' && this.dashboardRaw) {
+                    this.dashboardDetection = false;
+                    this.$root.querySelectorAll('[data-dashboard-detection-child]').forEach((input) => {
+                        input.checked = false;
+                    });
+                }
+            }
         }">
         @csrf
         @method('PUT')
@@ -98,42 +108,81 @@
                                     </label>
 
                                     @if ($hasChildren)
-                                        <div class="ml-7 mt-3 space-y-3 border-l border-gray-200 dark:border-gray-600 pl-4" x-show="enabled" x-cloak>
+                                        <div class="ml-7 mt-3 space-y-3 border-l-2 border-gray-200 dark:border-gray-600 pl-4" x-show="enabled" x-cloak>
                                             @foreach ($children as $childPermission => $childMeta)
-                                                <label class="flex items-start gap-3">
-                                                    <input
-                                                        type="checkbox"
-                                                        name="permissions[]"
-                                                        value="{{ $childPermission }}"
-                                                        @checked(in_array($childPermission, $selectedPermissions, true))
+                                                @continue(in_array($childPermission, $dashboardDetectionDetailPermissions, true))
+                                                
+                                                <div>
+                                                    <label class="flex items-start gap-3"
                                                         @if ($childPermission === $dashboardDetectionPermission)
-                                                            x-model="dashboardDetection"
-                                                            @change="if (dashboardDetection) dashboardRaw = false"
-                                                            :disabled="!enabled || dashboardRaw"
+                                                            :class="{ 'opacity-40 cursor-not-allowed': dashboardRaw }"
                                                         @elseif ($childPermission === $dashboardRawPermission)
-                                                            x-model="dashboardRaw"
-                                                            @change="if (dashboardRaw) {
-                                                                dashboardDetection = false;
-                                                                $root.querySelectorAll('[data-dashboard-detection-child]').forEach((input) => input.checked = false);
-                                                            }"
-                                                            :disabled="!enabled || dashboardDetection"
-                                                        @elseif (in_array($childPermission, $dashboardDetectionDetailPermissions, true))
-                                                            data-dashboard-detection-child
-                                                            :disabled="!enabled || !dashboardDetection || dashboardRaw"
-                                                        @else
-                                                            :disabled="!enabled"
+                                                            :class="{ 'opacity-40 cursor-not-allowed': dashboardDetection }"
                                                         @endif
-                                                        class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                                     >
-                                                    <span class="min-w-0">
-                                                    <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                        {{ $childMeta['label'] }}
-                                                    </span>
-                                                    <span class="block text-xs text-gray-500 dark:text-gray-400">
-                                                            {{ $childMeta['description'] }}
+                                                        <input
+                                                            type="checkbox"
+                                                            name="permissions[]"
+                                                            value="{{ $childPermission }}"
+                                                            @checked(in_array($childPermission, $selectedPermissions, true))
+                                                            @if ($childPermission === $dashboardDetectionPermission)
+                                                                x-model="dashboardDetection"
+                                                                @change="updateDashboardSelection('detection')"
+                                                                :disabled="!enabled || dashboardRaw"
+                                                            @elseif ($childPermission === $dashboardRawPermission)
+                                                                x-model="dashboardRaw"
+                                                                @change="updateDashboardSelection('raw')"
+                                                                :disabled="!enabled || dashboardDetection"
+                                                            @else
+                                                                :disabled="!enabled"
+                                                            @endif
+                                                            class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        >
+                                                        <span class="min-w-0">
+                                                            <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">
+                                                                {{ $childMeta['label'] }}
+                                                            </span>
+                                                            <span class="block text-xs text-gray-500 dark:text-gray-400">
+                                                                {{ $childMeta['description'] }}
+                                                            </span>
                                                         </span>
-                                                    </span>
-                                                </label>
+                                                    </label>
+
+                                                    @if ($childPermission === $dashboardDetectionPermission)
+                                                        <div class="ml-7 mt-3 space-y-2 border-l-2 border-blue-200 dark:border-blue-800 pl-4" 
+                                                            x-show="dashboardDetection && !dashboardRaw" 
+                                                            x-cloak
+                                                            x-transition>
+                                                            @foreach ($dashboardDetectionDetailPermissions as $detailPermission)
+                                                                @php
+                                                                    $detailMeta = $permissions[$detailPermission] ?? null;
+                                                                @endphp
+                                                                @if ($detailMeta)
+                                                                    <label class="flex items-start gap-3"
+                                                                        :class="{ 'opacity-40 cursor-not-allowed': !dashboardDetection || dashboardRaw }">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            name="permissions[]"
+                                                                            value="{{ $detailPermission }}"
+                                                                            @checked(in_array($detailPermission, $selectedPermissions, true))
+                                                                            data-dashboard-detection-child
+                                                                            :disabled="!enabled || !dashboardDetection || dashboardRaw"
+                                                                            class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                        >
+                                                                        <span class="min-w-0">
+                                                                            <span class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                                                {{ $detailMeta['label'] }}
+                                                                            </span>
+                                                                            <span class="block text-xs text-gray-500 dark:text-gray-400">
+                                                                                {{ $detailMeta['description'] }}
+                                                                            </span>
+                                                                        </span>
+                                                                    </label>
+                                                                @endif
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
+                                                </div>
                                             @endforeach
                                         </div>
                                     @endif

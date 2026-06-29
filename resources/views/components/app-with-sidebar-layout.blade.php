@@ -138,7 +138,7 @@
             :class="{ 'hidden': !sidebarOpen }">
             <div class="flex flex-col h-full">
                 <!-- Logo Section -->
-                <div class="p-[22px] border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
+                <div class="p-[24px] border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
                     <a href="{{ $homeUrl }}" class="flex items-center space-x-3">
                         <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0">
                             <img src="{{ asset('images/logo-polindra.png') }}" alt="Logo" class="w-full h-full object-contain">
