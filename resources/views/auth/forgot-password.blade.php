@@ -7,6 +7,11 @@
         <div aria-hidden="true"
             class="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white/80 dark:from-slate-900/80 to-transparent"></div>
 
+        <!-- Theme Toggle Button -->
+        <div class="absolute top-4 right-4 z-50">
+            <x-theme-toggle />
+        </div>
+
         <div class="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md items-center justify-center">
             <section class="w-full">
                 <div
@@ -48,7 +53,7 @@
                         </div>
 
                         <button type="submit"
-                            class="inline-flex w-full items-center justify-center rounded-lg bg-slate-950 dark:bg-slate-700 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-300/80 dark:shadow-slate-900/80 transition hover:bg-slate-800 dark:hover:bg-slate-600 focus:outline-none focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700">
+                            class="inline-flex w-full items-center justify-center rounded-lg bg-slate-950 dark:bg-slate-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:hover:bg-slate-600 focus:outline-none focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700">
                             Kirim Tautan Reset
                         </button>
                     </form>
