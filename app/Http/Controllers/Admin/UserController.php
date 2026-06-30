@@ -28,6 +28,13 @@ class UserController extends Controller
                         ->orWhere('email', 'like', "%{$keyword}%");
                 });
             })
+            ->when($request->filled('role'), function ($query) use ($request) {
+                $role = $request->string('role')->toString();
+
+                $query->whereHas('roles', function ($query) use ($role) {
+                    $query->where('name', $role);
+                });
+            })
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -36,6 +43,7 @@ class UserController extends Controller
             'users' => $users,
             'filters' => [
                 'q' => $request->string('q')->toString(),
+                'role' => $request->string('role')->toString(),
             ],
         ]);
     }
