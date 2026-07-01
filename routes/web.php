@@ -8,6 +8,7 @@ use App\Http\Controllers\RawDatasetController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Support\AccessControl;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -15,7 +16,12 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    if (!Auth::check()) {
+        return redirect()->route('login');
+    }
+    
+    $routeName = AccessControl::homeRouteNameFor(Auth::user());
+    return redirect()->route($routeName);
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
