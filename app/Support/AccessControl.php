@@ -224,6 +224,8 @@ class AccessControl
             Permission::findOrCreate($permission, 'web');
         }
 
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
         $newDashboardDetectionPermissions = array_values(array_intersect($newPermissions, [
             self::PERMISSION_VIEW_DASHBOARD_DETECTION,
             ...self::dashboardDetectionDetailPermissions(),

@@ -17,6 +17,10 @@ return new class extends Migration
 
         Schema::create('detection_results', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('dataset_id')
+                ->nullable()
+                ->constrained('datasets')
+                ->nullOnDelete();
             $table->dateTime('detected_at')->nullable()->index();
             $table->unsignedInteger('row_index')->default(0);
 
@@ -51,6 +55,7 @@ return new class extends Migration
             $table->json('raw_record')->nullable();
             $table->timestamps();
 
+            $table->unique('dataset_id');
             $table->index(['prediction', 'source_ip']);
             $table->index(['source_ip', 'destination_ip']);
             $table->index(['disposition', 'priority']);

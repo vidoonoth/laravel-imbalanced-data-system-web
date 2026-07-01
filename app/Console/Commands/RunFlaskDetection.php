@@ -40,11 +40,13 @@ class RunFlaskDetection extends Command
             ->whereDoesntHave('detectionResult')
             ->orderBy('id');
 
+        $totalAvailable = (clone $query)->count();
+
         if ($limit) {
             $query->limit($limit);
         }
 
-        $total = $query->count();
+        $total = $limit ? min($totalAvailable, $limit) : $totalAvailable;
 
         if ($total === 0) {
             $this->info('Tidak ada dataset baru untuk dideteksi.');
@@ -61,21 +63,26 @@ class RunFlaskDetection extends Command
             $query->chunk($batchSize, function ($datasets) use ($flaskService, &$processed, &$malware, &$normal, $bar, $dryRun) {
                 $records = $datasets->map(fn ($dataset) => array_merge(
                     $dataset->payload,
-                    ['_dataset_id' => $dataset->id]
+                    [
+                        '_dataset_id' => $dataset->id,
+                        '_row_number' => $dataset->row_number,
+                    ]
                 ))->toArray();
 
                 try {
                     $results = $flaskService->detectBatch($records);
+                    $datasetIds = $datasets->pluck('id')->values();
 
-                    foreach ($results as $result) {
-                        $datasetId = $result['_dataset_id'] ?? null;
+                    foreach ($results as $index => $result) {
+                        $datasetId = $result['_dataset_id'] ?? $datasetIds->get($index);
                         
                         if (!$datasetId || $dryRun) {
                             continue;
                         }
 
-                        DB::table('detection_results')->insert([
+                        $insertData = [
                             'dataset_id' => $datasetId,
+                            'row_index' => $result['_row_number'] ?? 0,
                             'prediction' => $result['prediction'],
                             'prediction_label' => $result['prediction_label'],
                             'confidence' => $result['confidence'],
@@ -86,10 +93,31 @@ class RunFlaskDetection extends Command
                             'source_port' => $result['source_port'] ?? null,
                             'destination_port' => $result['destination_port'] ?? null,
                             'protocol' => $result['protocol'] ?? null,
-                            'detected_at' => now(),
+                            'detected_at' => isset($result['timestamp']) ? $result['timestamp'] : now(),
+                            'raw_record' => json_encode($result),
                             'created_at' => now(),
                             'updated_at' => now(),
-                        ]);
+                        ];
+
+                        $optionalFields = [
+                            'log_type' => 'log_type',
+                            'event_type' => 'event_name',
+                            'action' => 'action',
+                            'severity' => 'priority',
+                            'message' => 'log',
+                            'src_country' => 'geo_src',
+                            'dst_country' => 'geo_dst',
+                            'policy_name' => 'policy',
+                            'application' => 'disposition',
+                        ];
+
+                        foreach ($optionalFields as $resultKey => $dbColumn) {
+                            if (isset($result[$resultKey])) {
+                                $insertData[$dbColumn] = $result[$resultKey];
+                            }
+                        }
+
+                        DB::table('detection_results')->insert($insertData);
 
                         if ($result['prediction'] == 1) {
                             $malware++;
