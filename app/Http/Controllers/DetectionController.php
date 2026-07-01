@@ -94,7 +94,7 @@ class DetectionController extends Controller
             ->orderByDesc('update_time')
             ->orderByDesc('created_at')
             ->orderByDesc('id')
-            ->paginate(25)
+            ->paginate(5)
             ->withQueryString();
 
         $alerts = (clone $baseQuery)
