@@ -15,6 +15,7 @@
     $dashboardDetectionPermission = \App\Support\AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION;
     $dashboardRawPermission = \App\Support\AccessControl::PERMISSION_VIEW_DASHBOARD_RAW;
     $dashboardDetectionDetailPermissions = \App\Support\AccessControl::dashboardDetectionDetailPermissions();
+    $reportPermission = \App\Support\AccessControl::PERMISSION_VIEW_REPORT;
 @endphp
 
 <x-app-with-sidebar-layout>
@@ -58,6 +59,10 @@
                     this.$root.querySelectorAll('[data-dashboard-detection-child]').forEach((input) => {
                         input.checked = false;
                     });
+                    const reportCheckbox = this.$root.querySelector('[data-report-permission]');
+                    if (reportCheckbox) {
+                        reportCheckbox.checked = false;
+                    }
                 }
             }
         }">
@@ -88,18 +93,29 @@
                                 @endphp
 
                                 <div @if ($hasChildren) x-data="{ enabled: {{ $isPermissionSelected ? 'true' : 'false' }} }" @endif>
-                                    <label class="flex items-start gap-3">
+                                    <label class="flex items-start gap-3"
+                                        @if ($permission === $reportPermission)
+                                            :class="{ 'opacity-40 cursor-not-allowed': dashboardRaw }"
+                                        @endif
+                                    >
                                         <input
                                             type="checkbox"
                                             name="permissions[]"
                                             value="{{ $permission }}"
                                             @checked($isPermissionSelected)
                                             @if ($hasChildren) x-model="enabled" @endif
+                                            @if ($permission === $reportPermission)
+                                                data-report-permission
+                                                :disabled="dashboardRaw"
+                                            @endif
                                             class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                         >
                                         <span class="min-w-0">
                                             <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">
                                                 {{ $meta['label'] }}
+                                                @if ($permission === $reportPermission)
+                                                    <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">(Hanya untuk Dashboard Deteksi)</span>
+                                                @endif
                                             </span>
                                             <span class="block text-xs text-gray-500 dark:text-gray-400">
                                                 {{ $meta['description'] }}

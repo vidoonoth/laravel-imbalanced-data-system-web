@@ -31,7 +31,7 @@ class DetectionController extends Controller
         $malwarePercentage = $totalTraffic > 0 ? ($malwareTotal / $totalTraffic) * 100 : 0;
 
         $latestDetection = DetectionResult::query()
-            ->latest('detected_at')
+            ->latest('created_at')
             ->latest('id')
             ->first();
 

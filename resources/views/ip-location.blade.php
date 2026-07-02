@@ -31,7 +31,7 @@
         }
     @endphp
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
             <p class="text-sm text-gray-500">Source IP</p>
             <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-2 truncate" title="{{ $ipAddress }}">{{ $ipAddress }}</p>
@@ -41,11 +41,6 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">Lokasi</p>
             <p class="text-lg font-bold text-gray-800 dark:text-gray-100 mt-2 truncate" title="{{ $ipLocationLabel }}">{{ $ipLocationLabel }}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Koordinat {{ $mapCoordinateLabel }}</p>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Alert Malware</p>
-            <p class="text-2xl font-bold text-red-700 dark:text-red-400 mt-2">{{ number_format($summary['total_alerts'], 0, ',', '.') }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ number_format($summary['total_activities'], 0, ',', '.') }} total record IP</p>
         </div>
     </div>
 

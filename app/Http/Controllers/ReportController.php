@@ -19,22 +19,6 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $data = $this->getReportData($request);
-        
-        $dateFrom = $data['dateFrom'];
-        $dateTo = $data['dateTo'];
-        
-        $detectionQuery = DetectionResult::query()
-            ->latest('detected_at')
-            ->latest('id');
-             
-        if ($dateFrom) {
-            $detectionQuery->where('detected_at', '>=', $dateFrom);
-        }
-        if ($dateTo) {
-            $detectionQuery->where('detected_at', '<=', $dateTo);
-        }
-        
-        $data['recentDetections'] = $detectionQuery->paginate(10)->withQueryString();
 
         return view('report.index', $data);
     }
@@ -94,26 +78,7 @@ class ReportController extends Controller
         $normalPercentage = $totalTraffic > 0 ? ($normalTotal / $totalTraffic) * 100 : 0;
         $malwarePercentage = $totalTraffic > 0 ? ($malwareTotal / $totalTraffic) * 100 : 0;
 
-        // Top suspicious IPs
-        $topSuspiciousIps = DetectionResult::query()
-            ->select(
-                'source_ip',
-                DB::raw('COUNT(*) as total'),
-                DB::raw('AVG(confidence) as avg_confidence'),
-                DB::raw("MIN(NULLIF(geo_src, '')) as geo_src")
-            )
-            ->where('prediction', 1)
-            ->whereNotNull('source_ip')
-            ->when($dateFrom, fn($q) => $q->where('detected_at', '>=', $dateFrom))
-            ->when($dateTo, fn($q) => $q->where('detected_at', '<=', $dateTo))
-            ->groupBy('source_ip')
-            ->orderByDesc('total')
-            ->limit(10)
-            ->get()
-            ->map(function (DetectionResult $ip) {
-                $ip->setAttribute('location', $this->ipGeolocation->lookup($ip->source_ip, $ip->geo_src));
-                return $ip;
-            });
+        $topSuspiciousIps = $this->topPublicSuspiciousIps($dateFrom, $dateTo);
 
         // Daily stats (date, total, normal, malware)
         $dailyStats = DetectionResult::query()
@@ -145,5 +110,32 @@ class ReportController extends Controller
             ],
             'isPdf' => false,
         ];
+    }
+
+    private function topPublicSuspiciousIps(?Carbon $dateFrom, ?Carbon $dateTo, int $limit = 10)
+    {
+        return DetectionResult::query()
+            ->select(
+                'source_ip',
+                DB::raw('COUNT(*) as total'),
+                DB::raw('AVG(confidence) as avg_confidence'),
+                DB::raw("MIN(NULLIF(geo_src, '')) as geo_src")
+            )
+            ->where('prediction', 1)
+            ->whereNotNull('source_ip')
+            ->when($dateFrom, fn($q) => $q->where('detected_at', '>=', $dateFrom))
+            ->when($dateTo, fn($q) => $q->where('detected_at', '<=', $dateTo))
+            ->groupBy('source_ip')
+            ->orderByDesc('total')
+            ->orderBy('source_ip')
+            ->get()
+            ->filter(fn (DetectionResult $ip) => $this->ipGeolocation->isPublicIp($ip->source_ip))
+            ->take($limit)
+            ->map(function (DetectionResult $ip) {
+                $ip->setAttribute('location', $this->ipGeolocation->lookup($ip->source_ip, $ip->geo_src));
+
+                return $ip;
+            })
+            ->values();
     }
 }

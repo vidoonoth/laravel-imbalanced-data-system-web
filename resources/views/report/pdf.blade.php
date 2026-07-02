@@ -202,7 +202,7 @@
                     </td>
                 @endif
                 <td class="header-text">
-                    <h1 class="header-title-main">Unit Pelaksana Teknis (UPT) Teknologi Informasi & Komunikasi</h1>
+                    <h1 class="header-title-main">UPA Teknologi Informasi dan Komunikasi</h1>
                     <h2 class="header-title-main" style="font-size: 11px; margin-top: 2px;">Politeknik Negeri Indramayu</h2>
                     <p class="header-subtitle">Jl. Raya Lohbener Lama No.08, Lohbener, Kab. Indramayu, Jawa Barat 45252</p>
                     <p class="header-subtitle" style="margin-top: 1px;">Website: http://www.polindra.ac.id | Email: info@polindra.ac.id</p>
@@ -215,7 +215,7 @@
     <div class="report-title-container">
         <h2 class="report-title">Laporan Analisis Deteksi Malware</h2>
         <p class="report-period">
-            Periode: 
+            Periode:
             @if($dateFrom && $dateTo)
                 {{ $dateFrom->timezone('Asia/Jakarta')->format('d/m/Y') }} s/d {{ $dateTo->timezone('Asia/Jakarta')->format('d/m/Y') }}
             @elseif($dateFrom)

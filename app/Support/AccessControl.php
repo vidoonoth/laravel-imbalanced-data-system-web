@@ -150,6 +150,7 @@ class AccessControl
         if ($normalized->contains(self::PERMISSION_VIEW_DASHBOARD_RAW)) {
             return $normalized
                 ->reject(fn (string $permission) => $permission === self::PERMISSION_VIEW_DASHBOARD_DETECTION
+                    || $permission === self::PERMISSION_VIEW_REPORT
                     || in_array($permission, self::dashboardDetectionDetailPermissions(), true))
                 ->unique()
                 ->values()

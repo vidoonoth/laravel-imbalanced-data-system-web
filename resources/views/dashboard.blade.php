@@ -49,8 +49,8 @@
     </style>
 
     @php
-        $lastScanTime = $latestDetection?->detected_at?->timezone('Asia/Jakarta')->format('H:i:s') ?? '-';
-        $lastScanDate = $latestDetection?->detected_at?->timezone('Asia/Jakarta')->format('d/m/Y') ?? 'Belum ada deteksi';
+        $lastScanTime = $latestDetection?->created_at?->timezone('Asia/Jakarta')->format('H:i:s') ?? '-';
+        $lastScanDate = $latestDetection?->created_at?->timezone('Asia/Jakarta')->format('d/m/Y') ?? 'Belum ada deteksi';
         $circumference = 251.33;
         $normalArc = $totalTraffic > 0 ? ($normalPercentage / 100) * $circumference : 0;
         $malwareArc = $totalTraffic > 0 ? ($malwarePercentage / 100) * $circumference : 0;
