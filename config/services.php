@@ -33,10 +33,6 @@ return [
         'cache_ttl' => env('IP_GEOLOCATION_CACHE_TTL', 60 * 60 * 24 * 30),
     ],
 
-    'ml_pipeline' => [
-        'api_key' => env('ML_API_KEY'),
-    ],
-
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
@@ -82,15 +78,8 @@ return [
         'schedule_time' => env('ML_DETECTION_SCHEDULE_TIME', '13:00'),
         'schedule_timezone' => env('ML_DETECTION_SCHEDULE_TIMEZONE', 'Asia/Jakarta'),
         'api_key' => env('ML_API_KEY'),
-        'api_url' => env('ML_API_URL'),
-        'datasets_url' => env('ML_DATASETS_URL'),
         'flask_url' => env('ML_FLASK_URL', 'https://detectionmalwareupatik.my.id/api/ml'),
-        'python_path' => env('ML_PYTHON_PATH'),
-        'script_path' => env('ML_SCRIPT_PATH'),
-        'artifacts_path' => env('ML_ARTIFACTS_PATH'),
         'timeout' => (int) env('ML_DETECTION_TIMEOUT', 60),
-        'batch_size' => (int) env('ML_BATCH_SIZE', 500),
-        'fetch_limit' => (int) env('ML_FETCH_LIMIT', 500),
     ],
 
 ];

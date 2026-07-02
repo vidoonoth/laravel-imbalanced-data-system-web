@@ -15,7 +15,7 @@ class EnsureValidApiKey
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $apiKey = config('services.ml_pipeline.api_key');
+        $apiKey = config('services.ml.api_key');
 
         if (!$apiKey) {
             return response()->json([
