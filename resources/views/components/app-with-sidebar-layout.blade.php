@@ -231,7 +231,7 @@
                             </svg>
                         </button>
 
-                        <div class="hidden md:flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                        <div id="page-breadcrumbs" class="hidden md:flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                             @if ($breadcrumbs)
                                 {!! $breadcrumbs !!}
                             @else

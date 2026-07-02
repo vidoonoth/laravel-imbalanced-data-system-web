@@ -1,90 +1,124 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Handle sidebar navigation with AJAX
-    document.querySelectorAll("[data-nav-link]").forEach((link) => {
-        link.addEventListener("click", function (e) {
-            e.preventDefault();
+    const setContentLoading = function (isLoading) {
+        const mainContent = document.getElementById("main-content");
 
-            const url = this.href;
-            const navLink = this;
+        if (!mainContent) {
+            return;
+        }
 
-            // Show loading state
-            const mainContent = document.getElementById("main-content");
-            if (mainContent) {
-                mainContent.style.opacity = "0.6";
-                mainContent.style.pointerEvents = "none";
-            }
+        mainContent.style.opacity = isLoading ? "0.6" : "1";
+        mainContent.style.pointerEvents = isLoading ? "none" : "auto";
+    };
 
-            // Fetch the new page
-            fetch(url, {
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                },
+    const initAlpineTree = function (element) {
+        if (element && window.Alpine && typeof window.Alpine.initTree === "function") {
+            window.Alpine.initTree(element);
+        }
+    };
+
+    const replacePageSection = function (selector, newDocument, initializeAlpine = false) {
+        const currentElement = document.querySelector(selector);
+        const newElement = newDocument.querySelector(selector);
+
+        if (!currentElement || !newElement) {
+            return;
+        }
+
+        currentElement.innerHTML = newElement.innerHTML;
+
+        if (initializeAlpine) {
+            initAlpineTree(currentElement);
+        }
+    };
+
+    const renderPage = function (html) {
+        const parser = new DOMParser();
+        const newDocument = parser.parseFromString(html, "text/html");
+        const mainContent = document.getElementById("main-content");
+        const newMainContent = newDocument.getElementById("main-content");
+
+        if (!mainContent || !newMainContent) {
+            return false;
+        }
+
+        mainContent.innerHTML = newMainContent.innerHTML;
+        initAlpineTree(mainContent);
+
+        replacePageSection("aside nav", newDocument);
+        replacePageSection("#page-breadcrumbs", newDocument);
+        replacePageSection("#page-header", newDocument, true);
+
+        if (newDocument.title) {
+            document.title = newDocument.title;
+        }
+
+        mainContent.scrollTo(0, 0);
+        window.scrollTo(0, 0);
+
+        return true;
+    };
+
+    const navigateTo = function (url, options = {}) {
+        const shouldPushState = options.pushState !== false;
+
+        setContentLoading(true);
+
+        fetch(url, {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+            },
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("Navigation request failed.");
+                }
+
+                return response.text();
             })
-                .then((response) => response.text())
-                .then((html) => {
-                    // Parse the response HTML
-                    const parser = new DOMParser();
-                    const newDoc = parser.parseFromString(html, "text/html");
-
-                    // Extract the main content
-                    const newMainContent = newDoc.getElementById("main-content");
-                    const newHeader = newDoc.getElementById("page-header");
-
-                    if (newMainContent) {
-                        // Replace the main content with smooth transition
-                        mainContent.innerHTML = newMainContent.innerHTML;
-
-                        // Replace header if it exists
-                        if (newHeader) {
-                            const currentHeader = document.getElementById("page-header");
-                            if (currentHeader) {
-                                currentHeader.innerHTML = newHeader.innerHTML;
-                            }
-                        }
-
-                        // Update URL
-                        window.history.pushState({ path: url }, "", url);
-
-                        // Restore content visibility
-                        if (mainContent) {
-                            mainContent.style.opacity = "1";
-                            mainContent.style.pointerEvents = "auto";
-                        }
-
-                        // Update active nav link
-                        document.querySelectorAll('[data-nav-link]').forEach((el) => {
-                            el.classList.remove('bg-gray-200');
-                        });
-                        navLink.classList.add('bg-gray-200');
-
-                        // Remove hover:bg-gray-400 from active, add to others
-                        document.querySelectorAll('[data-nav-link]').forEach((el) => {
-                            if (el === navLink) {
-                                el.classList.remove('hover:bg-gray-400');
-                            } else {
-                                if (!el.classList.contains('hover:bg-gray-400')) {
-                                    el.classList.add('hover:bg-gray-400');
-                                }
-                            }
-                        });
-
-                        // Scroll to top
-                        window.scrollTo(0, 0);
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error loading page:", error);
-                    // Fallback: navigate normally
+            .then(function (html) {
+                if (!renderPage(html)) {
                     window.location.href = url;
-                });
-        });
+                    return;
+                }
+
+                if (shouldPushState) {
+                    window.history.pushState({ path: url }, "", url);
+                }
+
+                setContentLoading(false);
+            })
+            .catch(function (error) {
+                console.error("Error loading page:", error);
+                window.location.href = url;
+            });
+    };
+
+    window.history.replaceState({ path: window.location.href }, "", window.location.href);
+
+    document.addEventListener("click", function (event) {
+        const link = event.target.closest("[data-nav-link]");
+
+        if (!link || event.defaultPrevented || event.button !== 0) {
+            return;
+        }
+
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            return;
+        }
+
+        const url = new URL(link.href);
+
+        if (url.origin !== window.location.origin) {
+            return;
+        }
+
+        event.preventDefault();
+        navigateTo(url.href);
     });
 
-    // Handle browser back/forward buttons
-    window.addEventListener("popstate", function (e) {
-        if (e.state && e.state.path) {
-            // Reload the page at that URL
-            window.location.href = e.state.path;
-        }
+    window.addEventListener("popstate", function (event) {
+        const url = event.state && event.state.path ? event.state.path : window.location.href;
+
+        navigateTo(url, { pushState: false });
     });
 });
