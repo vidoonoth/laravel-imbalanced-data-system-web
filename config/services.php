@@ -51,7 +51,7 @@ return [
 
     'vps_csv' => [
         'enabled' => env('VPS_CSV_ENABLED', false),
-        'schedule' => env('VPS_CSV_SCHEDULE', 'daily_at'),
+        'schedule' => env('VPS_CSV_SCHEDULE', 'every_four_hours'),
         'schedule_time' => env('VPS_CSV_SCHEDULE_TIME', '12:55'),
         'schedule_timezone' => env('VPS_CSV_SCHEDULE_TIMEZONE', 'Asia/Jakarta'),
         'max_files' => (int) env('VPS_CSV_MAX_FILES', 10),
@@ -74,12 +74,26 @@ return [
 
     'ml' => [
         'enabled' => env('ML_DETECTION_ENABLED', true),
-        'schedule' => env('ML_DETECTION_SCHEDULE', 'hourly'),
+        'schedule' => env('ML_DETECTION_SCHEDULE', 'every_four_hours'),
         'schedule_time' => env('ML_DETECTION_SCHEDULE_TIME', '13:00'),
         'schedule_timezone' => env('ML_DETECTION_SCHEDULE_TIMEZONE', 'Asia/Jakarta'),
         'api_key' => env('ML_API_KEY'),
-        'flask_url' => env('ML_FLASK_URL', 'https://detectionmalwareupatik.my.id/api/ml'),
+        'flask_url' => env('ML_FLASK_URL', 'http://127.0.0.1:5000'),
         'timeout' => (int) env('ML_DETECTION_TIMEOUT', 60),
+        'batch_size' => (int) env('ML_DETECTION_BATCH_SIZE', 100),
+    ],
+
+    'malware_pipeline' => [
+        'enabled' => env('MALWARE_PIPELINE_ENABLED', false),
+        'schedule' => env('MALWARE_PIPELINE_SCHEDULE', 'every_four_hours'),
+        'schedule_time' => env('MALWARE_PIPELINE_SCHEDULE_TIME', '00:00'),
+        'schedule_timezone' => env('MALWARE_PIPELINE_SCHEDULE_TIMEZONE', 'Asia/Jakarta'),
+        'import_limit' => (int) env('MALWARE_PIPELINE_IMPORT_LIMIT', env('VPS_CSV_MAX_FILES', 10)),
+        'detection_limit' => env('MALWARE_PIPELINE_DETECTION_LIMIT') !== null && env('MALWARE_PIPELINE_DETECTION_LIMIT') !== ''
+            ? (int) env('MALWARE_PIPELINE_DETECTION_LIMIT')
+            : null,
+        'batch_size' => (int) env('MALWARE_PIPELINE_BATCH_SIZE', env('ML_DETECTION_BATCH_SIZE', 100)),
+        'without_overlapping_minutes' => (int) env('MALWARE_PIPELINE_LOCK_MINUTES', 240),
     ],
 
 ];

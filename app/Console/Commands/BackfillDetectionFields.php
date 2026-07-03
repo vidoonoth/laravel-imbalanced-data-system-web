@@ -58,15 +58,30 @@ class BackfillDetectionFields extends Command
                     $updates = [];
 
                     $fieldMapping = [
+                        'update_time' => 'update_time',
+                        'sn' => 'sn',
                         'event_type' => 'event_name',
+                        'event_name' => 'event_name',
                         'application' => 'disposition',
+                        'disposition' => 'disposition',
                         'action' => 'action',
                         'log_type' => 'log_type',
                         'severity' => 'priority',
+                        'priority' => 'priority',
                         'message' => 'log',
+                        'log' => 'log',
                         'src_country' => 'geo_src',
+                        'geo_src' => 'geo_src',
                         'dst_country' => 'geo_dst',
+                        'geo_dst' => 'geo_dst',
                         'policy_name' => 'policy',
+                        'policy' => 'policy',
+                        'source_interface' => 'source_interface',
+                        'destination_interface' => 'destination_interface',
+                        'pckt_len' => 'pckt_len',
+                        'ttl' => 'ttl',
+                        'sent_bytes' => 'sent_bytes',
+                        'rcvd_bytes' => 'rcvd_bytes',
                     ];
 
                     foreach ($fieldMapping as $payloadKey => $dbColumn) {

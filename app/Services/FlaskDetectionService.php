@@ -15,7 +15,7 @@ class FlaskDetectionService
     public function __construct()
     {
         $this->baseUrl = rtrim(config('services.ml.flask_url', 'http://localhost:5000'), '/');
-        $this->apiKey = config('services.ml.api_key', 'ml_api_key_secret_2026');
+        $this->apiKey = (string) config('services.ml.api_key', '');
         $this->timeout = (int) config('services.ml.timeout', 60);
     }
 
@@ -24,6 +24,8 @@ class FlaskDetectionService
         if (empty($records)) {
             throw new RuntimeException('No records to detect');
         }
+
+        $this->ensureApiKeyIsConfigured();
 
         Log::info('Calling Flask API for batch detection', [
             'count' => count($records),
@@ -70,6 +72,8 @@ class FlaskDetectionService
 
     public function detectSingle(array $record): array
     {
+        $this->ensureApiKeyIsConfigured();
+
         Log::info('Calling Flask API for single detection');
 
         try {
@@ -131,5 +135,12 @@ class FlaskDetectionService
     {
         $health = $this->checkHealth();
         return ($health['status'] ?? 'unhealthy') === 'healthy';
+    }
+
+    private function ensureApiKeyIsConfigured(): void
+    {
+        if ($this->apiKey === '') {
+            throw new RuntimeException('ML_API_KEY belum diisi di environment Laravel.');
+        }
     }
 }
