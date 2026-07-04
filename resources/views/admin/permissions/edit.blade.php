@@ -1,7 +1,7 @@
 @php
     $groupOrder = [
         'Monitoring' => 1,
-        'Administrasi' => 2,
+        'Admin' => 2,
         'Laporan' => 3,
     ];
     $permissionCollection = collect($permissions);
@@ -73,9 +73,6 @@
             <div class="flex items-center justify-between gap-4 mb-3">
                 <div>
                     <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Hak Akses Fitur</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Role admin selalu punya Manajemen User secara bawaan; akses fitur lain bisa diatur.
-                    </p>
                 </div>
             </div>
 
@@ -95,21 +92,21 @@
                                 <div @if ($hasChildren) x-data="{ enabled: {{ $isPermissionSelected ? 'true' : 'false' }} }" @endif>
                                     <label class="flex items-start gap-3"
                                         @if ($permission === $reportPermission)
-                                            :class="{ 'opacity-40 cursor-not-allowed': dashboardRaw }"
-                                        @endif
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            name="permissions[]"
-                                            value="{{ $permission }}"
-                                            @checked($isPermissionSelected)
-                                            @if ($hasChildren) x-model="enabled" @endif
-                                            @if ($permission === $reportPermission)
-                                                data-report-permission
-                                                :disabled="dashboardRaw"
-                                            @endif
-                                            class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                        >
+                                             :class="{ 'opacity-40 cursor-not-allowed': dashboardRaw || !dashboardDetection }"
+                                         @endif
+                                     >
+                                         <input
+                                             type="checkbox"
+                                             name="permissions[]"
+                                             value="{{ $permission }}"
+                                             @checked($isPermissionSelected)
+                                             @if ($hasChildren) x-model="enabled" @endif
+                                             @if ($permission === $reportPermission)
+                                                 data-report-permission
+                                                 :disabled="dashboardRaw || !dashboardDetection"
+                                             @endif
+                                             class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                         >
                                         <span class="min-w-0">
                                             <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">
                                                 {{ $meta['label'] }}
@@ -127,7 +124,7 @@
                                         <div class="ml-7 mt-3 space-y-3 border-l-2 border-gray-200 dark:border-gray-600 pl-4" x-show="enabled" x-cloak>
                                             @foreach ($children as $childPermission => $childMeta)
                                                 @continue(in_array($childPermission, $dashboardDetectionDetailPermissions, true))
-                                                
+
                                                 <div>
                                                     <label class="flex items-start gap-3"
                                                         @if ($childPermission === $dashboardDetectionPermission)
@@ -165,8 +162,8 @@
                                                     </label>
 
                                                     @if ($childPermission === $dashboardDetectionPermission)
-                                                        <div class="ml-7 mt-3 space-y-2 border-l-2 border-blue-200 dark:border-blue-800 pl-4" 
-                                                            x-show="dashboardDetection && !dashboardRaw" 
+                                                        <div class="ml-7 mt-3 space-y-2 border-l-2 border-blue-200 dark:border-blue-800 pl-4"
+                                                            x-show="dashboardDetection && !dashboardRaw"
                                                             x-cloak
                                                             x-transition>
                                                             @foreach ($dashboardDetectionDetailPermissions as $detailPermission)

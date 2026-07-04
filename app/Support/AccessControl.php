@@ -38,46 +38,46 @@ class AccessControl
             self::PERMISSION_VIEW_DASHBOARD => [
                 'label' => 'Dashboard',
                 'group' => 'Monitoring',
-                'description' => 'Melihat dashboard data jaringan.',
+                'description' => 'Melihat dashboard',
             ],
             self::PERMISSION_VIEW_DASHBOARD_DETECTION => [
                 'label' => 'Dashboard Hasil Deteksi',
                 'group' => 'Monitoring',
                 'parent' => self::PERMISSION_VIEW_DASHBOARD,
-                'description' => 'Menampilkan dashboard hasil penerapan deteksi malware.',
+                'description' => 'Menampilkan dashboard hasil deteksi malware.',
             ],
             self::PERMISSION_VIEW_DASHBOARD_RAW => [
                 'label' => 'Dashboard Raw Data',
                 'group' => 'Monitoring',
                 'parent' => self::PERMISSION_VIEW_DASHBOARD,
-                'description' => 'Menampilkan dashboard data mentah CSV tanpa hasil deteksi ML.',
+                'description' => 'Menampilkan data mentah (Raw Data).',
             ],
             self::PERMISSION_VIEW_DASHBOARD_DETECTION_CARD => [
                 'label' => 'Deteksi Malware',
                 'group' => 'Monitoring',
                 'parent' => self::PERMISSION_VIEW_DASHBOARD,
-                'description' => 'Menampilkan card dan chart deteksi malware pada dashboard.',
+                'description' => 'Menampilkan data hasil deteksi malware.',
             ],
             self::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD => [
                 'label' => 'IP Mencurigakan',
                 'group' => 'Monitoring',
                 'parent' => self::PERMISSION_VIEW_DASHBOARD,
-                'description' => 'Menampilkan card dan daftar IP mencurigakan pada dashboard.',
+                'description' => 'Menampilkan data daftar IP mencurigakan.',
             ],
             self::PERMISSION_VIEW_REPORT => [
                 'label' => 'Laporan',
                 'group' => 'Laporan',
-                'description' => 'Melihat dan mengekspor laporan deteksi malware.',
+                'description' => 'Melihat dan mengunduh laporan deteksi malware.',
             ],
             self::PERMISSION_MANAGE_USERS => [
                 'label' => 'Manajemen User',
-                'group' => 'Administrasi',
-                'description' => 'Membuat, mengubah, menghapus user, dan role.',
+                'group' => 'Admin',
+                'description' => 'Membuat dan menghapus user.',
             ],
             self::PERMISSION_MANAGE_PERMISSIONS => [
                 'label' => 'Hak Akses Menu',
-                'group' => 'Administrasi',
-                'description' => 'Mengatur hak akses dan izin menu untuk setiap user.',
+                'group' => 'Admin',
+                'description' => 'Mengatur hak akses menu untuk setiap user.',
             ],
         ];
     }
@@ -133,13 +133,13 @@ class AccessControl
             ->reject(function (string $permission) use ($permissions, $permissionMetadata) {
                 $parentPermission = $permissionMetadata[$permission]['parent'] ?? null;
 
-                return $parentPermission !== null && ! in_array($parentPermission, $permissions, true);
+                return $parentPermission !== null && !in_array($parentPermission, $permissions, true);
             })
             ->values();
 
-        if (! $normalized->contains(self::PERMISSION_VIEW_DASHBOARD)) {
+        if (!$normalized->contains(self::PERMISSION_VIEW_DASHBOARD)) {
             return $normalized
-                ->reject(fn (string $permission) => in_array($permission, [
+                ->reject(fn(string $permission) => in_array($permission, [
                     ...self::dashboardModePermissions(),
                     ...self::dashboardDetectionDetailPermissions(),
                 ], true))
@@ -149,7 +149,7 @@ class AccessControl
 
         if ($normalized->contains(self::PERMISSION_VIEW_DASHBOARD_RAW)) {
             return $normalized
-                ->reject(fn (string $permission) => $permission === self::PERMISSION_VIEW_DASHBOARD_DETECTION
+                ->reject(fn(string $permission) => $permission === self::PERMISSION_VIEW_DASHBOARD_DETECTION
                     || $permission === self::PERMISSION_VIEW_REPORT
                     || in_array($permission, self::dashboardDetectionDetailPermissions(), true))
                 ->unique()
@@ -161,16 +161,16 @@ class AccessControl
             ->intersect(self::dashboardDetectionDetailPermissions())
             ->isNotEmpty();
 
-        if (! $normalized->contains(self::PERMISSION_VIEW_DASHBOARD_DETECTION) && $hasDetectionDetailPermission) {
+        if (!$normalized->contains(self::PERMISSION_VIEW_DASHBOARD_DETECTION) && $hasDetectionDetailPermission) {
             $normalized->push(self::PERMISSION_VIEW_DASHBOARD_DETECTION);
         }
 
-        if (! $normalized->contains(self::PERMISSION_VIEW_DASHBOARD_DETECTION)) {
+        if (!$normalized->contains(self::PERMISSION_VIEW_DASHBOARD_DETECTION)) {
             $normalized->push(self::PERMISSION_VIEW_DASHBOARD_DETECTION);
         }
 
         return $normalized
-            ->reject(fn (string $permission) => $permission === self::PERMISSION_VIEW_DASHBOARD_RAW)
+            ->reject(fn(string $permission) => $permission === self::PERMISSION_VIEW_DASHBOARD_RAW)
             ->unique()
             ->values()
             ->all();
@@ -218,7 +218,7 @@ class AccessControl
         $newPermissions = [];
 
         foreach (self::permissionNames() as $permission) {
-            if (! Permission::query()->where('guard_name', 'web')->where('name', $permission)->exists()) {
+            if (!Permission::query()->where('guard_name', 'web')->where('name', $permission)->exists()) {
                 $newPermissions[] = $permission;
             }
 
@@ -235,7 +235,7 @@ class AccessControl
         if ($newDashboardDetectionPermissions !== []) {
             User::permission(self::PERMISSION_VIEW_DASHBOARD)->each(
                 function (User $user) use ($newDashboardDetectionPermissions) {
-                    if (! $user->can(self::PERMISSION_VIEW_DASHBOARD_RAW)) {
+                    if (!$user->can(self::PERMISSION_VIEW_DASHBOARD_RAW)) {
                         $user->givePermissionTo($newDashboardDetectionPermissions);
                     }
                 }
@@ -267,9 +267,9 @@ class AccessControl
     public static function homeRouteNameFor(User $user): string
     {
         $routesByPermission = [
+            self::PERMISSION_MANAGE_USERS => 'admin.users.index',
             self::PERMISSION_VIEW_DASHBOARD_DETECTION => 'dashboard',
             self::PERMISSION_VIEW_DASHBOARD_RAW => 'dashboard.raw',
-            self::PERMISSION_MANAGE_USERS => 'admin.users.index',
             self::PERMISSION_VIEW_REPORT => 'report.index',
         ];
 

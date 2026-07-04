@@ -134,7 +134,7 @@
         $dashboardRawPermission = \App\Support\AccessControl::PERMISSION_VIEW_DASHBOARD_RAW;
     @endphp
 
-    <div class="flex h-screen bg-gray-100 dark:bg-gray-900" x-data="{ sidebarOpen: window.innerWidth >= 1024 }" @resize.window="if (window.innerWidth >= 1024 && !sidebarOpen) sidebarOpen = true">
+    <div class="flex h-screen bg-gray-100 dark:bg-gray-900" x-data="{ sidebarOpen: window.innerWidth >= 1024 }">
         
         <!-- Backdrop Overlay (Mobile Only) -->
         <div x-show="sidebarOpen" 
@@ -150,8 +150,8 @@
         </div>
 
         <!-- Sidebar -->
-        <aside class="fixed lg:static inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 text-black dark:text-gray-100 shadow-lg transition-transform duration-300 overflow-visible z-50"
-            :class="{ '-translate-x-full lg:translate-x-0': !sidebarOpen, 'translate-x-0': sidebarOpen }">
+        <aside class="fixed lg:relative inset-y-0 left-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 text-black dark:text-gray-100 shadow-lg transition-all duration-300 z-50 lg:z-auto"
+            :class="sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0 w-64 lg:w-0 lg:border-0 lg:overflow-hidden'">
             <div class="flex flex-col h-full">
                 <!-- Logo Section -->
                 <div class="p-[24px] border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
