@@ -30,7 +30,7 @@
                 @endif
                 <div class="flex flex-col">
                     <input id="avatar" name="avatar" type="file" accept="image/*" class="text-sm text-gray-500 dark:text-gray-400 cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-gray-300 dark:file:border-gray-600 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-slate-200 file:text-blue-700 dark:file:text-slate-600 hover:file:bg-blue-100 dark:hover:file:bg-gray-300 file:cursor-pointer transition">
-                    <p class="text-xs text-gray-400 dark:text-gray-100 mt-1">PNG, JPG, JPEG maks 2MB</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">PNG, JPG, JPEG maks 2MB</p>
                 </div>
             </div>
             <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
