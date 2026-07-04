@@ -1,6 +1,6 @@
 <x-app-with-sidebar-layout>
     <x-slot name="breadcrumbs">
-        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : route('profile.show') }}" class="text-gray-600 hover:text-gray-300 dark:hover:text-gray-100">Dashboard</a>
+        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : route('profile.show') }}" class="text-gray-600 dark:text-gray-100 hover:text-gray-300 dark:hover:text-gray-100">Dashboard</a>
         <span class="text-gray-400">/</span>
         <span class="text-gray-900 dark:text-gray-100 text-[23px] font-semibold">Lokasi IP</span>
     </x-slot>
