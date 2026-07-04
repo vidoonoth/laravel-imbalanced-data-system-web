@@ -59,7 +59,7 @@
                             <td class="px-6 py-4">
                                 <span
                                     class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold {{ $roleName === 'admin' ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">
-                                    {{ ucfirst($roleName) }}
+                                    {{ $roleName === 'user' ? 'Petugas' : ucfirst($roleName) }}
                                 </span>
                             </td>
                             <td class="px-6 py-4">

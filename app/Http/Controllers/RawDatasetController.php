@@ -49,7 +49,7 @@ class RawDatasetController extends Controller
         $datasets = $datasetsQuery
             ->orderBy('datasets.dataset_import_id', 'asc')
             ->orderBy('datasets.row_number', 'asc')
-            ->paginate(50)
+            ->paginate(10)
             ->withQueryString();
 
         $latestImport = DatasetImport::query()

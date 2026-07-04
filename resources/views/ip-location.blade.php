@@ -1,6 +1,6 @@
 <x-app-with-sidebar-layout>
     <x-slot name="breadcrumbs">
-        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : route('profile.show') }}" class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">Dashboard</a>        
+        <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : route('profile.show') }}" class="text-gray-600 hover:text-gray-300 dark:hover:text-gray-100">Dashboard</a>
         <span class="text-gray-400">/</span>
         <span class="text-gray-900 dark:text-gray-100 text-[23px] font-semibold">Lokasi IP</span>
     </x-slot>
@@ -33,23 +33,23 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <p class="text-sm text-gray-500">Source IP</p>
+            <p class="text-sm text-gray-500 dark:text-gray-300">Source IP</p>
             <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-2 truncate" title="{{ $ipAddress }}">{{ $ipAddress }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">source IP dari hasil deteksi</p>
+            <p class="text-xs text-gray-500 dark:text-gray-300 mt-1">source IP dari hasil deteksi</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Lokasi</p>
+            <p class="text-sm text-gray-500 dark:text-gray-300">Lokasi</p>
             <p class="text-lg font-bold text-gray-800 dark:text-gray-100 mt-2 truncate" title="{{ $ipLocationLabel }}">{{ $ipLocationLabel }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Koordinat {{ $mapCoordinateLabel }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-300 mt-1">Koordinat {{ $mapCoordinateLabel }}</p>
         </div>
     </div>
 
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
         <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="min-w-0">
-                <p class="text-sm text-gray-500 dark:text-gray-400">Lokasi Asal IP</p>
+                <p class="text-sm text-gray-500 dark:text-gray-300">Lokasi Asal IP</p>
                 <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1 truncate" title="{{ $ipLocationLabel }}">{{ $ipLocationLabel }}</h3>
-                <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-300">
                     @if ($ipLocationSource === 'api')
                         <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded font-semibold">data GeoIP</span>
                     @elseif ($ipLocationSource === 'log')
@@ -83,48 +83,48 @@
                 <div class="p-5 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-700">
                     <dl class="space-y-4 text-sm">
                         <div>
-                            <dt class="text-gray-500 dark:text-gray-400">Negara</dt>
+                            <dt class="text-gray-500 dark:text-gray-300">Negara</dt>
                             <dd class="font-semibold text-gray-800 dark:text-gray-100 mt-1">{{ $ipLocation['country'] ?? $ipLocation['country_code'] ?? '-' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500 dark:text-gray-400">Region/Kota</dt>
+                            <dt class="text-gray-500 dark:text-gray-300">Region/Kota</dt>
                             <dd class="font-semibold text-gray-800 dark:text-gray-100 mt-1">
                                 {{ collect([$ipLocation['region'] ?? null, $ipLocation['city'] ?? null])->filter()->implode(', ') ?: '-' }}
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500 dark:text-gray-400">Latitude</dt>
+                            <dt class="text-gray-500 dark:text-gray-300">Latitude</dt>
                             <dd class="font-semibold text-gray-800 dark:text-gray-100 mt-1">{{ number_format($ipLatitude, 6, '.', '') }}</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500 dark:text-gray-400">Longitude</dt>
+                            <dt class="text-gray-500 dark:text-gray-300">Longitude</dt>
                             <dd class="font-semibold text-gray-800 dark:text-gray-100 mt-1">{{ number_format($ipLongitude, 6, '.', '') }}</dd>
                         </div>
                     </dl>
                 </div>
             </div>
         @else
-            <div class="p-6 bg-gray-50 dark:bg-gray-700 text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+            <div class="p-6 bg-gray-50 dark:bg-gray-700 text-sm text-gray-500 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
                 Peta belum tersedia karena data koordinat tidak ditemukan untuk IP ini.
             </div>
             <div class="p-5">
                 <dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                     <div>
-                        <dt class="text-gray-500 dark:text-gray-400">Negara</dt>
+                        <dt class="text-gray-500 dark:text-gray-300">Negara</dt>
                         <dd class="font-semibold text-gray-800 dark:text-gray-100 mt-1">{{ $ipLocation['country'] ?? $ipLocation['country_code'] ?? '-' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-gray-500 dark:text-gray-400">Region/Kota</dt>
+                        <dt class="text-gray-500 dark:text-gray-300">Region/Kota</dt>
                         <dd class="font-semibold text-gray-800 dark:text-gray-100 mt-1">
                             {{ collect([$ipLocation['region'] ?? null, $ipLocation['city'] ?? null])->filter()->implode(', ') ?: '-' }}
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-gray-500 dark:text-gray-400">Latitude</dt>
+                        <dt class="text-gray-500 dark:text-gray-300">Latitude</dt>
                         <dd class="font-semibold text-gray-800 dark:text-gray-100 mt-1">-</dd>
                     </div>
                     <div>
-                        <dt class="text-gray-500 dark:text-gray-400">Longitude</dt>
+                        <dt class="text-gray-500 dark:text-gray-300">Longitude</dt>
                         <dd class="font-semibold text-gray-800 dark:text-gray-100 mt-1">-</dd>
                     </div>
                 </dl>

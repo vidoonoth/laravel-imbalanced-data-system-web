@@ -213,7 +213,7 @@
 
     <!-- Judul Laporan -->
     <div class="report-title-container">
-        <h2 class="report-title">Laporan Analisis Deteksi Malware</h2>
+        <h2 class="report-title">Laporan Deteksi Malware</h2>
         <p class="report-period">
             Periode:
             @if($dateFrom && $dateTo)
@@ -242,17 +242,14 @@
             <td class="summary-card" style="border-right: none; width: 33.3%;">
                 <div class="summary-label">Total Log Traffic</div>
                 <div class="summary-value">{{ number_format($totalTraffic, 0, ',', '.') }}</div>
-                <div class="summary-subtext">Baris Log Dianalisis</div>
             </td>
             <td class="summary-card" style="border-right: none; width: 33.3%;">
                 <div class="summary-label">Data Normal</div>
                 <div class="summary-value text-green">{{ number_format($normalTotal, 0, ',', '.') }}</div>
-                <div class="summary-subtext">{{ number_format($normalPercentage, 2, ',', '.') }}% dari total</div>
             </td>
             <td class="summary-card" style="width: 33.3%;">
                 <div class="summary-label">Terdeteksi Malware</div>
                 <div class="summary-value text-red">{{ number_format($malwareTotal, 0, ',', '.') }}</div>
-                <div class="summary-subtext">{{ number_format($malwarePercentage, 2, ',', '.') }}% dari total</div>
             </td>
         </tr>
     </table>
@@ -262,11 +259,11 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th style="width: 5%; text-align: center;">No</th>
                 <th style="width: 25%;">Tanggal</th>
                 <th style="width: 25%; text-align: right;">Total Log</th>
-                <th style="width: 20%; text-align: right; color: #2f855a;">Normal</th>
-                <th style="width: 25%; text-align: right; color: #c53030;">Malware (% Malware)</th>
+                <th style="width: 25%; text-align: right; color: #2f855a;">Normal</th>
+                <th style="width: 15%; text-align: right; color: #c53030;">Malware</th>
+                <th style="width: 10%; text-align: right; color: #c53030;">% Malware</th>
             </tr>
         </thead>
         <tbody>
@@ -277,13 +274,11 @@
                     $malwarePct = $total > 0 ? ($malware / $total) * 100 : 0;
                 @endphp
                 <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
                     <td class="font-semibold">{{ Carbon\Carbon::parse($stat->date)->format('d/m/Y') }}</td>
                     <td class="text-right">{{ number_format($total, 0, ',', '.') }}</td>
                     <td class="text-right text-green font-semibold">{{ number_format((int) $stat->normal_count, 0, ',', '.') }}</td>
-                    <td class="text-right text-red font-semibold">
-                        {{ number_format($malware, 0, ',', '.') }} ({{ number_format($malwarePct, 2, ',', '.') }}%)
-                    </td>
+                    <td class="text-right text-red font-semibold">{{ number_format($malware, 0, ',', '.') }}</td>
+                    <td class="text-right text-red font-semibold">{{ number_format($malwarePct, 2, ',', '.') }}%</td>
                 </tr>
             @empty
                 <tr>
@@ -299,10 +294,9 @@
         <thead>
             <tr>
                 <th style="width: 5%; text-align: center;">No</th>
-                <th style="width: 30%;">IP Address</th>
-                <th style="width: 35%;">Perkiraan Lokasi</th>
-                <th style="width: 15%; text-align: center;">Jumlah Alert</th>
-                <th style="width: 15%; text-align: right;">Avg Confidence</th>
+                <th style="width: 35%;">IP Address</th>
+                <th style="width: 45%;">Lokasi</th>
+                <th style="width: 15%; text-align: right;">Total Alert</th>
             </tr>
         </thead>
         <tbody>
@@ -316,63 +310,14 @@
                     <td class="font-semibold text-red">{{ $ip->source_ip }}</td>
                     <td>
                         {{ $location['label'] }}
-                        @if($locationSource === 'api')
-                            <span class="badge badge-geoip">GeoIP</span>
-                        @endif
                     </td>
-                    <td class="text-center font-semibold">
+                    <td class="text-right font-semibold">
                         <span style="color: #742a2a;">{{ number_format($ip->total, 0, ',', '.') }}</span>
                     </td>
-                    <td class="text-right font-semibold">
-                        {{ number_format(((float) $ip->avg_confidence) * 100, 2, ',', '.') }}%
-                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="text-center" style="padding: 12px;">Belum ada IP terdeteksi sebagai malware.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    <div class="page-break"></div>
-
-    <!-- Riwayat Deteksi -->
-    <div class="section-title">Riwayat Deteksi Log (Maks. 200 Deteksi Terbaru)</div>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th style="width: 20%;">Waktu Deteksi</th>
-                <th style="width: 20%;">Source IP</th>
-                <th style="width: 20%;">Destination IP</th>
-                <th style="width: 15%;">Protocol</th>
-                <th style="width: 13%; text-align: center;">Prediction</th>
-                <th style="width: 12%; text-align: right;">Confidence</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($recentDetections as $record)
-                <tr>
-                    <td>
-                        {{ $record->detected_at ? $record->detected_at->timezone('Asia/Jakarta')->format('d/m/Y H:i:s') : $record->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i:s') }}
-                    </td>
-                    <td class="font-semibold">{{ $record->source_ip ?? '-' }}</td>
-                    <td>{{ $record->destination_ip ?? '-' }}</td>
-                    <td>{{ $record->protocol ?? '-' }}</td>
-                    <td class="text-center font-semibold">
-                        @if($record->prediction === 1)
-                            <span style="color: #c53030;">MALWARE</span>
-                        @else
-                            <span style="color: #2f855a;">NORMAL</span>
-                        @endif
-                    </td>
-                    <td class="text-right font-semibold">
-                        {{ number_format(((float) $record->confidence) * 100, 2, ',', '.') }}%
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="6" class="text-center" style="padding: 12px;">Belum ada riwayat deteksi yang sesuai filter.</td>
+                    <td colspan="4" class="text-center" style="padding: 12px;">Belum ada IP terdeteksi sebagai malware.</td>
                 </tr>
             @endforelse
         </tbody>

@@ -1,10 +1,10 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
             {{ __('Informasi Profil') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
             {{ __('Perbarui informasi profil dan alamat email akun Anda.') }}
         </p>
     </header>
@@ -29,8 +29,8 @@
                     </div>
                 @endif
                 <div class="flex flex-col">
-                    <input id="avatar" name="avatar" type="file" accept="image/*" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition">
-                    <p class="text-xs text-gray-400 mt-1">PNG, JPG, JPEG maks 2MB</p>
+                    <input id="avatar" name="avatar" type="file" accept="image/*" class="text-sm text-gray-500 dark:text-gray-400 cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-gray-300 dark:file:border-gray-600 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-slate-200 file:text-blue-700 dark:file:text-slate-600 hover:file:bg-blue-100 dark:hover:file:bg-gray-300 file:cursor-pointer transition">
+                    <p class="text-xs text-gray-400 dark:text-gray-100 mt-1">PNG, JPG, JPEG maks 2MB</p>
                 </div>
             </div>
             <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
@@ -49,16 +49,16 @@
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
-                    <p class="text-sm mt-2 text-gray-800">
+                    <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
                         {{ __('Alamat email Anda belum terverifikasi.') }}
 
-                        <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button form="send-verification" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
                             {{ __('Klik di sini untuk mengirim ulang email verifikasi.') }}
                         </button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600">
+                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
                             {{ __('Tautan verifikasi baru telah dikirim ke alamat email Anda.') }}
                         </p>
                     @endif

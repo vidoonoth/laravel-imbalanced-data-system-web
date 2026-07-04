@@ -47,7 +47,7 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('report.pdf', $data)->setPaper('a4', 'portrait');
         
         $filename = 'laporan-deteksi-malware-' . now()->format('YmdHis') . '.pdf';
-        return $pdf->download($filename);
+        return $pdf->stream($filename);
     }
 
     private function getReportData(Request $request): array

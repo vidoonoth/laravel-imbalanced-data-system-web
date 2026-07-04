@@ -46,9 +46,9 @@
                         <div>
                             <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
                             <input id="email"
-                                class="mt-2 block w-full rounded-lg border border-white/70 dark:border-gray-600 bg-white/65 dark:bg-gray-700/65 px-4 py-3 text-sm text-slate-900 dark:text-slate-100 shadow-sm outline-none transition placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-blue-400 dark:focus:border-blue-500 focus:bg-white/85 dark:focus:bg-gray-700/85 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/50"
+                                class="mt-2 block w-full rounded-lg border border-white/70 dark:border-gray-600 bg-white/65 dark:bg-gray-700/65 px-4 py-3 text-sm text-slate-900 dark:text-slate-100 shadow-sm outline-none transition placeholder:text-slate-400 dark:placeholder:text-slate-300 focus:border-blue-400 dark:focus:border-blue-500 focus:bg-white/85 dark:focus:bg-gray-700/85 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/50"
                                 type="email" name="email" value="{{ old('email') }}" required autofocus
-                                autocomplete="username" placeholder="nama@email.com">
+                                autocomplete="username" placeholder="Masukkan email yang sudah terdaftar">
                             <x-input-error :messages="$errors->get('email')" class="mt-2 text-sm text-rose-600 dark:text-rose-400" />
                         </div>
 

@@ -43,7 +43,7 @@
         <select id="role" name="role"
             class="mt-1 block w-full max-w-sm rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
             @foreach ($roles as $role)
-                <option value="{{ $role }}" @selected($selectedRole === $role)>{{ ucfirst($role) }}</option>
+                <option value="{{ $role }}" @selected($selectedRole === $role)>{{ $role === 'user' ? 'Petugas' : ucfirst($role) }}</option>
             @endforeach
         </select>
         <x-input-error :messages="$errors->get('role')" class="mt-2" />

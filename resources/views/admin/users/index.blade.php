@@ -14,7 +14,7 @@
                         class="rounded-lg border-gray-300 dark:border-gray-500 dark:bg-gray-700 dark:text-white focus:border-blue-500 focus:ring-blue-500">
                         <option value="">Semua Role</option>
                         <option value="admin" {{ $filters['role'] === 'admin' ? 'selected' : '' }}>Admin</option>
-                        <option value="user" {{ $filters['role'] === 'user' ? 'selected' : '' }}>User</option>
+                        <option value="user" {{ $filters['role'] === 'user' ? 'selected' : '' }}>Petugas</option>
                     </select>
                     <button type="submit"
                         class="px-4 py-2 bg-gray-800 text-white dark:bg-gray-600 rounded-lg hover:bg-gray-900 hover:dark:bg-gray-700 transition text-sm font-semibold">
@@ -59,7 +59,7 @@
                             <td class="px-6 py-4">
                                 <span
                                     class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold {{ $roleName === 'admin' ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">
-                                    {{ ucfirst($roleName) }}
+                                    {{ $roleName === 'user' ? 'Petugas' : ucfirst($roleName) }}
                                 </span>
                             </td>
                             <td class="px-6 py-4">

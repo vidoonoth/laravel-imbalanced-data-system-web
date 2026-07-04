@@ -169,7 +169,7 @@
                             class="flex items-center space-x-3 px-4 py-3 rounded-lg {{ request()->routeIs('dashboard.raw') ? 'bg-gray-200 dark:bg-gray-700' : 'hover:bg-gray-100 dark:hover:bg-gray-700' }} transition cursor-pointer">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 7h16M4 12h16M4 17h16"></path>
+                                    d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
                             </svg>
                             <span class="whitespace-nowrap">Dashboard Raw</span>
                         </a>
@@ -245,7 +245,7 @@
                         <x-theme-toggle />
 
                      <!-- User Profile Section -->
-                        <div class="flex-shrink-0 bg-blue-100 dark:bg-gray-700 rounded-xl">
+                        <div class="flex-shrink-0 bg-blue-50 dark:bg-gray-700 rounded-xl">
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button
@@ -274,18 +274,20 @@
                         </x-slot>
 
                         <x-slot name="content">
-                            <x-dropdown-link :href="route('profile.show')">
-                                {{ __('Profile') }}
-                            </x-dropdown-link>
-
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                        this.closest('form').submit();">
-                                    {{ __('Log Out') }}
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                                <x-dropdown-link :href="route('profile.show')">
+                                    {{ __('Profil') }}
                                 </x-dropdown-link>
-                            </form>
+
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <x-dropdown-link :href="route('logout')"
+                                        onclick="event.preventDefault();
+                                                            this.closest('form').submit();">
+                                        {{ __('Keluar') }}
+                                    </x-dropdown-link>
+                                </form>
+                            </div>
                         </x-slot>
                     </x-dropdown>
                 </div>

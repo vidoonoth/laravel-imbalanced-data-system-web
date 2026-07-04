@@ -72,8 +72,8 @@
     </style>
     <x-slot name="breadcrumbs">
         <a href="{{ Auth::user()->can('dashboard.view') ? route('dashboard') : route('profile.show') }}"
-            class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">Dashboard</a>
-        <span class="text-gray-400">/</span>
+            class="text-gray-600 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100">Dashboard</a>
+        <span class="text-gray-200">/</span>
         <span class="text-gray-900 dark:text-gray-100 text-[23px] font-semibold">Detail Aktivitas IP</span>
     </x-slot>
 
@@ -94,7 +94,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <p class="text-sm text-gray-500 dark:text-gray-400">
+            <p class="text-sm text-gray-500 dark:text-gray-200">
                 <span class="tip-wrap">
                     Jumlah Request
                     <span class="tip-icon">?</span>
@@ -103,23 +103,23 @@
             </p>
             <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-2">
                 {{ number_format($summary['total_activities'], 0, ',', '.') }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">record aktivitas source IP</p>
+            <p class="text-xs text-gray-500 dark:text-gray-200 mt-1">record aktivitas source IP</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <p class="text-sm text-gray-500 dark:text-gray-400">
+            <p class="text-sm text-gray-500 dark:text-gray-200">
                 <span class="tip-wrap">
                     Alert Malware
                     <span class="tip-icon">?</span>
-                    <span class="tip-box">Dari semua aktivitas IP ini, ini adalah jumlah aktivitas yang sistem kita deteksi sebagai berbahaya (malware). Sistem pakai machine learning untuk menganalisis pola aktivitas, terus kasih label "malware" kalau polanya mirip dengan serangan. Makin banyak angka alert ini, makin berbahaya IP-nya karena banyak aktivitasnya yang mencurigakan.</span>
+                    <span class="tip-box">Dari semua aktivitas IP ini, ini adalah jumlah aktivitas yang sistem kita deteksi sebagai berbahaya (malware). Makin banyak angka alert ini, makin berbahaya IP-nya karena banyak aktivitasnya yang mencurigakan.</span>
                 </span>
             </p>
             <p class="text-2xl font-bold text-red-700 dark:text-red-400 mt-2">
                 {{ number_format($summary['total_alerts'], 0, ',', '.') }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">record dengan prediksi malware</p>
+            <p class="text-xs text-gray-500 dark:text-gray-200 mt-1">record dengan prediksi malware</p>
         </div>
 
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <p class="text-sm text-gray-500 dark:text-gray-400">
+            <p class="text-sm text-gray-500 dark:text-gray-200">
                 <span class="tip-wrap">
                     Kemunculan IP
                     <span class="tip-icon">?</span>
@@ -128,7 +128,7 @@
                 </span>
             </p>
             <p class="text-sm font-semibold text-gray-800 dark:text-gray-100 mt-2">{{ $firstSeen }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">terakhir {{ $lastSeen }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-200 mt-1">terakhir {{ $lastSeen }}</p>
         </div>
     </div>
 
@@ -149,7 +149,7 @@
                                 menunjukkan aktivitas yang perlu mendapat perhatian:
                             </p>
 
-                            <ul class="mt-2 ml-4 text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                            <ul class="mt-2 ml-4 text-xs text-gray-600 dark:text-gray-200 space-y-1">
                                 <li>
                                     <strong>Allow</strong>: Aktivitas yang diizinkan oleh firewall, tetapi diprediksi
                                     sebagai
@@ -194,13 +194,13 @@
                                 <span class="font-semibold text-gray-800 dark:text-gray-100">{{ $item['label'] }}</span>
                             </div>
                             <span
-                                class="text-gray-500 dark:text-gray-400 font-bold">{{ number_format($item['total'], 0, ',', '.') }}</span>
+                                class="text-gray-500 dark:text-gray-200 font-bold">{{ number_format($item['total'], 0, ',', '.') }}</span>
                         </div>
                         <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2 mt-2">
                             <div class="{{ $isAllow ? 'bg-red-600' : 'bg-orange-500' }} h-2 rounded-full"
                                 style="width: {{ $width }}%;"></div>
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <p class="text-xs text-gray-500 dark:text-gray-200 mt-1">
                             @if ($isAllow)
                                 Ancaman berhasil menembus sistem keamanan
                             @elseif ($isDeny)
@@ -212,7 +212,7 @@
                     </div>
                 @empty
                     <p
-                        class="p-6 bg-gray-50 dark:bg-gray-700 rounded-lg text-center text-sm text-gray-500 dark:text-gray-400">
+                        class="p-6 bg-gray-50 dark:bg-gray-700 rounded-lg text-center text-sm text-gray-500 dark:text-gray-200">
                         Data aktivitas mencurigakan belum tersedia.</p>
                 @endforelse
             </div>
@@ -245,7 +245,7 @@
                             <span class="font-semibold text-gray-800 dark:text-gray-100 truncate"
                                 title="{{ $item['label'] }}">{{ $item['label'] }}</span>
                             <span
-                                class="text-gray-500 dark:text-gray-400">{{ number_format($item['total'], 0, ',', '.') }}</span>
+                                class="text-gray-500 dark:text-gray-200">{{ number_format($item['total'], 0, ',', '.') }}</span>
                         </div>
                         <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2 mt-2">
                             <div class="bg-green-500 h-2 rounded-full" style="width: {{ $width }}%;"></div>
@@ -253,7 +253,7 @@
                     </div>
                 @empty
                     <p
-                        class="p-6 bg-gray-50 dark:bg-gray-700 rounded-lg text-center text-sm text-gray-500 dark:text-gray-400">
+                        class="p-6 bg-gray-50 dark:bg-gray-700 rounded-lg text-center text-sm text-gray-500 dark:text-gray-200">
                         Tujuan akses belum tersedia.</p>
                 @endforelse
             </div>
@@ -272,11 +272,11 @@
                             diprediksi normal maupun malware. Baris merah = diprediksi malware.</span>
                     </span>
                 </h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Semua record dari source IP {{ $ipAddress }}.
+                <p class="text-sm text-gray-500 dark:text-gray-200">Semua record dari source IP {{ $ipAddress }}.
                 </p>
             </div>
             <span
-                class="text-sm text-gray-500 dark:text-gray-400">{{ number_format($activities->total(), 0, ',', '.') }}
+                class="text-sm text-gray-500 dark:text-gray-200">{{ number_format($activities->total(), 0, ',', '.') }}
                 record</span>
         </div>
 
@@ -360,7 +360,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-10 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="6" class="px-5 py-10 text-center text-gray-500 dark:text-gray-200">
                                 Tidak ada record aktivitas untuk IP ini.
                             </td>
                         </tr>
