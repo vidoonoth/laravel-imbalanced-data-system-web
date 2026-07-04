@@ -134,10 +134,24 @@
         $dashboardRawPermission = \App\Support\AccessControl::PERMISSION_VIEW_DASHBOARD_RAW;
     @endphp
 
-    <div class="flex h-screen bg-gray-100 dark:bg-gray-900" x-data="{ sidebarOpen: true }">
+    <div class="flex h-screen bg-gray-100 dark:bg-gray-900" x-data="{ sidebarOpen: window.innerWidth >= 1024 }" @resize.window="if (window.innerWidth >= 1024 && !sidebarOpen) sidebarOpen = true">
+        
+        <!-- Backdrop Overlay (Mobile Only) -->
+        <div x-show="sidebarOpen" 
+             @click="sidebarOpen = false"
+             x-transition:enter="transition-opacity ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+             style="display: none;">
+        </div>
+
         <!-- Sidebar -->
-        <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 text-black dark:text-gray-100 shadow-lg transition-all duration-300 overflow-visible"
-            :class="{ 'hidden': !sidebarOpen }">
+        <aside class="fixed lg:static inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 text-black dark:text-gray-100 shadow-lg transition-transform duration-300 overflow-visible z-50"
+            :class="{ '-translate-x-full lg:translate-x-0': !sidebarOpen, 'translate-x-0': sidebarOpen }">
             <div class="flex flex-col h-full">
                 <!-- Logo Section -->
                 <div class="p-[24px] border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
