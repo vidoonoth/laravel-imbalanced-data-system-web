@@ -36,7 +36,15 @@ return new class extends Migration
             $table->unsignedInteger('destination_port')->nullable();
             $table->string('policy')->nullable();
             $table->string('geo_src', 16)->nullable();
+            $table->string('geo_dst', 16)->nullable()->index();
             $table->string('action')->nullable();
+            $table->string('sn', 64)->nullable()->index();
+            $table->string('source_interface', 64)->nullable();
+            $table->string('destination_interface', 64)->nullable();
+            $table->unsignedInteger('pckt_len')->nullable();
+            $table->unsignedInteger('ttl')->nullable();
+            $table->unsignedBigInteger('sent_bytes')->nullable();
+            $table->unsignedBigInteger('rcvd_bytes')->nullable();
 
             $table->unsignedTinyInteger('prediction')->nullable();
             $table->string('prediction_label', 32)->nullable();
