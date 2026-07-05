@@ -29,7 +29,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route(AccessControl::homeRouteNameFor($request->user()), absolute: false));
+        return redirect()->intended(route(AccessControl::homeRouteNameFor($request->user()), absolute: false))
+            ->with('success', 'Berhasil masuk ke sistem');
     }
 
     /**
