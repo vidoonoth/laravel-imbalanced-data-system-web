@@ -134,7 +134,7 @@
         $dashboardRawPermission = \App\Support\AccessControl::PERMISSION_VIEW_DASHBOARD_RAW;
     @endphp
 
-    <div class="flex h-screen bg-gray-100 dark:bg-gray-900" x-data="{ sidebarOpen: window.innerWidth >= 1024 }">
+    <div class="flex h-screen bg-gray-100 dark:bg-gray-900" x-data="{ sidebarOpen: window.innerWidth >= 1024, showLogoutModal: false }" @show-logout-modal.window="showLogoutModal = true" @keydown.escape.window="showLogoutModal = false">
         
         <!-- Backdrop Overlay (Mobile Only) -->
         <div x-show="sidebarOpen" 
@@ -293,14 +293,14 @@
                                     {{ __('Profil') }}
                                 </x-dropdown-link>
 
-                                <form method="POST" action="{{ route('logout') }}">
+                                <form method="POST" action="{{ route('logout') }}" id="logout-form">
                                     @csrf
-                                    <x-dropdown-link :href="route('logout')"
-                                        onclick="event.preventDefault();
-                                                            this.closest('form').submit();">
-                                        {{ __('Keluar') }}
-                                    </x-dropdown-link>
                                 </form>
+                                <button type="button"
+                                    @click.prevent="showLogoutModal = true"
+                                    class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700 transition duration-150 ease-in-out">
+                                    {{ __('Keluar') }}
+                                </button>
                             </div>
                         </x-slot>
                     </x-dropdown>
@@ -323,6 +323,49 @@
                     {{ $slot }}
                 </div>
             </main>
+        </div>
+
+        <!-- Logout Confirmation Modal -->
+        <div x-show="showLogoutModal"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+             style="display: none;">
+            <div x-show="showLogoutModal"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-90"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-90"
+                 @click.stop
+                 class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+                <div class="p-6">
+                    <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-900/20 rounded-full mb-4">
+                        <svg class="w-6 h-6 text-red-600 dark:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-2">Konfirmasi Keluar</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 text-center mb-6">Apakah Anda yakin ingin keluar dari aplikasi?</p>
+                    <div class="flex gap-3">
+                        <button @click="showLogoutModal = false"
+                                type="button"
+                                class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg transition">
+                            Batal
+                        </button>
+                        <button @click="document.getElementById('logout-form').submit()"
+                                type="button"
+                                class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
+                            Keluar
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
