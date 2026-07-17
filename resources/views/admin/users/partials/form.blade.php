@@ -2,32 +2,80 @@
     $selectedRole = old('role', $selectedRole ?? 'user');
 @endphp
 
-<form method="POST" action="{{ $action }}" class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6">
+<form method="POST" action="{{ $action }}" class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6"
+    x-data="{
+        name: '{{ old('name') }}',
+        email: '{{ old('email') }}',
+        password: '',
+        passwordConfirmation: '',
+        errors: {},
+        validate() {
+            this.errors = {};
+
+            if (!this.name.trim()) {
+                this.errors.name = 'Nama tidak boleh kosong.';
+            } else if (this.name.trim().length > 255) {
+                this.errors.name = 'Nama maksimal 255 karakter.';
+            }
+
+            if (!this.email.trim()) {
+                this.errors.email = 'Email tidak boleh kosong.';
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)) {
+                this.errors.email = 'Format email tidak valid.';
+            }
+
+            if (!this.password) {
+                this.errors.password = 'Password tidak boleh kosong.';
+            } else if (this.password.length < 8) {
+                this.errors.password = 'Password minimal 8 karakter.';
+            } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(this.password)) {
+                this.errors.password = 'Password harus mengandung huruf besar, huruf kecil, dan angka.';
+            }
+
+            if (this.password !== this.passwordConfirmation) {
+                this.errors.passwordConfirmation = 'Konfirmasi password tidak sama.';
+            }
+
+            return Object.keys(this.errors).length === 0;
+        },
+        handleSubmit(e) {
+            if (!this.validate()) {
+                e.preventDefault();
+            }
+        }
+    }"
+    @submit="handleSubmit($event)">
     @csrf
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
             <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama</label>
-            <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus
+            <input id="name" name="name" type="text" x-model="name" required autofocus
                 placeholder="Masukkan nama lengkap"
-                class="mt-1 block w-full rounded-lg border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                :class="['mt-1 block w-full rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10', errors.name ? 'border-red-500' : 'border-gray-300']">
+            <template x-if="errors.name">
+                <p class="mt-2 text-sm text-red-600 dark:text-red-400" x-text="errors.name"></p>
+            </template>
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
         <div>
             <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-            <input id="email" name="email" type="email" value="{{ old('email') }}" required
+            <input id="email" name="email" type="email" x-model="email" required
                 placeholder="Masukkan alamat email"
-                class="mt-1 block w-full rounded-lg border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                :class="['mt-1 block w-full rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10', errors.email ? 'border-red-500' : 'border-gray-300']">
+            <template x-if="errors.email">
+                <p class="mt-2 text-sm text-red-600 dark:text-red-400" x-text="errors.email"></p>
+            </template>
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
         <div>
             <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
             <div class="relative">
-                <input id="password" name="password" type="password" autocomplete="new-password" required
+                <input id="password" name="password" type="password" x-model="password" autocomplete="new-password" required
                     placeholder="Masukkan password"
-                    class="mt-1 block w-full rounded-lg border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10">
+                    :class="['mt-1 block w-full rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10', errors.password ? 'border-red-500' : 'border-gray-300']">
                 <button type="button"
                     class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,15 +87,18 @@
                     </svg>
                 </button>
             </div>
+            <template x-if="errors.password">
+                <p class="mt-2 text-sm text-red-600 dark:text-red-400" x-text="errors.password"></p>
+            </template>
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
         <div>
             <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Konfirmasi Password</label>
             <div class="relative">
-                <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required
+                <input id="password_confirmation" name="password_confirmation" type="password" x-model="passwordConfirmation" autocomplete="new-password" required
                     placeholder="Konfirmasi password"
-                    class="mt-1 block w-full rounded-lg border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10">
+                    :class="['mt-1 block w-full rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10', errors.passwordConfirmation ? 'border-red-500' : 'border-gray-300']">
                 <button type="button"
                     class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,6 +110,9 @@
                     </svg>
                 </button>
             </div>
+            <template x-if="errors.passwordConfirmation">
+                <p class="mt-2 text-sm text-red-600 dark:text-red-400" x-text="errors.passwordConfirmation"></p>
+            </template>
         </div>
     </div>
 

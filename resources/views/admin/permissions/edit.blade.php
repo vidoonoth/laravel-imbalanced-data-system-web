@@ -12,6 +12,7 @@
     $childPermissions = $permissionCollection
         ->filter(fn ($meta) => isset($meta['parent']) && $meta['parent'] !== '')
         ->groupBy(fn ($meta) => $meta['parent'], true);
+    $dashboardPermission = \App\Support\AccessControl::PERMISSION_VIEW_DASHBOARD;
     $dashboardDetectionPermission = \App\Support\AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION;
     $dashboardRawPermission = \App\Support\AccessControl::PERMISSION_VIEW_DASHBOARD_RAW;
     $dashboardDetectionDetailPermissions = \App\Support\AccessControl::dashboardDetectionDetailPermissions();
@@ -49,11 +50,24 @@
 
     <form method="POST" action="{{ route('admin.permissions.update', $user) }}" class="space-y-6"
         x-data="{
+            dashboardEnabled: false,
             dashboardDetection: {{ in_array($dashboardDetectionPermission, $selectedPermissions, true) ? 'true' : 'false' }},
             dashboardRaw: {{ in_array($dashboardRawPermission, $selectedPermissions, true) ? 'true' : 'false' }},
+            errorMessage: '',
             updateDashboardSelection(type) {
-                if (type === 'detection' && this.dashboardDetection) {
-                    this.dashboardRaw = false;
+                if (type === 'detection') {
+                    if (this.dashboardDetection) {
+                        this.dashboardRaw = false;
+                    } else {
+                        this.dashboardRaw = false;
+                        this.$root.querySelectorAll('[data-dashboard-detection-child]').forEach((input) => {
+                            input.checked = false;
+                        });
+                        const reportCheckbox = this.$root.querySelector('[data-report-permission]');
+                        if (reportCheckbox) {
+                            reportCheckbox.checked = false;
+                        }
+                    }
                 } else if (type === 'raw' && this.dashboardRaw) {
                     this.dashboardDetection = false;
                     this.$root.querySelectorAll('[data-dashboard-detection-child]').forEach((input) => {
@@ -64,8 +78,53 @@
                         reportCheckbox.checked = false;
                     }
                 }
+            },
+            clearDashboardState() {
+                this.dashboardDetection = false;
+                this.dashboardRaw = false;
+                document.querySelectorAll('[data-dashboard-detection-child]').forEach((input) => {
+                    input.checked = false;
+                });
+                const reportCheckbox = this.$root.querySelector('[data-report-permission]');
+                if (reportCheckbox) {
+                    reportCheckbox.checked = false;
+                }
+            },
+            validate() {
+                const anyPermissionChecked = this.$root.querySelector('.permission-checkbox:checked');
+                if (!anyPermissionChecked) {
+                    this.errorMessage = 'Pilih setidaknya satu hak akses menu.';
+                    return false;
+                }
+
+                if (this.dashboardEnabled) {
+                    if (!this.dashboardDetection && !this.dashboardRaw) {
+                        this.errorMessage = 'Pilih salah satu jenis dashboard (Hasil Deteksi atau Raw Data).';
+                        return false;
+                    }
+
+                    if (this.dashboardDetection) {
+                        const children = Array.from(this.$root.querySelectorAll('[data-dashboard-detection-child]'));
+                        const isAnyChildChecked = children.some(input => input.checked);
+                        if (!isAnyChildChecked) {
+                            this.errorMessage = 'Pilih setidaknya satu fitur di bawah Dashboard Hasil Deteksi.';
+                            return false;
+                        }
+                    }
+                }
+                this.errorMessage = '';
+                return true;
+            },
+            handleSubmit(e) {
+                if (!this.validate()) {
+                    e.preventDefault();
+                    return;
+                }
+                e.target.submit();
             }
-        }">
+        }"
+        @clear-dashboard-state.window="clearDashboardState()"
+        @submit="handleSubmit($event)">
         @csrf
         @method('PUT')
 
@@ -89,7 +148,19 @@
                                     $isPermissionSelected = in_array($permission, $selectedPermissions, true);
                                 @endphp
 
-                                <div @if ($hasChildren) x-data="{ enabled: {{ $isPermissionSelected ? 'true' : 'false' }} }" @endif>
+                                <div @if ($hasChildren)
+                                    x-data="{
+                                        enabled: {{ $isPermissionSelected ? 'true' : 'false' }}
+                                    }"
+                                    @if ($permission === $dashboardPermission)
+                                        x-init="$watch('enabled', value => {
+                                            if (!value) $dispatch('clear-dashboard-state');
+                                            dashboardEnabled = value;
+                                        }); dashboardEnabled = enabled"
+                                    @else
+                                        x-init="$watch('enabled', value => !value && $dispatch('clear-dashboard-state'))"
+                                    @endif
+                                @endif>
                                     <label class="flex items-start gap-3"
                                         @if ($permission === $reportPermission)
                                              :class="{ 'opacity-40 cursor-not-allowed': dashboardRaw || !dashboardDetection }"
@@ -105,7 +176,7 @@
                                                  data-report-permission
                                                  :disabled="dashboardRaw || !dashboardDetection"
                                              @endif
-                                             class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                             class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500 permission-checkbox"
                                          >
                                         <span class="min-w-0">
                                             <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">
@@ -140,11 +211,11 @@
                                                             @checked(in_array($childPermission, $selectedPermissions, true))
                                                             @if ($childPermission === $dashboardDetectionPermission)
                                                                 x-model="dashboardDetection"
-                                                                @change="updateDashboardSelection('detection')"
+                                                                @change="updateDashboardSelection('detection'); errorMessage = ''"
                                                                 :disabled="!enabled || dashboardRaw"
                                                             @elseif ($childPermission === $dashboardRawPermission)
                                                                 x-model="dashboardRaw"
-                                                                @change="updateDashboardSelection('raw')"
+                                                                @change="updateDashboardSelection('raw'); errorMessage = ''"
                                                                 :disabled="!enabled || dashboardDetection"
                                                             @else
                                                                 :disabled="!enabled"
@@ -179,8 +250,9 @@
                                                                             value="{{ $detailPermission }}"
                                                                             @checked(in_array($detailPermission, $selectedPermissions, true))
                                                                             data-dashboard-detection-child
+                                                                            @change="$dispatch('change'); errorMessage = ''"
                                                                             :disabled="!enabled || !dashboardDetection || dashboardRaw"
-                                                                            class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed permission-checkbox"
                                                                         >
                                                                         <span class="min-w-0">
                                                                             <span class="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -205,6 +277,8 @@
                     </div>
                 @endforeach
             </div>
+
+            <div x-show="errorMessage" x-cloak class="mt-2 text-sm text-red-600 dark:text-red-400 font-medium" x-text="errorMessage"></div>
 
             <x-input-error :messages="$errors->get('permissions')" class="mt-2" />
             <x-input-error :messages="$errors->get('permissions.*')" class="mt-2" />

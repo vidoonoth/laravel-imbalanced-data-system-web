@@ -54,45 +54,58 @@ class ReportController extends Controller
     {
         $dateFrom = null;
         $dateTo = null;
+        $showReport = false;
 
-        if ($request->filled('date_from')) {
-            $dateFrom = Carbon::parse($request->string('date_from')->toString())->startOfDay();
-        }
-        if ($request->filled('date_to')) {
-            $dateTo = Carbon::parse($request->string('date_to')->toString())->endOfDay();
-        }
-
-        $baseQuery = DetectionResult::query();
-
-        if ($dateFrom) {
-            $baseQuery->where('detected_at', '>=', $dateFrom);
-        }
-        if ($dateTo) {
-            $baseQuery->where('detected_at', '<=', $dateTo);
+        if ($request->filled('date_from') || $request->filled('date_to')) {
+            $showReport = true;
+            if ($request->filled('date_from')) {
+                $dateFrom = Carbon::parse($request->string('date_from')->toString())->startOfDay();
+            }
+            if ($request->filled('date_to')) {
+                $dateTo = Carbon::parse($request->string('date_to')->toString())->endOfDay();
+            }
         }
 
-        $totalTraffic = (clone $baseQuery)->count();
-        $normalTotal = (clone $baseQuery)->where('prediction', 0)->count();
-        $malwareTotal = (clone $baseQuery)->where('prediction', 1)->count();
+        $totalTraffic = 0;
+        $normalTotal = 0;
+        $malwareTotal = 0;
+        $normalPercentage = 0;
+        $malwarePercentage = 0;
+        $topSuspiciousIps = collect();
+        $dailyStats = collect();
 
-        $normalPercentage = $totalTraffic > 0 ? ($normalTotal / $totalTraffic) * 100 : 0;
-        $malwarePercentage = $totalTraffic > 0 ? ($malwareTotal / $totalTraffic) * 100 : 0;
+        if ($showReport) {
+            $baseQuery = DetectionResult::query();
 
-        $topSuspiciousIps = $this->topPublicSuspiciousIps($dateFrom, $dateTo);
+            if ($dateFrom) {
+                $baseQuery->where('detected_at', '>=', $dateFrom);
+            }
+            if ($dateTo) {
+                $baseQuery->where('detected_at', '<=', $dateTo);
+            }
 
-        // Daily stats (date, total, normal, malware)
-        $dailyStats = DetectionResult::query()
-            ->select(
-                DB::raw('DATE(detected_at) as date'),
-                DB::raw('COUNT(*) as total_count'),
-                DB::raw('SUM(CASE WHEN prediction = 0 THEN 1 ELSE 0 END) as normal_count'),
-                DB::raw('SUM(CASE WHEN prediction = 1 THEN 1 ELSE 0 END) as malware_count')
-            )
-            ->when($dateFrom, fn($q) => $q->where('detected_at', '>=', $dateFrom))
-            ->when($dateTo, fn($q) => $q->where('detected_at', '<=', $dateTo))
-            ->groupBy(DB::raw('DATE(detected_at)'))
-            ->orderBy('date', 'desc')
-            ->get();
+            $totalTraffic = (clone $baseQuery)->count();
+            $normalTotal = (clone $baseQuery)->where('prediction', 0)->count();
+            $malwareTotal = (clone $baseQuery)->where('prediction', 1)->count();
+
+            $normalPercentage = $totalTraffic > 0 ? ($normalTotal / $totalTraffic) * 100 : 0;
+            $malwarePercentage = $totalTraffic > 0 ? ($malwareTotal / $totalTraffic) * 100 : 0;
+
+            $topSuspiciousIps = $this->topPublicSuspiciousIps($dateFrom, $dateTo);
+
+            $dailyStats = DetectionResult::query()
+                ->select(
+                    DB::raw('DATE(detected_at) as date'),
+                    DB::raw('COUNT(*) as total_count'),
+                    DB::raw('SUM(CASE WHEN prediction = 0 THEN 1 ELSE 0 END) as normal_count'),
+                    DB::raw('SUM(CASE WHEN prediction = 1 THEN 1 ELSE 0 END) as malware_count')
+                )
+                ->when($dateFrom, fn($q) => $q->where('detected_at', '>=', $dateFrom))
+                ->when($dateTo, fn($q) => $q->where('detected_at', '<=', $dateTo))
+                ->groupBy(DB::raw('DATE(detected_at)'))
+                ->orderBy('date', 'desc')
+                ->get();
+        }
 
         return [
             'dateFrom' => $dateFrom,
@@ -109,6 +122,7 @@ class ReportController extends Controller
                 'date_to' => $request->string('date_to')->toString(),
             ],
             'isPdf' => false,
+            'showReport' => $showReport,
         ];
     }
 
