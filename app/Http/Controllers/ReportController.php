@@ -26,36 +26,38 @@ class ReportController extends Controller
     public function exportPdf(Request $request)
     {
         $data = $this->getReportData($request);
-        
+
         $dateFrom = $data['dateFrom'];
         $dateTo = $data['dateTo'];
-        
+
         $detectionQuery = DetectionResult::query()
             ->latest('detected_at')
             ->latest('id');
-             
+
         if ($dateFrom) {
             $detectionQuery->where('detected_at', '>=', $dateFrom);
         }
         if ($dateTo) {
             $detectionQuery->where('detected_at', '<=', $dateTo);
         }
-        
+
         $data['recentDetections'] = $detectionQuery->limit(200)->get();
         $data['isPdf'] = true;
 
         $pdf = Pdf::loadView('report.pdf', $data)->setPaper('a4', 'portrait');
-        
+
         $filename = 'laporan-deteksi-malware-' . now()->format('YmdHis') . '.pdf';
         return $pdf->stream($filename);
     }
 
+    // mengambil data laporan berdasarkan filter tanggal dari request
     private function getReportData(Request $request): array
     {
         $dateFrom = null;
         $dateTo = null;
         $showReport = false;
 
+        // memeriksa apakah parameter 'date_from' atau 'date_to' ada pada request, jika ada maka mengatur variabel $showReport menjadi true dan mengatur nilai $dateFrom dan $dateTo sesuai dengan parameter yang diberikan
         if ($request->filled('date_from') || $request->filled('date_to')) {
             $showReport = true;
             if ($request->filled('date_from')) {
@@ -66,6 +68,7 @@ class ReportController extends Controller
             }
         }
 
+        // menginisialisasi variabel untuk menyimpan total lalu lintas, total normal, total malware, persentase normal, persentase malware, daftar IP mencurigakan teratas, dan statistik harian
         $totalTraffic = 0;
         $normalTotal = 0;
         $malwareTotal = 0;
@@ -74,6 +77,7 @@ class ReportController extends Controller
         $topSuspiciousIps = collect();
         $dailyStats = collect();
 
+        // Jika $showReport bernilai true, maka akan dilakukan query untuk menghitung total lalu lintas, total normal, total malware, persentase normal, persentase malware, daftar IP mencurigakan teratas, dan statistik harian berdasarkan filter tanggal yang diberikan. Hasilnya akan disimpan dalam variabel yang telah diinisialisasi sebelumnya.
         if ($showReport) {
             $baseQuery = DetectionResult::query();
 
@@ -84,15 +88,19 @@ class ReportController extends Controller
                 $baseQuery->where('detected_at', '<=', $dateTo);
             }
 
+            // menghitung total lalu lintas, total normal, total malware, persentase normal, persentase malware, daftar IP mencurigakan teratas, dan statistik harian berdasarkan filter tanggal yang diberikan
             $totalTraffic = (clone $baseQuery)->count();
             $normalTotal = (clone $baseQuery)->where('prediction', 0)->count();
             $malwareTotal = (clone $baseQuery)->where('prediction', 1)->count();
 
+            // menghitung persentase normal dan persentase malware berdasarkan total lalu lintas
             $normalPercentage = $totalTraffic > 0 ? ($normalTotal / $totalTraffic) * 100 : 0;
             $malwarePercentage = $totalTraffic > 0 ? ($malwareTotal / $totalTraffic) * 100 : 0;
 
+            // mengambil daftar IP mencurigakan teratas berdasarkan filter tanggal yang diberikan
             $topSuspiciousIps = $this->topPublicSuspiciousIps($dateFrom, $dateTo);
 
+            // mengambil statistik harian berdasarkan filter tanggal yang diberikan
             $dailyStats = DetectionResult::query()
                 ->select(
                     DB::raw('DATE(detected_at) as date'),

@@ -6,8 +6,10 @@ use App\Models\DetectionResult;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
+// Command untuk melakukan backfill pada field event_name, disposition, dan action dari payload dataset ke tabel detection_results
 class BackfillDetectionFields extends Command
 {
+
     protected $signature = 'detection:backfill-fields
         {--dry-run : Simulasi tanpa menyimpan}
         {--limit= : Batasi jumlah record yang diproses}';
@@ -16,12 +18,15 @@ class BackfillDetectionFields extends Command
 
     public function handle(): int
     {
+        // mengambil opsi dry-run dan limit dari command line
         $dryRun = (bool) $this->option('dry-run');
         $limit = $this->option('limit') ? (int) $this->option('limit') : null;
 
+        // menampilkan informasi bahwa proses backfill telah dimulai
         $this->info('Memulai backfill detection fields...');
         $this->newLine();
 
+        // membuat query untuk mengambil detection results yang memiliki dataset terkait
         $query = DetectionResult::query()
             ->whereNotNull('dataset_id')
             ->with('dataset');
@@ -44,6 +49,7 @@ class BackfillDetectionFields extends Command
         $skipped = 0;
         $errors = 0;
 
+        // menampilkan progress bar selama proses backfill berlangsung
         $this->withProgressBar($total, function ($bar) use ($query, $dryRun, &$updated, &$skipped, &$errors) {
             $query->chunk(100, function ($results) use ($dryRun, &$updated, &$skipped, &$errors, $bar) {
                 foreach ($results as $result) {
@@ -86,7 +92,7 @@ class BackfillDetectionFields extends Command
 
                     foreach ($fieldMapping as $payloadKey => $dbColumn) {
                         $value = $this->getPayloadValue($payload, $payloadKey);
-                        
+
                         if ($value !== null && $result->{$dbColumn} === null) {
                             $updates[$dbColumn] = $value;
                         }
@@ -135,13 +141,13 @@ class BackfillDetectionFields extends Command
     {
         $normalizedPayload = array_change_key_case($payload, CASE_LOWER);
         $normalizedKey = strtolower($key);
-        
+
         $value = $normalizedPayload[$normalizedKey] ?? null;
-        
+
         if ($value === null || $value === '' || $value === 'unknown') {
             return null;
         }
-        
+
         return is_scalar($value) ? $value : null;
     }
 }

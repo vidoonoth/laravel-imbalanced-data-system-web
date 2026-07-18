@@ -23,27 +23,33 @@ class DetectionController extends Controller
         $canViewDashboardSuspiciousIpCard = $user?->can(AccessControl::PERMISSION_VIEW_DASHBOARD_SUSPICIOUS_IP_CARD) ?? false;
         $canViewDashboardDetection = $user?->can(AccessControl::PERMISSION_VIEW_DASHBOARD_DETECTION) ?? false;
 
+        // jumlah total traffic, normal, dan malware
         $totalTraffic = DetectionResult::count();
         $normalTotal = DetectionResult::where('prediction', 0)->count();
         $malwareTotal = DetectionResult::where('prediction', 1)->count();
 
+        // persentase normal dan malware
         $normalPercentage = $totalTraffic > 0 ? ($normalTotal / $totalTraffic) * 100 : 0;
         $malwarePercentage = $totalTraffic > 0 ? ($malwareTotal / $totalTraffic) * 100 : 0;
 
+        // ambil data deteksi terbaru
         $latestDetection = DetectionResult::query()
             ->latest('created_at')
             ->latest('id')
             ->first();
 
+        // hitung jumlah IP mencurigakan
         $suspiciousIpCount = $canViewDashboardSuspiciousIpCard
             ? $this->publicSuspiciousIpCount()
             : 0;
 
+        // ambil 8 deteksi terbaru
         $recentDetections = DetectionResult::query()
             ->latest('id')
             ->limit(8)
             ->get();
 
+        // ambil 5 IP mencurigakan teratas
         $topSuspiciousIps = $canViewDashboardSuspiciousIpCard
             ? $this->topPublicSuspiciousIps()
             : collect();
@@ -64,19 +70,23 @@ class DetectionController extends Controller
         ]);
     }
 
+    // menampilkan aktivitas IP
     public function ipActivity(Request $request)
     {
+        // ambil parameter IP dari query string
         $ipAddress = trim((string) $request->query('ip', ''));
         abort_if($ipAddress === '', 404);
 
+        // ambil data aktivitas IP dari database
         $baseQuery = $this->ipActivityQuery($ipAddress);
-
         abort_unless((clone $baseQuery)->exists(), 404);
 
+        // hitung total aktivitas, total alert, dan rata-rata confidence alert
         $totalActivities = (clone $baseQuery)->count();
         $totalAlerts = (clone $baseQuery)->where('prediction', 1)->count();
         $avgAlertConfidence = (clone $baseQuery)->where('prediction', 1)->avg('confidence');
 
+        // ambil waktu aktivitas untuk membangun tren aktivitas
         $timeRecords = (clone $baseQuery)->get(['update_time', 'created_at']);
         $activityTimes = $timeRecords
             ->map(fn (DetectionResult $record) => $record->update_time ?: $record->created_at)
@@ -85,11 +95,13 @@ class DetectionController extends Controller
             ->sortBy(fn ($date) => $date->getTimestamp())
             ->values();
 
+        // tentukan granularitas tren berdasarkan selisih waktu antara aktivitas pertama dan terakhir
         $firstSeen = $activityTimes->first();
         $lastSeen = $activityTimes->last();
         $trendGranularity = $firstSeen && $lastSeen && $firstSeen->diffInHours($lastSeen) > 48 ? 'day' : 'hour';
         $activityTrend = $this->buildActivityTrend($activityTimes, $trendGranularity);
 
+        // ambil aktivitas terbaru dan alert terbaru untuk ditampilkan di halaman
         $activities = (clone $baseQuery)
             ->orderByDesc('update_time')
             ->orderByDesc('created_at')
@@ -97,6 +109,7 @@ class DetectionController extends Controller
             ->paginate(5)
             ->withQueryString();
 
+        // ambil 8 alert terbaru untuk ditampilkan di halaman
         $alerts = (clone $baseQuery)
             ->where('prediction', 1)
             ->orderByDesc('confidence')
@@ -104,6 +117,7 @@ class DetectionController extends Controller
             ->limit(8)
             ->get();
 
+        // kembalikan view dengan data yang telah diambil dan dihitung
         return view('ip-activity', [
             'ipAddress' => $ipAddress,
             'summary' => [
@@ -143,17 +157,21 @@ class DetectionController extends Controller
         ]);
     }
 
+    // menampilkan lokasi IP
     public function ipLocation(Request $request)
     {
+        // ambil parameter IP dari query string
         $ipAddress = trim((string) $request->query('ip', ''));
         abort_if($ipAddress === '', 404);
 
+        // ambil data aktivitas IP dari database
         $baseQuery = $this->ipActivityQuery($ipAddress);
         $totalActivities = (clone $baseQuery)->count();
         $totalAlerts = (clone $baseQuery)->where('prediction', 1)->count();
 
         abort_unless($totalActivities > 0, 404);
 
+        // ambil record terbaru dan alert terbaru untuk ditampilkan di halaman
         $latestRecord = (clone $baseQuery)
             ->orderByDesc('update_time')
             ->orderByDesc('created_at')
@@ -165,6 +183,7 @@ class DetectionController extends Controller
             ->orderByDesc('id')
             ->first(['event_name', 'confidence', 'update_time', 'created_at']);
 
+        // ambil lokasi IP menggunakan layanan IpGeolocationService dengan fallback geo_src dari query
         return view('ip-location', [
             'pageTitle' => $totalAlerts > 0 ? 'Lokasi IP Mencurigakan' : 'Lokasi IP',
             'ipAddress' => $ipAddress,
@@ -178,14 +197,18 @@ class DetectionController extends Controller
         ]);
     }
 
+    // membuat query untuk mengambil aktivitas berdasarkan IP
     private function ipActivityQuery(string $ipAddress): Builder
     {
+        // buat query untuk mengambil data aktivitas dari tabel detection_results berdasarkan source_ip
         return DetectionResult::query()
             ->where('source_ip', $ipAddress);
     }
 
+    // menghitung jumlah IP publik yang mencurigakan
     private function publicSuspiciousIpCount(): int
     {
+        // ambil jumlah IP publik yang mencurigakan dari tabel detection_results dengan prediction = 1 dan source_ip tidak null
         return DetectionResult::query()
             ->where('prediction', 1)
             ->whereNotNull('source_ip')
@@ -195,8 +218,10 @@ class DetectionController extends Controller
             ->count();
     }
 
+    // mengambil 5 IP publik yang mencurigakan teratas berdasarkan jumlah deteksi
     private function topPublicSuspiciousIps(int $limit = 5)
     {
+        // buat query untuk mengambil data IP publik yang mencurigakan dari tabel detection_results dengan prediction = 1 dan source_ip tidak null
         return DetectionResult::query()
             ->select(
                 'source_ip',
@@ -220,16 +245,20 @@ class DetectionController extends Controller
             ->values();
     }
 
+    // mengambil nilai geo_src fallback dari query
     private function fallbackGeoCode(Builder $query): ?string
     {
+        // ambil nilai geo_src fallback dari query dengan memfilter nilai null dan kosong
         return (clone $query)
             ->whereNotNull('geo_src')
             ->where('geo_src', '<>', '')
             ->value('geo_src');
     }
 
+    // membuat lokasi fallback jika lookup gagal
     private function topColumnValues(Builder $query, string $column, int $limit = 5)
     {
+        // buat query untuk mengambil nilai kolom tertentu dari tabel detection_results dengan menghitung jumlah kemunculan dan mengurutkan berdasarkan jumlah kemunculan
         return (clone $query)
             ->select($column, DB::raw('COUNT(*) as total'))
             ->whereNotNull($column)
@@ -245,6 +274,7 @@ class DetectionController extends Controller
             ]);
     }
 
+    // mengambil 5 destinasi teratas berdasarkan kombinasi destination_ip, destination_port, dan protocol
     private function topDestinations(Builder $query, int $limit = 5)
     {
         return (clone $query)
@@ -270,10 +300,12 @@ class DetectionController extends Controller
             });
     }
 
+    // mengambil 5 nilai raw_record teratas berdasarkan kunci tertentu
     private function topRawRecordValues(Builder $query, array $keys, int $limit = 5)
     {
         $counts = [];
 
+        // clone query untuk mengambil nilai raw_record dari tabel detection_results dan menghitung jumlah kemunculan berdasarkan kunci tertentu
         (clone $query)
             ->whereNotNull('raw_record')
             ->get(['raw_record'])
@@ -289,6 +321,7 @@ class DetectionController extends Controller
 
         arsort($counts);
 
+        // ambil 5 nilai teratas dan kembalikan sebagai koleksi dengan label dan total
         return collect($counts)
             ->take($limit)
             ->map(fn ($total, $label) => [
@@ -298,6 +331,7 @@ class DetectionController extends Controller
             ->values();
     }
 
+    // mengambil nilai pertama dari raw_record berdasarkan kunci tertentu
     private function firstRawRecordValue($rawRecord, array $keys): ?string
     {
         if (! is_array($rawRecord)) {
@@ -317,6 +351,7 @@ class DetectionController extends Controller
         return null;
     }
 
+    // membuat lokasi fallback jika lookup gagal
     private function buildActivityTrend($activityTimes, string $granularity)
     {
         $buckets = [];

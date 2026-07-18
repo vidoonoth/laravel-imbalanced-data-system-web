@@ -6,6 +6,7 @@ use App\Services\Datasets\VpsCsvDatasetImporter;
 use Illuminate\Console\Command;
 use Throwable;
 
+// Command untuk mengimpor dataset dari VPS melalui file CSV
 class ImportVpsDatasets extends Command
 {
     protected $signature = 'datasets:import-vps
@@ -17,6 +18,7 @@ class ImportVpsDatasets extends Command
 
     public function handle(VpsCsvDatasetImporter $importer): int
     {
+        // memeriksa apakah fitur impor dataset dari VPS diaktifkan melalui konfigurasi, jika tidak maka menampilkan peringatan dan mengembalikan status sukses
         if (! (bool) config('services.vps_csv.enabled', false)) {
             $this->warn('VPS_CSV_ENABLED=false, import dataset dari VPS dimatikan.');
 
@@ -25,6 +27,7 @@ class ImportVpsDatasets extends Command
 
         $limit = $this->option('limit') !== null ? (int) $this->option('limit') : null;
 
+        // menangani proses impor dataset dari VPS menggunakan VpsCsvDatasetImporter, dan menangkap exception jika terjadi kesalahan selama proses impor. Jika terjadi kesalahan, menampilkan pesan error dan mengembalikan status gagal. Jika berhasil, menampilkan ringkasan hasil impor termasuk jumlah file yang ditemukan, jumlah file yang berhasil diimpor, jumlah file yang dilewati, dan jumlah file yang gagal. Juga menampilkan status masing-masing file yang diproses.
         try {
             $summary = $importer->import(
                 limit: $limit,

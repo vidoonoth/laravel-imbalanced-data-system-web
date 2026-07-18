@@ -98,7 +98,7 @@
                 <span class="tip-wrap">
                     Jumlah Request
                     <span class="tip-icon">?</span>
-                    <span class="tip-box">Ini menunjukkan berapa kali IP ini melakukan aktivitas di jaringan kampus. Setiap kali IP ini mengirim data atau mencoba akses sesuatu, itu dihitung sebagai 1 request. Jadi kalau angkanya besar, berarti IP ini sangat aktif dan sering berkomunikasi di jaringan kampus.</span>
+                    <span class="tip-box">Ini menunjukkan berapa kali IP ini melakukan aktivitas di jaringan. Setiap kali IP ini mengirim data atau mencoba akses sesuatu, itu dihitung sebagai 1 request. Jadi kalau angkanya besar, berarti IP ini sangat aktif dan sering berkomunikasi di jaringan kampus.</span>
                 </span>
             </p>
             <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-2">
@@ -110,7 +110,7 @@
                 <span class="tip-wrap">
                     Alert Malware
                     <span class="tip-icon">?</span>
-                    <span class="tip-box">Dari semua aktivitas IP ini, ini adalah jumlah aktivitas yang sistem kita deteksi sebagai berbahaya (malware). Makin banyak angka alert ini, makin berbahaya IP-nya karena banyak aktivitasnya yang mencurigakan.</span>
+                    <span class="tip-box">Dari semua aktivitas IP ini, ini adalah jumlah aktivitas yang sistem deteksi sebagai berbahaya (malware). Makin banyak angka alert ini, makin berbahaya IP-nya karena banyak aktivitasnya yang mencurigakan.</span>
                 </span>
             </p>
             <p class="text-2xl font-bold text-red-700 dark:text-red-400 mt-2">
@@ -184,20 +184,13 @@
                     <div>
                         <div class="flex items-center justify-between gap-3 text-sm">
                             <div class="flex items-center gap-2">
-                                @if ($isAllow)
-                                    <span
-                                        class="px-2 py-0.5 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 text-xs rounded font-semibold">KRITIKAL</span>
-                                @elseif ($isDeny)
-                                    <span
-                                        class="px-2 py-0.5 bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 text-xs rounded font-semibold">PERCOBAAN</span>
-                                @endif
                                 <span class="font-semibold text-gray-800 dark:text-gray-100">{{ $item['label'] }}</span>
                             </div>
                             <span
                                 class="text-gray-500 dark:text-gray-200 font-bold">{{ number_format($item['total'], 0, ',', '.') }}</span>
                         </div>
                         <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2 mt-2">
-                            <div class="{{ $isAllow ? 'bg-red-600' : 'bg-orange-500' }} h-2 rounded-full"
+                            <div class="{{ $isDeny ? 'bg-red-600' : 'bg-orange-500' }} h-2 rounded-full"
                                 style="width: {{ $width }}%;"></div>
                         </div>
                         <p class="text-xs text-gray-500 dark:text-gray-200 mt-1">
@@ -231,7 +224,7 @@
                     <span class="tip-wrap">
                         {{ $frequentAccessTitle }}
                         <span class="tip-icon">?</span>
-                        <span class="tip-box">Daftar alamat IP tujuan yang paling sering dihubungi atau diakses oleh IP mencurigakan ini. Kalau IP ini sering banget akses ke satu tujuan tertentu, bisa jadi itu server komando untuk kontrol malware, atau target yang mau diserang. Pola akses yang nggak normal atau ke alamat yang aneh biasanya jadi tanda kalau IP ini lagi nyoba ngelakuin sesuatu yang berbahaya.</span>
+                        <span class="tip-box"><strong>Aktivitas IP Tujuan:</strong> Bagian ini menunjukkan alamat IP yang paling sering dihubungi. Jika IP mencurigakan ini terus-menerus mengakses satu tujuan, ada kemungkinan itu adalah server kontrol malware atau target serangan. Pola akses abnormal atau ke domain asing biasanya menjadi indikasi kuat adanya ancaman keamanan.</span>
                     </span>
                 @endif
             </h3>
@@ -289,23 +282,26 @@
                             <span class="tip-wrap">
                                 Source IP
                                 <span class="tip-icon">?</span>
-                                <span class="tip-box">Alamat IP pengirim paket — yaitu IP yang sedang dianalisis pada
-                                    halaman ini.</span>
+                                <span class="tip-box">Alamat IP pengirim paket</span>
                             </span>
                         </th>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">
                             <span class="tip-wrap">
                                 Destination
                                 <span class="tip-icon">?</span>
-                                <span class="tip-box">Alamat IP dan port tujuan yang dihubungi oleh Source IP. Format:
-                                    <em>IP:port</em>, mis. <em>192.168.1.1:443</em>.</span>
+                                <span class="tip-box">Alamat IP dan port tujuan yang dihubungi oleh Source IP</span>
                             </span>
                         </th>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">
                             <span class="tip-wrap">
                                 Protocol
                                 <span class="tip-icon">?</span>
-                                <span class="tip-box">Protokol itu kayak "bahasa" yang dipake komputer untuk ngobrol satu sama lain di jaringan. Ada beberapa jenis protokol dengan fungsi beda-beda: <strong>TCP</strong> adalah protokol yang paling aman dan teliti, setiap data yang dikirim pasti dikonfirmasi sampai atau nggak (makanya dipake buat browsing web, kirim email, download file). <strong>UDP</strong> lebih cepat tapi nggak ada konfirmasi, jadi cocok buat streaming video atau gaming online yang butuh kecepatan. <strong>ICMP</strong> dipake khusus untuk tes koneksi jaringan (kayak ping) atau kirim pesan error. Kalau IP mencurigakan banyak pake protokol tertentu dengan pola aneh, bisa jadi tanda serangan.</span>
+                                <span class="tip-box">
+                                    Protokol merupakan aturan atau "bahasa" yang digunakan komputer untuk saling berkomunikasi di dalam jaringan. Setiap protokol memiliki karakteristik dan fungsi yang berbeda:<br>
+                                    <strong>TCP:</strong> Menjamin data terkirim dengan akurat melalui mekanisme konfirmasi (digunakan pada web, email, dan transfer file).<br>
+                                    <strong>UDP:</strong> Memprioritaskan kecepatan transfer tanpa konfirmasi data (digunakan pada streaming dan gaming).<br>
+                                    <strong>ICMP:</strong> Berfungsi untuk diagnosis jaringan dan deteksi error (misalnya proses ping).
+                                </span>
                             </span>
                         </th>
                         <th class="px-5 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">
@@ -320,7 +316,7 @@
                             <span class="tip-wrap">
                                 Prediksi
                                 <span class="tip-icon">?</span>
-                                <span class="tip-box">Hasil klasifikasi model ML: <strong>Malware</strong> = terdeteksi
+                                <span class="tip-box"><strong>Malware</strong> = terdeteksi
                                     sebagai traffic berbahaya; <strong>Normal</strong> = traffic biasa yang aman.</span>
                             </span>
                         </th>
